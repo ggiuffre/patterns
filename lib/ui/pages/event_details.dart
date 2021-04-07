@@ -1,0 +1,18 @@
+import 'package:flutter/material.dart';
+
+import '../../data/event.dart';
+
+class EventDetailsPage extends StatelessWidget {
+  final Event event;
+
+  const EventDetailsPage({Key? key, required this.event}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+        appBar: AppBar(title: Text(event.title)),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Text("${event.title}, at ${event.time}"),
+        ),
+      );
+}
