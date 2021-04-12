@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/event.dart';
+import '../../data/event_provider.dart';
 
 class EventsIndexPage extends StatelessWidget {
-  final List<Event> events;
   final void Function(Event) onEventTapped;
   final VoidCallback onNewEvent;
 
   const EventsIndexPage({
     Key? key,
-    this.events = const <Event>[],
     required this.onEventTapped,
     required this.onNewEvent,
   }) : super(key: key);
@@ -19,24 +19,29 @@ class EventsIndexPage extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Home Page"),
         ),
-        body: events.isEmpty
-            ? const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Center(child: Text("Nothing to display")),
-              )
-            : ListView.separated(
-                padding: const EdgeInsets.all(8.0),
-                itemCount: events.length,
-                separatorBuilder: (BuildContext context, int index) => const Divider(),
-                itemBuilder: (BuildContext context, int index) => ListTile(
-                  title: Text(events[index].title),
-                  onTap: () => onEventTapped(events[index]),
-                ),
-              ),
+        body: Consumer(
+          builder: (context, watch, child) {
+            final events = watch(eventProvider);
+            return events.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text("Nothing to display")),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: events.length,
+                    separatorBuilder: (BuildContext context, int index) => const Divider(),
+                    itemBuilder: (BuildContext context, int index) => ListTile(
+                      title: Text(events[index].title),
+                      onTap: () => onEventTapped(events[index]),
+                    ),
+                  );
+          },
+        ),
         floatingActionButton: FloatingActionButton(
           onPressed: onNewEvent,
           tooltip: 'New event',
-          child: Icon(Icons.add),
+          child: const Icon(Icons.add),
         ),
       );
 }

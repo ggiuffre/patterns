@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/event.dart';
+import '../../data/event_provider.dart';
 
 class NewEventPage extends StatefulWidget {
-  final Function(Event) onSave;
+  final void Function() onSubmit;
 
-  const NewEventPage({Key? key, required this.onSave}) : super(key: key);
+  const NewEventPage({Key? key, required this.onSubmit}) : super(key: key);
 
   @override
   _NewEventPageState createState() => _NewEventPageState();
@@ -131,8 +133,8 @@ class _NewEventPageState extends State<NewEventPage> {
                           _dateFieldController.text = newTime.toString();
                         },
                         decoration: const InputDecoration(
-                          icon: const Icon(Icons.calendar_today),
-                          border: const OutlineInputBorder(),
+                          icon: Icon(Icons.calendar_today),
+                          border: OutlineInputBorder(),
                           labelText: 'Event time',
                         ),
                       ),
@@ -145,7 +147,8 @@ class _NewEventPageState extends State<NewEventPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      widget.onSave(Event(_eventTitle, _eventTime));
+                      context.read(eventProvider).addEvent(Event(_eventTitle, _eventTime));
+                      widget.onSubmit();
                     }
                   },
                   child: const Text("Submit"),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/event.dart';
+import '../../data/event_provider.dart';
 import 'error.dart';
 import 'event_details.dart';
 import 'events_index.dart';
@@ -37,7 +38,6 @@ class EventRoutePath {
 class EventRouterDelegate extends RouterDelegate<EventRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<EventRoutePath> {
   final GlobalKey<NavigatorState> navigatorKey;
-  List<Event> _events = [];
   Event? _selectedEvent;
   bool _newEventNeeded = false;
   bool _show404 = false;
@@ -51,7 +51,6 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
           MaterialPage(
             key: const ValueKey('/'),
             child: EventsIndexPage(
-              events: _events,
               onEventTapped: (event) {
                 _selectedEvent = event;
                 notifyListeners();
@@ -71,8 +70,7 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
             MaterialPage(
               key: const ValueKey('/new-event'),
               child: NewEventPage(
-                onSave: (event) {
-                  _events.add(event);
+                onSubmit: () {
                   _newEventNeeded = false;
                   notifyListeners();
                 },
@@ -110,7 +108,9 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
     if (path.isDetailsPage) {
       if (path.id?.startsWith("/events/") ?? false) {
         final eventId = path.id?.replaceFirst("/events/", "");
-        _selectedEvent = _events.firstWhere((element) => element.id == eventId);
+        final container = ProviderContainer();
+        final events = container.read(eventProvider).state;
+        _selectedEvent = events.firstWhere((element) => element.id == eventId);
       } else {
         _show404 = true;
         return;

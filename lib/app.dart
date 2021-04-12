@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'ui/pages/routing.dart';
 
 class PatternsApp extends StatefulWidget {
+  const PatternsApp({Key? key}) : super(key: key);
+
   @override
   _PatternsAppState createState() => _PatternsAppState();
 }
