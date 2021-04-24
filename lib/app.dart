@@ -2,16 +2,9 @@ import 'package:flutter/material.dart';
 
 import 'ui/pages/routing.dart';
 
-class PatternsApp extends StatefulWidget {
-  const PatternsApp({Key? key}) : super(key: key);
-
-  @override
-  _PatternsAppState createState() => _PatternsAppState();
-}
-
-class _PatternsAppState extends State<PatternsApp> {
-  EventRouterDelegate _routerDelegate = EventRouterDelegate();
-  EventRouteInformationParser _routeInformationParser = EventRouteInformationParser();
+class PatternsApp extends StatelessWidget {
+  final EventRouterDelegate _routerDelegate = EventRouterDelegate();
+  final EventRouteInformationParser _routeInformationParser = EventRouteInformationParser();
 
   @override
   Widget build(BuildContext context) {
