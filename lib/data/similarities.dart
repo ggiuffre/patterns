@@ -1,6 +1,6 @@
 import 'event.dart';
 
-double correlation(List<Event> a, List<Event> b) {
+double similarity(List<Event> a, List<Event> b) {
   double accumulator = 0.0;
   int samplesVisited = 0;
   int aIndex = 0;
