@@ -109,7 +109,7 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
       if (path.id?.startsWith("/events/") ?? false) {
         final eventId = path.id?.replaceFirst("/events/", "");
         final container = ProviderContainer();
-        final events = container.read(eventProvider).state;
+        final events = container.read(eventProvider);
         _selectedEvent = events.firstWhere((element) => element.id == eventId);
       } else {
         _show404 = true;

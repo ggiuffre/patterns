@@ -2,11 +2,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'event.dart';
 
-final eventProvider = StateNotifierProvider((ref) => EventSequence());
+final eventProvider =
+    StateNotifierProvider<EventSequenceStateNotifier, List<Event>>((ref) => EventSequenceStateNotifier());
 
 /// Sequence of all recorded events.
-class EventSequence extends StateNotifier<List<Event>> {
-  EventSequence() : super([]);
+class EventSequenceStateNotifier extends StateNotifier<List<Event>> {
+  EventSequenceStateNotifier() : super([]);
 
   /// Adds event to the sequence of events, placing it after all events with earlier time and
   /// before all events with later time.

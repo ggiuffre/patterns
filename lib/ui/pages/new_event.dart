@@ -147,7 +147,7 @@ class _NewEventPageState extends State<NewEventPage> {
                 child: ElevatedButton(
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
-                      context.read(eventProvider).addEvent(Event(_eventTitle, _eventTime));
+                      context.read(eventProvider.notifier).addEvent(Event(_eventTitle, _eventTime));
                       widget.onSubmit();
                     }
                   },
