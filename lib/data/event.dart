@@ -5,7 +5,9 @@ class Event implements Comparable {
   final String title;
   final DateTime time;
 
-  Event(this.title, this.time) : id = "$time$title";
+  Event(this.title, time)
+      : time = DateTime(time.year, time.month, time.day),
+        id = "$time$title";
 
   @override
   int compareTo(other) => time == other.time ? title.compareTo(other.title) : time.compareTo(other.time);
