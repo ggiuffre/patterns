@@ -15,7 +15,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  test: null
+  test: ^1.16.5
 
 flutter:
 
