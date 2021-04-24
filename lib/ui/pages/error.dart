@@ -6,6 +6,6 @@ class ErrorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text("Page not found")),
-        body: const Text("Error 404: the page you requested could not be found."),
+        body: Center(child: const Text("Error 404: the page you requested could not be found.")),
       );
 }
