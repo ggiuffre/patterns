@@ -5,8 +5,9 @@ import 'package:patterns/data/event.dart';
 import 'package:test/test.dart';
 
 void main() {
+  final randomGenerator = Random();
+
   test("correlation is at least -1", () {
-    final randomGenerator = Random();
     final series1 = List.generate(
       100,
       (_) => Event(
@@ -26,7 +27,6 @@ void main() {
   });
 
   test("correlation is at most 1", () {
-    final randomGenerator = Random();
     final series1 = List.generate(
       100,
       (_) => Event(
@@ -46,7 +46,6 @@ void main() {
   });
 
   test("correlation of identical series is 1", () {
-    final randomGenerator = Random();
     final series = List.generate(
       30,
       (_) => Event(
@@ -59,7 +58,6 @@ void main() {
   });
 
   test("correlation of non-overlapping series is -1", () {
-    final randomGenerator = Random();
     final series = List.generate(
       30,
       (_) => Event(
@@ -69,5 +67,24 @@ void main() {
     ).toSet().toList();
     final result = correlation(series.sublist(0, series.length ~/ 2), series.sublist(series.length ~/ 2));
     expect(result, equals(-1.0));
+  });
+
+  test("correlation of series with different length can be calculated", () {
+    final series1 = List.generate(
+      randomGenerator.nextInt(50),
+      (_) => Event(
+        "title",
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+      ),
+    );
+    final series2 = List.generate(
+      randomGenerator.nextInt(50),
+      (_) => Event(
+        "title",
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+      ),
+    );
+    final result = correlation(series1, series2);
+    expect(result, isA<double>());
   });
 }
