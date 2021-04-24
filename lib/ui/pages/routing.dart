@@ -5,7 +5,7 @@ import '../../data/event.dart';
 import '../../data/event_provider.dart';
 import 'error.dart';
 import 'event_details.dart';
-import 'events_index.dart';
+import 'home.dart';
 import 'new_event.dart';
 
 class EventRoutePath {
@@ -14,6 +14,10 @@ class EventRoutePath {
 
   const EventRoutePath.home()
       : id = "/",
+        isUnknown = false;
+
+  const EventRoutePath.patterns()
+      : id = "/patterns",
         isUnknown = false;
 
   const EventRoutePath.details(eventId)
@@ -30,6 +34,8 @@ class EventRoutePath {
 
   bool get isHomePage => id == "/";
 
+  bool get isPatternsPage => id == "/patterns";
+
   bool get isNewEventPage => id == "/new-event";
 
   bool get isDetailsPage => id?.startsWith("/events/") ?? false;
@@ -39,6 +45,7 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<EventRoutePath> {
   final GlobalKey<NavigatorState> navigatorKey;
   Event? _selectedEvent;
+  int _homePageNavigationItem = 0;
   bool _newEventNeeded = false;
   bool _show404 = false;
 
@@ -50,7 +57,12 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
         pages: [
           MaterialPage(
             key: const ValueKey('/'),
-            child: EventsIndexPage(
+            child: HomePage(
+              selectedNavigationItem: _homePageNavigationItem,
+              onNavigationItemTapped: (item) {
+                _homePageNavigationItem = item;
+                notifyListeners();
+              },
               onEventTapped: (event) {
                 _selectedEvent = event;
                 notifyListeners();
@@ -119,6 +131,11 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
       _selectedEvent = null;
       _newEventNeeded = true;
     } else {
+      if (path.isPatternsPage) {
+        _homePageNavigationItem = 0;
+      } else {
+        _homePageNavigationItem = 1;
+      }
       _selectedEvent = null;
       _newEventNeeded = false;
     }
@@ -149,9 +166,11 @@ class EventRouteInformationParser extends RouteInformationParser<EventRoutePath>
       return EventRoutePath.home();
     }
 
-    // Handle '/new-event' and 'events'
+    // Handle 'patterns', '/new-event' and 'events'
     if (uri.pathSegments.length == 1) {
-      if (uri.pathSegments[0] == 'new-event') {
+      if (uri.pathSegments[0] == 'patterns') {
+        return EventRoutePath.patterns();
+      } else if (uri.pathSegments[0] == 'new-event') {
         return EventRoutePath.newEvent();
       } else if (uri.pathSegments[0] == 'events') {
         return EventRoutePath.home();
@@ -179,6 +198,8 @@ class EventRouteInformationParser extends RouteInformationParser<EventRoutePath>
       return RouteInformation(location: '/404');
     } else if (path.isHomePage) {
       return RouteInformation(location: '/');
+    } else if (path.isPatternsPage) {
+      return RouteInformation(location: '/patterns');
     } else if (path.isNewEventPage) {
       return RouteInformation(location: '/new-event');
     } else if (path.isDetailsPage) {
