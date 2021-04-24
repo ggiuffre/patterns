@@ -15,7 +15,7 @@ class EventsIndex extends ConsumerWidget {
     return events.isEmpty
         ? const Padding(
             padding: EdgeInsets.all(8.0),
-            child: Center(child: Text("No events to display yet")),
+            child: Center(child: Text("No events yet")),
           )
         : ListView.separated(
             padding: const EdgeInsets.all(8.0),
