@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/date_formatting.dart';
 import '../../data/event.dart';
 import '../../data/event_provider.dart';
 
@@ -24,7 +25,7 @@ class EventsIndex extends ConsumerWidget {
             itemBuilder: (BuildContext context, int index) => ListTile(
               title: Text(events[index].title),
               onTap: () => onEventTapped(events[index]),
-              trailing: Text(events[index].time.toString()),
+              trailing: Text(formattedDate(events[index].time)),
             ),
           );
   }

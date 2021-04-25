@@ -14,7 +14,7 @@ class FirebaseEnabledApp extends StatelessWidget {
 
   static final theme = ThemeData(
     brightness: Brightness.light,
-    primarySwatch: Colors.brown,
+    primarySwatch: Colors.deepOrange,
     pageTransitionsTheme: const PageTransitionsTheme(builders: {
       TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       TargetPlatform.android: CupertinoPageTransitionsBuilder(),
@@ -23,7 +23,7 @@ class FirebaseEnabledApp extends StatelessWidget {
 
   static final darkTheme = ThemeData(
     brightness: Brightness.dark,
-    primarySwatch: Colors.brown,
+    primarySwatch: Colors.teal,
     pageTransitionsTheme: const PageTransitionsTheme(builders: {
       TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
       TargetPlatform.android: CupertinoPageTransitionsBuilder(),

@@ -25,9 +25,9 @@ class PatternsIndex extends ConsumerWidget {
             itemCount: coefficients.length,
             separatorBuilder: (BuildContext context, int index) => const Divider(),
             itemBuilder: (BuildContext context, int index) => ListTile(
-              title: Text(
-                  "${coefficients[index].coefficient} -- ${coefficients[index].labels.first} && ${coefficients[index].labels.last}"),
+              title: Text("${coefficients[index].labels.first} && ${coefficients[index].labels.last}"),
               onTap: () => print("tapped ${coefficients[index]}"),
+              trailing: Text(coefficients[index].coefficient.toString()),
             ),
           );
   }
