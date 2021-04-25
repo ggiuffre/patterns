@@ -1,4 +1,4 @@
-package io.ggiuffre.github.patterns
+package io.github.ggiuffre.patterns
 
 import io.flutter.embedding.android.FlutterActivity
 

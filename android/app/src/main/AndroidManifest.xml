@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.ggiuffre.github.patterns">
+    package="io.github.ggiuffre.patterns">
    <application
         android:label="patterns"
         android:icon="@mipmap/ic_launcher">
