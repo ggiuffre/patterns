@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'ui/pages/routing.dart';
@@ -6,59 +5,19 @@ import 'ui/pages/routing.dart';
 class PatternsApp extends StatelessWidget {
   final EventRouterDelegate _routerDelegate = EventRouterDelegate();
   final EventRouteInformationParser _routeInformationParser = EventRouteInformationParser();
-  final Future<FirebaseApp> _firebaseInitialization = Firebase.initializeApp();
 
-  static final theme = ThemeData(
-    brightness: Brightness.light,
-    primarySwatch: Colors.brown,
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-    }),
-  );
+  final ThemeData theme;
+  final ThemeData darkTheme;
 
-  static final darkTheme = ThemeData(
-    brightness: Brightness.dark,
-    primarySwatch: Colors.brown,
-    pageTransitionsTheme: const PageTransitionsTheme(builders: {
-      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
-      TargetPlatform.android: CupertinoPageTransitionsBuilder(),
-    }),
-  );
+  PatternsApp({Key? key, required this.theme, required this.darkTheme}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<FirebaseApp>(
-        future: _firebaseInitialization,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return MaterialApp(
-              theme: theme,
-              darkTheme: darkTheme,
-              themeMode: ThemeMode.system,
-              title: 'Patterns',
-              home: const Scaffold(body: Center(child: Text("Couldn't initialize storage."))),
-            );
-          }
-
-          if (snapshot.connectionState == ConnectionState.done) {
-            return MaterialApp.router(
-              theme: theme,
-              darkTheme: darkTheme,
-              themeMode: ThemeMode.system,
-              title: 'Patterns',
-              routerDelegate: _routerDelegate,
-              routeInformationParser: _routeInformationParser,
-            );
-          }
-
-          return MaterialApp(
-            theme: theme,
-            darkTheme: darkTheme,
-            themeMode: ThemeMode.system,
-            title: 'Patterns',
-            home: const Scaffold(body: Center(child: CircularProgressIndicator.adaptive())),
-          );
-        });
-  }
+  Widget build(BuildContext context) => MaterialApp.router(
+        theme: theme,
+        darkTheme: darkTheme,
+        themeMode: ThemeMode.system,
+        title: 'Patterns',
+        routerDelegate: _routerDelegate,
+        routeInformationParser: _routeInformationParser,
+      );
 }
