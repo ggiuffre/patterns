@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'authentication.dart';
 import 'theme.dart';
+import 'user_data.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,7 +30,7 @@ class FirebaseEnabledApp extends StatelessWidget {
         }
 
         if (snapshot.connectionState == ConnectionState.done) {
-          return Authenticated(child: PatternsApp());
+          return Authenticated(child: WithUpToDateSchema(child: PatternsApp()));
         }
 
         return MaterialApp(
