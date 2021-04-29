@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -27,6 +29,7 @@ class _NewEventPageState extends State<NewEventPage> {
   final _formKey = GlobalKey<FormState>();
   final _dateFieldController = TextEditingController();
   late TextEditingController _textFieldController;
+  final user = FirebaseAuth.instance.currentUser;
 
   String _eventTitle = "";
   DateTime _eventTime = DateTime.now();
@@ -145,9 +148,16 @@ class _NewEventPageState extends State<NewEventPage> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
                     if (_formKey.currentState!.validate()) {
                       context.read(eventProvider.notifier).addEvent(Event(_eventTitle, _eventTime));
+                      if (user?.uid != null) {
+                        await FirebaseFirestore.instance
+                            .collection("users")
+                            .doc(user!.uid)
+                            .collection("events")
+                            .add({"title": _eventTitle, "time": _eventTime});
+                      }
                       widget.onSubmit();
                     }
                   },
