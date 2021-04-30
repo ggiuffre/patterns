@@ -32,6 +32,10 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text("Register for free", style: Theme.of(context).textTheme.headline5),
+                ),
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email'),
@@ -67,12 +71,8 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                     label: const Text('Register'),
                   ),
                 ),
-                Container(
-                  alignment: Alignment.center,
-                  child: Text(_success == null
-                      ? ''
-                      : (_success! ? 'Successfully registered $_userEmail' : 'Registration failed')),
-                )
+                if (_success != null)
+                  Center(child: Text(_success! ? 'Successfully registered $_userEmail' : 'Registration failed'))
               ],
             ),
           ),
@@ -87,7 +87,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
   }
 
   Future<void> _register() async {
-    late UserCredential userCredential;
+    UserCredential? userCredential;
     try {
       userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
@@ -103,14 +103,14 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
       print(e);
     }
 
-    final user = userCredential.user;
+    final user = userCredential?.user;
     if (user != null) {
       setState(() {
         _success = true;
         _userEmail = user.email ?? _userEmail;
       });
     } else {
-      _success = false;
+      setState(() => _success = false);
     }
   }
 }

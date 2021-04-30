@@ -30,9 +30,21 @@ class SignUpLogInSelector extends StatelessWidget {
           body: ListView(
             children: [
               SignUpScreen(),
-              const Padding(
-                padding: EdgeInsets.all(8.0),
-                child: Center(child: Text("or")),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 64.0),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const Divider(),
+                    ColoredBox(
+                      color: Theme.of(context).canvasColor,
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        child: Text("or"),
+                      ),
+                    ),
+                  ],
+                ),
               ),
               LogInScreen(),
             ],

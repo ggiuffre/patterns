@@ -21,7 +21,6 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool? _success;
-  String _userEmail = '';
 
   @override
   Widget build(BuildContext context) => Form(
@@ -32,6 +31,10 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text("Log in", style: Theme.of(context).textTheme.headline5),
+                ),
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email'),
@@ -67,12 +70,7 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
                     label: const Text('Log in'),
                   ),
                 ),
-                Container(
-                  alignment: Alignment.center,
-                  child: Text(_success == null
-                      ? ''
-                      : (_success! ? 'Successfully registered $_userEmail' : 'Registration failed')),
-                )
+                if (_success != null) Center(child: Text(_success! ? 'Successfully logged in' : 'Login failed'))
               ],
             ),
           ),
@@ -97,8 +95,10 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
       if ({'user-not-found', 'wrong-password'}.contains(e.code)) {
         print('Wrong username or password.');
       }
+      setState(() => _success = false);
     } catch (e) {
       print(e);
+      setState(() => _success = false);
     }
   }
 }
