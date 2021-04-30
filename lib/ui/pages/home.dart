@@ -23,7 +23,7 @@ class HomePage extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Home Page"),
         ),
-        body: selectedNavigationItem == 0 ? EventsIndex(onEventTapped: onEventTapped) : const PatternsIndex(),
+        body: selectedNavigationItem == 0 ? EventsIndex(onEventTapped: onEventTapped) : PatternsIndex(),
         floatingActionButton: FloatingActionButton(
           onPressed: onNewEvent,
           tooltip: 'New event',
