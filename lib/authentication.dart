@@ -30,25 +30,32 @@ class SignUpLogInSelector extends StatelessWidget {
           body: ListView(
             children: [
               SignUpScreen(),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 64.0),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    const Divider(),
-                    ColoredBox(
-                      color: Theme.of(context).canvasColor,
-                      child: const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                        child: Text("or"),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              const _OrText(),
               LogInScreen(),
             ],
           ),
         ),
       );
+}
+
+class _OrText extends StatelessWidget {
+  const _OrText({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 64.0),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          const Divider(),
+          ColoredBox(
+            color: Theme.of(context).canvasColor,
+            child: const Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: Text("or"),
+            ),
+          ),
+        ],
+      ),
+    );
 }
