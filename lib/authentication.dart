@@ -1,9 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:patterns/ui/components/login.dart';
 
 import 'theme.dart';
+import 'ui/components/login.dart';
 import 'ui/components/signup.dart';
 
 class Authenticated extends StatelessWidget {
@@ -43,19 +42,19 @@ class _OrText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 64.0),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          const Divider(),
-          ColoredBox(
-            color: Theme.of(context).canvasColor,
-            child: const Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-              child: Text("or"),
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 64.0),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            const Divider(),
+            ColoredBox(
+              color: Theme.of(context).canvasColor,
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Text("or"),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:patterns/ui/components/events_index.dart';
-import 'package:patterns/ui/components/patterns_index.dart';
 
 import '../../data/event.dart';
+import '../components/events_index.dart';
+import '../components/patterns_index.dart';
 
 class HomePage extends StatelessWidget {
   final int selectedNavigationItem;
