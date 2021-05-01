@@ -22,6 +22,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
 
   bool? _success;
   String _userEmail = '';
+  bool _isPasswordObscured = true;
 
   @override
   Widget build(BuildContext context) => Form(
@@ -49,14 +50,20 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                 ),
                 TextFormField(
                   controller: _passwordController,
-                  decoration: const InputDecoration(labelText: 'Password'),
+                  decoration: InputDecoration(
+                    labelText: 'Password',
+                    suffixIcon: IconButton(
+                      icon: Icon(_isPasswordObscured ? Icons.visibility : Icons.visibility_off),
+                      onPressed: () => setState(() => _isPasswordObscured = !_isPasswordObscured),
+                    ),
+                  ),
                   validator: (String? value) {
                     if (value?.isEmpty ?? true) {
                       return 'Please enter some text';
                     }
                     return null;
                   },
-                  obscureText: true,
+                  obscureText: _isPasswordObscured,
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(vertical: 16),
