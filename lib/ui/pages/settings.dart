@@ -15,10 +15,12 @@ class SettingsPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text("Brightness"),
-                    Switch.adaptive(
-                      value: context.read(themeModeProvider.notifier).light,
-                      onChanged: (_) => context.read(themeModeProvider.notifier).toggle(),
+                    const Text("Dark mode"),
+                    Consumer(
+                      builder: (context, watch, _) => Switch.adaptive(
+                        value: watch(themeModeProvider) == ThemeMode.dark,
+                        onChanged: (_) => context.read(themeModeProvider.notifier).toggle(),
+                      ),
                     ),
                   ],
                 ),
