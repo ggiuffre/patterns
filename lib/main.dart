@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'app.dart';
 import 'authentication.dart';
+import 'data/theme_mode_provider.dart';
 import 'theme.dart';
 
 void main() {
@@ -22,7 +23,7 @@ class FirebaseEnabledApp extends StatelessWidget {
           return MaterialApp(
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
-            themeMode: ThemeMode.system,
+            themeMode: context.read(themeModeProvider),
             title: 'Patterns',
             home: const Scaffold(body: Center(child: Text("Couldn't initialize storage."))),
           );
@@ -35,7 +36,7 @@ class FirebaseEnabledApp extends StatelessWidget {
         return MaterialApp(
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
-          themeMode: ThemeMode.system,
+          themeMode: context.read(themeModeProvider),
           title: 'Patterns',
           home: const Scaffold(body: Center(child: CircularProgressIndicator.adaptive())),
         );
