@@ -1,24 +1,18 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/event.dart';
+import '../../data/repositories/events.dart';
 import '../../data/similarities.dart';
 
 // final categoryProvider = Provider<Set<String>>((ref) => ref.watch(eventProvider).map((e) => e.title).toSet());
 
 class PatternsIndex extends ConsumerWidget {
-  final _user = FirebaseAuth.instance.currentUser;
+  const PatternsIndex({Key? key}) : super(key: key);
 
   @override
   Widget build(context, watch) => FutureBuilder<Iterable<Event>>(
-        future: FirebaseFirestore.instance
-            .collection("users")
-            .doc(_user?.uid)
-            .collection("events")
-            .get()
-            .then((collection) => collection.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"]))),
+        future: context.read(eventProvider).list,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text("Couldn't retrieve events needed to extract patterns."));

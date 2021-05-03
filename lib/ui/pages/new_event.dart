@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/event.dart';
-import '../../data/event_provider.dart';
+import '../../data/repositories/events.dart';
 
 class NewEventPage extends StatefulWidget {
   final void Function() onSubmit;
@@ -29,7 +27,6 @@ class _NewEventPageState extends State<NewEventPage> {
   final _formKey = GlobalKey<FormState>();
   final _dateFieldController = TextEditingController();
   late TextEditingController _textFieldController;
-  final user = FirebaseAuth.instance.currentUser;
 
   String _eventTitle = "";
   DateTime _eventTime = DateTime.now();
@@ -150,14 +147,15 @@ class _NewEventPageState extends State<NewEventPage> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      context.read(eventProvider.notifier).addEvent(Event(_eventTitle, _eventTime));
-                      if (user?.uid != null) {
-                        await FirebaseFirestore.instance
-                            .collection("users")
-                            .doc(user!.uid)
-                            .collection("events")
-                            .add({"title": _eventTitle, "time": _eventTime});
-                      }
+                      // context.read(eventProvider.notifier).addEvent(Event(_eventTitle, _eventTime));
+                      context.read(eventProvider).add(Event(_eventTitle, _eventTime));
+                      // if (user?.uid != null) {
+                      //   await FirebaseFirestore.instance
+                      //       .collection("users")
+                      //       .doc(user!.uid)
+                      //       .collection("events")
+                      //       .add({"title": _eventTitle, "time": _eventTime});
+                      // }
                       widget.onSubmit();
                     }
                   },

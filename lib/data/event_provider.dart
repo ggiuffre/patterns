@@ -2,8 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'event.dart';
 
-final eventProvider =
-    StateNotifierProvider<EventSequenceStateNotifier, List<Event>>((ref) => EventSequenceStateNotifier());
+// final eventProvider =
+//     StateNotifierProvider<EventSequenceStateNotifier, List<Event>>((ref) => EventSequenceStateNotifier());
 
 /// Sequence of all recorded events.
 class EventSequenceStateNotifier extends StateNotifier<List<Event>> {

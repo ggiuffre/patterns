@@ -1,23 +1,28 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:patterns/data/event.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../event.dart';
 
 abstract class EventRepository {
-  /// Get the event identified by [id]
+  /// Get the event identified by [id].
   Future<Event> get(String id);
 
-  /// Persist [event] to the repository
-  Future<String> addEvent(Event event);
+  /// Persist [event] to the repository, and return an identifier to retrieve it.
+  Future<String> add(Event event);
 
-  /// Remove [event] from the repository
-  Future<void> removeEvent(String id);
+  /// Delete [event] from the repository.
+  Future<void> delete(String id);
 
-  /// Iterable of all events stored in the repository
+  /// Iterable of all events stored in the repository.
   Future<Iterable<Event>> get list;
 
-  /// Iterable of all events stored in the repository, sorted by descending date
+  /// Iterable of all events stored in the repository, sorted by descending date.
   Future<Iterable<Event>> get sorted;
 }
+
+/// Currently selected implementation of [EventRepository].
+final eventProvider = Provider((_) => FirestoreEventRepository());
 
 class FirestoreEventRepository implements EventRepository {
   final _userId = FirebaseAuth.instance.currentUser?.uid;
@@ -37,7 +42,7 @@ class FirestoreEventRepository implements EventRepository {
   }
 
   @override
-  Future<String> addEvent(Event event) {
+  Future<String> add(Event event) {
     if (_userId != null) {
       return FirebaseFirestore.instance
           .collection("users")
@@ -49,7 +54,7 @@ class FirestoreEventRepository implements EventRepository {
   }
 
   @override
-  Future<void> removeEvent(String id) {
+  Future<void> delete(String id) {
     if (_userId != null) {
       return FirebaseFirestore.instance.collection("users").doc(_userId).collection("events").doc(id).delete();
     }
@@ -82,4 +87,46 @@ class FirestoreEventRepository implements EventRepository {
     }
     throw Future.error("Couldn't retrieve events from Cloud Firestore.");
   }
+}
+
+class InMemoryEventRepository implements EventRepository {
+  List<Event> events = [];
+
+  @override
+  Future<Event> get(String id) {
+    // TODO: implement get
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<String> add(Event event) {
+    // add the event at the end:
+    events.add(event);
+
+    // sort the list, assuming it is mostly sorted:
+    for (int i = 0; i < events.length; i++) {
+      Event key = events[i];
+      int j = i - 1;
+      while (j >= 0 && key < events[j]) {
+        events[j + 1] = events[j];
+        j--;
+      }
+      events[j + 1] = key;
+    }
+
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> delete(String id) {
+    // TODO: implement delete
+    throw UnimplementedError();
+  }
+
+  @override
+  // TODO: implement list
+  Future<Iterable<Event>> get list => throw UnimplementedError();
+
+  @override
+  Future<Iterable<Event>> get sorted => list;
 }

@@ -1,27 +1,20 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/date_formatting.dart';
 import '../../data/event.dart';
+import '../../data/repositories/events.dart';
 
 class EventsIndex extends ConsumerWidget {
   final void Function(Event) onEventTapped;
-  final _user = FirebaseAuth.instance.currentUser;
 
-  EventsIndex({Key? key, required this.onEventTapped}) : super(key: key);
+  const EventsIndex({Key? key, required this.onEventTapped}) : super(key: key);
 
   @override
   Widget build(context, watch) {
     // final events = watch(eventProvider).reversed.toList();
     return FutureBuilder<Iterable<Event>>(
-      future: FirebaseFirestore.instance
-          .collection("users")
-          .doc(_user?.uid)
-          .collection("events")
-          .get()
-          .then((collection) => collection.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"]))),
+      future: context.read(eventProvider).sorted,
       builder: (context, snapshot) {
         if (snapshot.hasError) {
           return const Center(child: Text("Couldn't retrieve events."));

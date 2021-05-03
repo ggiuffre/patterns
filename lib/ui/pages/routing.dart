@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/event.dart';
-import '../../data/event_provider.dart';
+import '../../data/repositories/events.dart';
 import 'error.dart';
 import 'event_details.dart';
 import 'home.dart';
@@ -120,8 +120,10 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
     if (path.isDetailsPage) {
       if (path.id?.startsWith("/events/") ?? false) {
         final eventId = path.id?.replaceFirst("/events/", "");
+        // final eventRepo = FirestoreEventRepository();
+        // final events = await eventRepo.list;
         final container = ProviderContainer();
-        final events = container.read(eventProvider);
+        final events = await container.read(eventProvider).list;
         _selectedEvent = events.firstWhere((element) => element.id == eventId);
       } else {
         _show404 = true;
