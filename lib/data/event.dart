@@ -11,9 +11,7 @@ class Event implements Comparable {
       : time = DateTime(time.year, time.month, time.day),
         id = "$time$title";
 
-  Event.fromFirestore(this.title, Timestamp timestamp)
-      : time = timestamp.toDate(),
-        id = "${timestamp.toDate()}$title";
+  Event.fromFirestore(this.title, Timestamp timestamp, this.id) : time = timestamp.toDate();
 
   @override
   int compareTo(other) => time == other.time ? title.compareTo(other.title) : time.compareTo(other.time);

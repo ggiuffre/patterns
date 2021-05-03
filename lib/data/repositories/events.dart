@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -36,7 +38,7 @@ class FirestoreEventRepository implements EventRepository {
           .collection("events")
           .doc(id)
           .get()
-          .then((e) => Event.fromFirestore(e.data()?["title"], e.data()?["time"]));
+          .then((e) => Event.fromFirestore(e.data()?["title"], e.data()?["time"], id));
     }
     throw Future.error("Couldn't retrieve event from Cloud Firestore.");
   }
@@ -64,12 +66,8 @@ class FirestoreEventRepository implements EventRepository {
   @override
   Future<Iterable<Event>> get list {
     if (_userId != null) {
-      return FirebaseFirestore.instance
-          .collection("users")
-          .doc(_userId)
-          .collection("events")
-          .get()
-          .then((collection) => collection.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"])));
+      return FirebaseFirestore.instance.collection("users").doc(_userId).collection("events").get().then(
+          (collection) => collection.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"], e.id)));
     }
     throw Future.error("Couldn't retrieve events from Cloud Firestore.");
   }
@@ -83,7 +81,8 @@ class FirestoreEventRepository implements EventRepository {
           .collection("events")
           .orderBy('time', descending: true)
           .get()
-          .then((collection) => collection.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"])));
+          .then((collection) =>
+              collection.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"], e.id)));
     }
     throw Future.error("Couldn't retrieve events from Cloud Firestore.");
   }
@@ -93,10 +92,7 @@ class InMemoryEventRepository implements EventRepository {
   List<Event> events = [];
 
   @override
-  Future<Event> get(String id) {
-    // TODO: implement get
-    throw UnimplementedError();
-  }
+  Future<Event> get(String id) => Future.value(events.firstWhere((e) => e.id == id));
 
   @override
   Future<String> add(Event event) {
@@ -118,14 +114,10 @@ class InMemoryEventRepository implements EventRepository {
   }
 
   @override
-  Future<void> delete(String id) {
-    // TODO: implement delete
-    throw UnimplementedError();
-  }
+  Future<void> delete(String id) => Future(() => events.removeWhere((e) => e.id == id));
 
   @override
-  // TODO: implement list
-  Future<Iterable<Event>> get list => throw UnimplementedError();
+  Future<Iterable<Event>> get list => Future.value(events);
 
   @override
   Future<Iterable<Event>> get sorted => list;
