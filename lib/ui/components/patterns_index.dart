@@ -5,8 +5,6 @@ import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import '../../data/similarities.dart';
 
-// final categoryProvider = Provider<Set<String>>((ref) => ref.watch(eventProvider).map((e) => e.title).toSet());
-
 class PatternsIndex extends ConsumerWidget {
   const PatternsIndex({Key? key}) : super(key: key);
 

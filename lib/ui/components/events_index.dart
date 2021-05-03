@@ -11,36 +11,33 @@ class EventsIndex extends ConsumerWidget {
   const EventsIndex({Key? key, required this.onEventTapped}) : super(key: key);
 
   @override
-  Widget build(context, watch) {
-    // final events = watch(eventProvider).reversed.toList();
-    return FutureBuilder<Iterable<Event>>(
-      future: context.read(eventProvider).sorted,
-      builder: (context, snapshot) {
-        if (snapshot.hasError) {
-          return const Center(child: Text("Couldn't retrieve events."));
-        }
+  Widget build(context, watch) => FutureBuilder<Iterable<Event>>(
+        future: context.read(eventProvider).sorted,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text("Couldn't retrieve events."));
+          }
 
-        if (snapshot.connectionState == ConnectionState.done) {
-          final events = snapshot.data?.toList() ?? [];
-          return events.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Center(child: Text("No events yet")),
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(8.0),
-                  itemCount: events.length,
-                  separatorBuilder: (BuildContext context, int index) => const Divider(),
-                  itemBuilder: (BuildContext context, int index) => ListTile(
-                    title: Text(events[index].title),
-                    onTap: () => onEventTapped(events[index]),
-                    trailing: Text(formattedDate(events[index].time)),
-                  ),
-                );
-        }
+          if (snapshot.connectionState == ConnectionState.done) {
+            final events = snapshot.data?.toList() ?? [];
+            return events.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Center(child: Text("No events yet")),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.all(8.0),
+                    itemCount: events.length,
+                    separatorBuilder: (BuildContext context, int index) => const Divider(),
+                    itemBuilder: (BuildContext context, int index) => ListTile(
+                      title: Text(events[index].title),
+                      onTap: () => onEventTapped(events[index]),
+                      trailing: Text(formattedDate(events[index].time)),
+                    ),
+                  );
+          }
 
-        return const Center(child: CircularProgressIndicator.adaptive());
-      },
-    );
-  }
+          return const Center(child: CircularProgressIndicator.adaptive());
+        },
+      );
 }

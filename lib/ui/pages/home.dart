@@ -26,7 +26,7 @@ class HomePage extends StatelessWidget {
         ),
         body: selectedNavigationItem == 0
             ? EventsIndex(onEventTapped: onEventTapped)
-            : (selectedNavigationItem == 1 ? PatternsIndex() : SettingsPage()),
+            : (selectedNavigationItem == 1 ? const PatternsIndex() : const SettingsPage()),
         floatingActionButton: FloatingActionButton(
           onPressed: onNewEvent,
           tooltip: 'New event',

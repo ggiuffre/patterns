@@ -21,7 +21,6 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   bool? _success;
-  String _userEmail = '';
   bool _isPasswordObscured = true;
 
   @override
@@ -79,7 +78,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                   ),
                 ),
                 if (_success != null)
-                  Center(child: Text(_success! ? 'Successfully registered $_userEmail' : 'Registration failed'))
+                  Center(child: Text(_success! ? 'Successfully registered new user' : 'Registration failed'))
               ],
             ),
           ),
@@ -112,10 +111,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
 
     final user = userCredential?.user;
     if (user != null) {
-      setState(() {
-        _success = true;
-        _userEmail = user.email ?? _userEmail;
-      });
+      setState(() => _success = true);
     } else {
       setState(() => _success = false);
     }

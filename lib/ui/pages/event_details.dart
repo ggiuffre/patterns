@@ -12,7 +12,7 @@ class EventDetailsPage extends StatelessWidget {
         appBar: AppBar(title: Text(event.title)),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Text("${event.title}, at ${event.time}"),
+          child: Text("${event.title}, on ${event.time}"),
         ),
       );
 }
