@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:patterns/ui/pages/settings.dart';
 
 import '../../data/event.dart';
 import '../components/events_index.dart';
@@ -23,7 +24,9 @@ class HomePage extends StatelessWidget {
         appBar: AppBar(
           title: const Text("Home Page"),
         ),
-        body: selectedNavigationItem == 0 ? EventsIndex(onEventTapped: onEventTapped) : PatternsIndex(),
+        body: selectedNavigationItem == 0
+            ? EventsIndex(onEventTapped: onEventTapped)
+            : (selectedNavigationItem == 1 ? PatternsIndex() : SettingsPage()),
         floatingActionButton: FloatingActionButton(
           onPressed: onNewEvent,
           tooltip: 'New event',

@@ -28,6 +28,10 @@ class EventRoutePath {
       : id = "/new-event",
         isUnknown = false;
 
+  const EventRoutePath.settings()
+      : id = "/settings",
+        isUnknown = false;
+
   const EventRoutePath.unknown()
       : id = null,
         isUnknown = true;
@@ -37,6 +41,8 @@ class EventRoutePath {
   bool get isPatternsPage => id == "/patterns";
 
   bool get isNewEventPage => id == "/new-event";
+
+  bool get isSettingsPage => id == "/settings";
 
   bool get isDetailsPage => id?.startsWith("/events/") ?? false;
 }
@@ -135,6 +141,8 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
     } else {
       if (path.isPatternsPage) {
         _homePageNavigationItem = 0;
+      } else if (path.isSettingsPage) {
+        _homePageNavigationItem = 2;
       } else {
         _homePageNavigationItem = 1;
       }
@@ -168,7 +176,7 @@ class EventRouteInformationParser extends RouteInformationParser<EventRoutePath>
       return EventRoutePath.home();
     }
 
-    // Handle 'patterns', '/new-event' and 'events'
+    // Handle 'patterns', '/new-event' 'events', and 'settings'
     if (uri.pathSegments.length == 1) {
       if (uri.pathSegments[0] == 'patterns') {
         return EventRoutePath.patterns();
@@ -176,6 +184,8 @@ class EventRouteInformationParser extends RouteInformationParser<EventRoutePath>
         return EventRoutePath.newEvent();
       } else if (uri.pathSegments[0] == 'events') {
         return EventRoutePath.home();
+      } else if (uri.pathSegments[0] == 'settings') {
+        return EventRoutePath.settings();
       } else {
         return EventRoutePath.unknown();
       }
@@ -204,6 +214,8 @@ class EventRouteInformationParser extends RouteInformationParser<EventRoutePath>
       return RouteInformation(location: '/patterns');
     } else if (path.isNewEventPage) {
       return RouteInformation(location: '/new-event');
+    } else if (path.isSettingsPage) {
+      return RouteInformation(location: '/settings');
     } else if (path.isDetailsPage) {
       return RouteInformation(location: path.id);
     }
