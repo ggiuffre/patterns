@@ -7,10 +7,11 @@ import 'theme.dart';
 import 'ui/components/login.dart';
 import 'ui/components/signup.dart';
 
-class Authenticated extends StatelessWidget {
+/// Wrapper that only shows its child if a user is authenticated, and otherwise prompts for authentication.
+class AuthenticationGuard extends StatelessWidget {
   final Widget child;
 
-  const Authenticated({Key? key, required this.child}) : super(key: key);
+  const AuthenticationGuard({Key? key, required this.child}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => StreamBuilder<User?>(
