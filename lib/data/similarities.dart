@@ -28,6 +28,16 @@ double similarity(List<Event> a, List<Event> b) {
     samplesVisited++;
   }
 
+  if (aIndex < a.length) {
+    final remaining = a.length - aIndex;
+    accumulator -= remaining;
+    samplesVisited += remaining;
+  } else if (bIndex < b.length) {
+    final remaining = b.length - bIndex;
+    accumulator -= remaining;
+    samplesVisited += remaining;
+  }
+
   return accumulator / samplesVisited;
 }
 

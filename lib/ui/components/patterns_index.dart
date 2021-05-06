@@ -10,7 +10,7 @@ class PatternsIndex extends ConsumerWidget {
 
   @override
   Widget build(context, watch) => FutureBuilder<Iterable<Event>>(
-        future: context.read(eventProvider).list,
+        future: context.read(eventProvider).sorted(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text("Couldn't retrieve events needed to extract patterns."));

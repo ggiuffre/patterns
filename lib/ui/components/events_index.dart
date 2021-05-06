@@ -12,7 +12,7 @@ class EventsIndex extends ConsumerWidget {
 
   @override
   Widget build(context, watch) => FutureBuilder<Iterable<Event>>(
-        future: context.read(eventProvider).sorted,
+        future: context.read(eventProvider).sorted(descending: true),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const Center(child: Text("Couldn't retrieve events."));

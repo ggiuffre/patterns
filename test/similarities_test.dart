@@ -87,4 +87,17 @@ void main() {
     final result = similarity(series1, series2);
     expect(result, isA<double>());
   });
+
+  test("similarity of identical series is greater than similarity of same pair with one unit displaced", () {
+    final series1 = List.generate(
+      30,
+      (_) => Event(
+        "title",
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+      ),
+    );
+    final series2 = [...series1.sublist(0, 29), Event("title", series1.last.time.add(const Duration(days: 1)))];
+    final result = similarity(series1, series2);
+    expect(similarity(series1, series1), greaterThan(similarity(series1, series2)));
+  });
 }

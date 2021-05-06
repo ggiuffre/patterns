@@ -19,8 +19,8 @@ abstract class EventRepository {
   /// Iterable of all events stored in the repository.
   Future<Iterable<Event>> get list;
 
-  /// Iterable of all events stored in the repository, sorted by descending date.
-  Future<Iterable<Event>> get sorted;
+  /// Iterable of all events stored in the repository, sorted by date (default ascending).
+  Future<Iterable<Event>> sorted({bool descending = false});
 }
 
 /// Currently selected implementation of [EventRepository].
@@ -73,13 +73,13 @@ class FirestoreEventRepository implements EventRepository {
   }
 
   @override
-  Future<Iterable<Event>> get sorted {
+  Future<Iterable<Event>> sorted({bool descending = false}) {
     if (_userId != null) {
       return FirebaseFirestore.instance
           .collection("users")
           .doc(_userId)
           .collection("events")
-          .orderBy('time', descending: true)
+          .orderBy('time', descending: descending)
           .get()
           .then((collection) =>
               collection.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"], e.id)));
@@ -120,5 +120,6 @@ class InMemoryEventRepository implements EventRepository {
   Future<Iterable<Event>> get list => Future.value(events);
 
   @override
-  Future<Iterable<Event>> get sorted => list;
+  Future<Iterable<Event>> sorted({bool descending = false}) =>
+      descending ? list.then((v) => v.toList().reversed) : list;
 }
