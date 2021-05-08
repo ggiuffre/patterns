@@ -19,9 +19,9 @@ class SettingsPage extends StatelessWidget {
                   children: [
                     const Text("Dark mode"),
                     Consumer(
-                      builder: (context, watch, _) => Switch.adaptive(
+                      builder: (innerContext, watch, _) => Switch.adaptive(
                         value: watch(themeModeProvider) == ThemeMode.dark,
-                        onChanged: (_) => context.read(themeModeProvider.notifier).toggle(),
+                        onChanged: (_) => innerContext.read(themeModeProvider.notifier).toggle(),
                       ),
                     ),
                   ],
