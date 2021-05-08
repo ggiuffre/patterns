@@ -20,8 +20,8 @@ class SettingsPage extends StatelessWidget {
                     const Text("Dark mode"),
                     Consumer(
                       builder: (innerContext, watch, _) => Switch.adaptive(
-                        value: watch(themeModeProvider) == ThemeMode.dark,
-                        onChanged: (_) => innerContext.read(themeModeProvider.notifier).toggle(),
+                        value: _isDark(themeMode: watch(themeModeProvider), context: innerContext),
+                        onChanged: innerContext.read(themeModeProvider.notifier).setDarkMode,
                       ),
                     ),
                   ],
@@ -31,4 +31,12 @@ class SettingsPage extends StatelessWidget {
           ],
         ),
       );
+
+  bool _isDark({required ThemeMode themeMode, required BuildContext context}) {
+    if ({ThemeMode.light, ThemeMode.dark}.contains(themeMode)) {
+      return themeMode == ThemeMode.dark;
+    } else {
+      return MediaQuery.platformBrightnessOf(context) == Brightness.dark;
+    }
+  }
 }
