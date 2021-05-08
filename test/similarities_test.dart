@@ -97,7 +97,6 @@ void main() {
       ),
     );
     final series2 = [...series1.sublist(0, 29), Event("title", series1.last.time.add(const Duration(days: 1)))];
-    final result = similarity(series1, series2);
     expect(similarity(series1, series1), greaterThan(similarity(series1, series2)));
   });
 }
