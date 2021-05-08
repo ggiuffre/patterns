@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:patterns/data/theme_mode_provider.dart';
 import 'package:patterns/ui/pages/settings.dart';
 
 void main() {
@@ -42,5 +43,37 @@ void main() {
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
     await tester.pumpAndSettle();
     expect(tester.widget<Switch>(find.byType(Switch)).value, false);
+  });
+
+  testWidgets("The dark mode switch is off if the user-defined theme mode is light.", (WidgetTester tester) async {
+    await tester.pumpWidget(ProviderScope(
+      overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier()..setDarkMode(false))],
+      child: MaterialApp(home: SettingsPage()),
+    ));
+
+    final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
+    expect(darkModeSwitch.value, false);
+  });
+
+  testWidgets("The dark mode switch is on if the user-defined theme mode is dark.", (WidgetTester tester) async {
+    await tester.pumpWidget(ProviderScope(
+      overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier()..setDarkMode(true))],
+      child: MaterialApp(home: SettingsPage()),
+    ));
+
+    final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
+    expect(darkModeSwitch.value, true);
+  });
+
+  testWidgets("The dark mode switch depends more on the user-defined theme mode than on the system's brightness.",
+      (WidgetTester tester) async {
+    tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+    await tester.pumpWidget(ProviderScope(
+      overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier()..setDarkMode(false))],
+      child: MaterialApp(home: SettingsPage()),
+    ));
+
+    final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
+    expect(darkModeSwitch.value, false);
   });
 }
