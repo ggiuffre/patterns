@@ -9,6 +9,8 @@ class LogInScreen extends StatelessWidget {
       );
 }
 
+enum _AuthState { signed_out, processing, error, signed_in }
+
 class EmailLogInForm extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _EmailLogInFormState();
@@ -20,7 +22,7 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  bool? _success;
+  _AuthState _authState = _AuthState.signed_out;
   bool _isPasswordObscured = true;
 
   @override
@@ -66,19 +68,22 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
                   obscureText: _isPasswordObscured,
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.all(16.0),
                   alignment: Alignment.center,
-                  child: TextButton.icon(
-                    icon: Icon(Icons.login),
-                    onPressed: () async {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        await _logIn();
-                      }
-                    },
-                    label: const Text('Log in'),
-                  ),
+                  child: _authState == _AuthState.signed_out || _authState == _AuthState.error
+                      ? TextButton.icon(
+                          icon: const Icon(Icons.login),
+                          onPressed: () async {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              await _logIn();
+                            }
+                          },
+                          label: const Text('Log in'),
+                        )
+                      : const CircularProgressIndicator.adaptive(),
                 ),
-                if (_success != null) Center(child: Text(_success! ? 'Successfully logged in' : 'Login failed'))
+                if (_authState == _AuthState.error) const Center(child: Text('Login failed')),
+                if (_authState == _AuthState.signed_in) const Center(child: Text('Successfully logged in')),
               ],
             ),
           ),
@@ -93,20 +98,21 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
   }
 
   Future<void> _logIn() async {
+    setState(() => _authState = _AuthState.processing);
     try {
       await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
-      setState(() => _success = true);
+      setState(() => _authState = _AuthState.signed_in);
     } on FirebaseAuthException catch (e) {
       if ({'user-not-found', 'wrong-password'}.contains(e.code)) {
         print('Wrong username or password.');
       }
-      setState(() => _success = false);
+      setState(() => _authState = _AuthState.error);
     } catch (e) {
       print(e);
-      setState(() => _success = false);
+      setState(() => _authState = _AuthState.error);
     }
   }
 }
