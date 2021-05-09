@@ -9,6 +9,8 @@ class SignUpScreen extends StatelessWidget {
       );
 }
 
+enum _AuthState { signed_out, processing, error, signed_in }
+
 class EmailRegistrationForm extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _EmailRegistrationFormState();
@@ -20,7 +22,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  bool? _success;
+  _AuthState _authState = _AuthState.signed_out;
   bool _isPasswordObscured = true;
 
   @override
@@ -65,20 +67,22 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                   obscureText: _isPasswordObscured,
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  padding: const EdgeInsets.all(16.0),
                   alignment: Alignment.center,
-                  child: TextButton.icon(
-                    icon: Icon(Icons.person_add),
-                    onPressed: () async {
-                      if (_formKey.currentState?.validate() ?? false) {
-                        await _register();
-                      }
-                    },
-                    label: const Text('Register'),
-                  ),
+                  child: _authState == _AuthState.signed_out || _authState == _AuthState.error
+                      ? TextButton.icon(
+                          icon: const Icon(Icons.person_add),
+                          onPressed: () async {
+                            if (_formKey.currentState?.validate() ?? false) {
+                              await _register();
+                            }
+                          },
+                          label: const Text('Register'),
+                        )
+                      : const CircularProgressIndicator.adaptive(),
                 ),
-                if (_success != null)
-                  Center(child: Text(_success! ? 'Successfully registered new user' : 'Registration failed'))
+                if (_authState == _AuthState.error) const Center(child: Text('Registration failed')),
+                if (_authState == _AuthState.signed_in) const Center(child: Text('Successfully registered new user')),
               ],
             ),
           ),
@@ -93,6 +97,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
   }
 
   Future<void> _register() async {
+    setState(() => _authState = _AuthState.processing);
     UserCredential? userCredential;
     try {
       userCredential = await _auth.createUserWithEmailAndPassword(
@@ -111,9 +116,9 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
 
     final user = userCredential?.user;
     if (user != null) {
-      setState(() => _success = true);
+      setState(() => _authState = _AuthState.signed_in);
     } else {
-      setState(() => _success = false);
+      setState(() => _authState = _AuthState.error);
     }
   }
 }
