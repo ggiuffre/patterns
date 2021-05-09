@@ -4,6 +4,7 @@ import 'package:patterns/ui/pages/settings.dart';
 import '../../data/event.dart';
 import '../components/events_index.dart';
 import '../components/patterns_index.dart';
+import '../components/user_app_bar.dart';
 
 class HomePage extends StatelessWidget {
   final int selectedNavigationItem;
@@ -21,7 +22,7 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: AppBar(
+        appBar: UserAppBar(
           title: const Text("Home Page"),
         ),
         body: selectedNavigationItem == 0
