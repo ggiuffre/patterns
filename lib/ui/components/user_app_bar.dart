@@ -13,7 +13,7 @@ class UserAppBar extends AppBar {
                   child: TextButton.icon(
                     onPressed: FirebaseAuth.instance.signOut,
                     icon: const Icon(Icons.logout),
-                    label: const Text("Log out"),
+                    label: Text("Log out ${FirebaseAuth.instance.currentUser?.email}"),
                   ),
                 ),
               ],
