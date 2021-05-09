@@ -30,6 +30,7 @@ class _NewEventFormState extends State<NewEventForm> {
 
   String _eventTitle = "";
   DateTime _eventTime = DateTime.now();
+  bool _addingEvent = false; // whether an event is in the process of being added
 
   @override
   void initState() {
@@ -140,23 +141,18 @@ class _NewEventFormState extends State<NewEventForm> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-              child: ElevatedButton(
-                onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
-                    // context.read(eventProvider.notifier).addEvent(Event(_eventTitle, _eventTime));
-                    context.read(eventProvider).add(Event(_eventTitle, _eventTime));
-                    // if (user?.uid != null) {
-                    //   await FirebaseFirestore.instance
-                    //       .collection("users")
-                    //       .doc(user!.uid)
-                    //       .collection("events")
-                    //       .add({"title": _eventTitle, "time": _eventTime});
-                    // }
-                    widget.onSubmit();
-                  }
-                },
-                child: const Text("Submit"),
-              ),
+              child: _addingEvent
+                  ? const Center(child: CircularProgressIndicator.adaptive())
+                  : ElevatedButton(
+                      onPressed: () async {
+                        if (_formKey.currentState!.validate()) {
+                          setState(() => _addingEvent = true);
+                          await context.read(eventProvider).add(Event(_eventTitle, _eventTime));
+                          widget.onSubmit();
+                        }
+                      },
+                      child: const Text("Submit"),
+                    ),
             ),
           ],
         ),
