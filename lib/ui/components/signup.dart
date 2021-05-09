@@ -42,9 +42,14 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email'),
                   textInputAction: TextInputAction.next,
+                  keyboardType: TextInputType.emailAddress,
                   validator: (String? value) {
                     if (value?.isEmpty ?? true) {
-                      return 'Please enter some text';
+                      return 'Please enter your email address';
+                    }
+                    if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                        .hasMatch(value ?? "")) {
+                      return 'Please check that the address you entered is correct';
                     }
                     return null;
                   },
@@ -60,7 +65,10 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                   ),
                   validator: (String? value) {
                     if (value?.isEmpty ?? true) {
-                      return 'Please enter some text';
+                      return 'Please enter a password';
+                    }
+                    if ((value?.length ?? 0) < 4) {
+                      return 'Please enter a slightly longer password';
                     }
                     return null;
                   },
