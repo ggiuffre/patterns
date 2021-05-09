@@ -4,8 +4,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'authentication.dart';
 import 'firebase_enabler.dart';
+import 'local_preferences_enabler.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(ProviderScope(child: FirebaseEnabler(child: AuthenticationGuard(child: PatternsApp()))));
+  runApp(
+    ProviderScope(
+      child: FirebaseEnabler(
+        child: AuthenticationGuard(
+          child: LocalPreferencesEnabler(
+            child: PatternsApp(),
+          ),
+        ),
+      ),
+    ),
+  );
 }

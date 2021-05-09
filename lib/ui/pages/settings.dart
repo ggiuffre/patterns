@@ -21,7 +21,8 @@ class SettingsPage extends StatelessWidget {
                     Consumer(
                       builder: (innerContext, watch, _) => Switch.adaptive(
                         value: _isDark(themeMode: watch(themeModeProvider), context: innerContext),
-                        onChanged: innerContext.read(themeModeProvider.notifier).setDarkMode,
+                        onChanged: (value) async =>
+                            await innerContext.read(themeModeProvider.notifier).setDarkMode(value),
                       ),
                     ),
                   ],

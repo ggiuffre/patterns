@@ -47,7 +47,7 @@ void main() {
 
   testWidgets("The dark mode switch is off if the user-defined theme mode is light.", (WidgetTester tester) async {
     await tester.pumpWidget(ProviderScope(
-      overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier()..setDarkMode(false))],
+      overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier(ThemeMode.light))],
       child: MaterialApp(home: SettingsPage()),
     ));
 
@@ -57,7 +57,7 @@ void main() {
 
   testWidgets("The dark mode switch is on if the user-defined theme mode is dark.", (WidgetTester tester) async {
     await tester.pumpWidget(ProviderScope(
-      overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier()..setDarkMode(true))],
+      overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier(ThemeMode.dark))],
       child: MaterialApp(home: SettingsPage()),
     ));
 
@@ -69,7 +69,7 @@ void main() {
       (WidgetTester tester) async {
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpWidget(ProviderScope(
-      overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier()..setDarkMode(false))],
+      overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier(ThemeMode.light))],
       child: MaterialApp(home: SettingsPage()),
     ));
 
