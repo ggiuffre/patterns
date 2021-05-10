@@ -45,13 +45,14 @@ enum Frequency { daily, weekly, biWeekly, monthly, biMonthly, annually }
 /// Get a sequence of events named [title] with time inside [range], recurring at [frequency].
 Iterable<Event> eventsAtInterval({required String title, required DateTimeRange range, required Frequency frequency}) {
   final actions = <Frequency, DateTime Function(DateTime)>{
-    Frequency.daily: (DateTime t) => t.add(const Duration(days: 1)),
-    Frequency.weekly: (DateTime t) => t.add(const Duration(days: 7)),
-    Frequency.biWeekly: (DateTime t) => t.add(const Duration(days: 14)),
-    Frequency.monthly: (DateTime t) => DateTime(
-        t.year + (t.month == 12 ? 1 : 0), t.month + 1, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-    Frequency.biMonthly: (DateTime t) => DateTime(
-        t.year + (t.month >= 11 ? 1 : 0), t.month + 2, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+    Frequency.daily: (DateTime t) =>
+        DateTime(t.year, t.month, t.day + 1, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+    Frequency.weekly: (DateTime t) =>
+        DateTime(t.year, t.month, t.day + 7, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+    Frequency.biWeekly: (DateTime t) =>
+        DateTime(t.year, t.month, t.day + 14, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+    Frequency.monthly: (DateTime t) => monthsLater(t: t, months: 1),
+    Frequency.biMonthly: (DateTime t) => monthsLater(t: t, months: 2),
     Frequency.annually: (DateTime t) =>
         DateTime(t.year + 1, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
   };
@@ -64,4 +65,20 @@ Iterable<Event> eventsAtInterval({required String title, required DateTimeRange 
   }
 
   return result;
+}
+
+DateTime monthsLater({required DateTime t, required int months}) {
+  DateTime candidate = DateTime(t.year + (t.month + months >= 12 ? 1 : 0), t.month + months, t.day, t.hour, t.minute,
+      t.second, t.millisecond, t.microsecond);
+
+  if ((candidate.month - t.month) % 12 > months) {
+    int correction = 1;
+    while (((candidate.month - t.month) % 12 > months)) {
+      candidate = DateTime(t.year + (t.month + months >= 12 ? 1 : 0), t.month + months, t.day - correction, t.hour,
+          t.minute, t.second, t.millisecond, t.microsecond);
+      correction++;
+    }
+  }
+
+  return candidate;
 }

@@ -56,30 +56,61 @@ void main() {
 
   test("eventsAtInterval returns events that are one day apart, if given a frequency of 'daily'", () {
     final range = DateTimeRange(start: DateTime(1492, 1, 1), end: DateTime(1492, 3, 28));
-    final events = eventsAtInterval(
-      title: "title",
-      range: range,
-      frequency: Frequency.daily,
-    );
+    final events = eventsAtInterval(title: "title", range: range, frequency: Frequency.daily);
     const interval = Duration(days: 1);
-    DateTime previousDate = range.start.subtract(interval);
-    for (final event in events) {
-      expect(event.time.subtract(interval), previousDate);
+    DateTime previousDate = events.first.time;
+    for (final event in events.skip(1)) {
+      expect(DateTime(event.time.year, event.time.month, event.time.day - 1), previousDate);
       previousDate = event.time;
     }
   });
 
   test("eventsAtInterval returns events that are one week apart, if given a frequency of 'weekly'", () {
     final range = DateTimeRange(start: DateTime(1890, 5, 10), end: DateTime(1892, 2, 2));
-    final events = eventsAtInterval(
-      title: "title",
-      range: range,
-      frequency: Frequency.weekly,
-    );
-    const interval = Duration(days: 7);
-    DateTime previousDate = range.start.subtract(interval);
-    for (final event in events) {
-      expect(event.time.subtract(interval), previousDate);
+    final events = eventsAtInterval(title: "title", range: range, frequency: Frequency.weekly);
+    DateTime previousDate = events.first.time;
+    for (final event in events.skip(1)) {
+      expect(DateTime(event.time.year, event.time.month, event.time.day - 7), previousDate);
+      previousDate = event.time;
+    }
+  });
+
+  test("eventsAtInterval returns events that are two weeks apart, if given a frequency of 'biWeekly'", () {
+    final range = DateTimeRange(start: DateTime(2004, 11, 21), end: DateTime(2005, 11, 21));
+    final events = eventsAtInterval(title: "title", range: range, frequency: Frequency.biWeekly);
+    DateTime previousDate = events.first.time;
+    for (final event in events.skip(1)) {
+      expect(DateTime(event.time.year, event.time.month, event.time.day - 14), previousDate);
+      previousDate = event.time;
+    }
+  });
+
+  test("eventsAtInterval returns events that are each one month apart, if given a frequency of 'monthly'", () {
+    final range = DateTimeRange(start: DateTime(1999, 1, 31), end: DateTime(1999, 10, 2));
+    final events = eventsAtInterval(title: "title", range: range, frequency: Frequency.monthly);
+    DateTime previousDate = events.first.time;
+    for (final event in events.skip(1)) {
+      expect((event.time.month - previousDate.month) % 12, equals(1));
+      previousDate = event.time;
+    }
+  });
+
+  test("eventsAtInterval returns events that are each two months apart, if given a frequency of 'biMonthly'", () {
+    final range = DateTimeRange(start: DateTime(1900, 2, 3), end: DateTime(1920, 9, 10));
+    final events = eventsAtInterval(title: "title", range: range, frequency: Frequency.biMonthly);
+    DateTime previousDate = events.first.time;
+    for (final event in events.skip(1)) {
+      expect((event.time.month - previousDate.month) % 12, equals(2));
+      previousDate = event.time;
+    }
+  });
+
+  test("eventsAtInterval returns events that are each one year apart, if given a frequency of 'annually'", () {
+    final range = DateTimeRange(start: DateTime(1200, 11, 11), end: DateTime(1234, 5, 6));
+    final events = eventsAtInterval(title: "title", range: range, frequency: Frequency.annually);
+    DateTime previousDate = events.first.time;
+    for (final event in events.skip(1)) {
+      expect(event.time.year - previousDate.year, equals(1));
       previousDate = event.time;
     }
   });
