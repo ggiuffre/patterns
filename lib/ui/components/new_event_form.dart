@@ -13,18 +13,8 @@ class NewEventForm extends StatefulWidget {
   _NewEventFormState createState() => _NewEventFormState();
 }
 
-const weekDays = {
-  DateTime.monday: "Monday",
-  DateTime.tuesday: "Tuesday",
-  DateTime.wednesday: "Wednesday",
-  DateTime.thursday: "Thursday",
-  DateTime.friday: "Friday",
-  DateTime.saturday: "Saturday",
-  DateTime.sunday: "Sunday",
-};
-
 class _NewEventFormState extends State<NewEventForm> {
-  static const List<String> _textFieldHints = <String>[
+  static const _textFieldHints = [
     'breakfast with cereals',
     'breakfast with bread+butter',
     'dinner with carbs',
@@ -33,6 +23,16 @@ class _NewEventFormState extends State<NewEventForm> {
     'good sleep',
     'bad sleep',
   ];
+
+  static const _weekDays = {
+    DateTime.monday: "Monday",
+    DateTime.tuesday: "Tuesday",
+    DateTime.wednesday: "Wednesday",
+    DateTime.thursday: "Thursday",
+    DateTime.friday: "Friday",
+    DateTime.saturday: "Saturday",
+    DateTime.sunday: "Sunday",
+  };
 
   final _formKey = GlobalKey<FormState>();
   final _dateFieldController = TextEditingController();
@@ -149,9 +149,9 @@ class _NewEventFormState extends State<NewEventForm> {
                       child: _recurringEvent
                           ? Column(
                               children: [
-                                for (final weekDay in weekDays.keys)
+                                for (final weekDay in _weekDays.keys)
                                   RadioListTile<int>(
-                                    title: Text("Every ${weekDays[weekDay]}"),
+                                    title: Text("Every ${_weekDays[weekDay]}"),
                                     value: weekDay,
                                     groupValue: _recurringEventTime,
                                     onChanged: (v) => setState(() => _recurringEventTime = v ?? _recurringEventTime),
