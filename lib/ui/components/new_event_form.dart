@@ -181,22 +181,7 @@ class _NewEventFormState extends State<NewEventForm> {
               child: _addingEvent
                   ? const Center(child: CircularProgressIndicator.adaptive())
                   : ElevatedButton(
-                      onPressed: () async {
-                        if (_formKey.currentState!.validate()) {
-                          setState(() => _addingEvent = true);
-                          if (_recurringEvent) {
-                            final currentWeekDay = DateTime.now().weekday;
-                            final offset = _recurringEventTime - currentWeekDay % 7;
-                            final recurringEventClosestDate = DateTime.now().add(Duration(days: offset));
-                            List.generate(5, (index) => recurringEventClosestDate.add(Duration(days: (index - 3) * 7)))
-                                .map((t) => Event(_eventTitle, t))
-                                .forEach((event) async => await context.read(eventProvider).add(event));
-                          } else {
-                            await context.read(eventProvider).add(Event(_eventTitle, _eventTime));
-                          }
-                          widget.onSubmit();
-                        }
-                      },
+                      onPressed: _submitEvent,
                       child: const Text("Submit"),
                     ),
             ),
@@ -212,5 +197,29 @@ class _NewEventFormState extends State<NewEventForm> {
       lastDate: DateTime(2025),
     );
     return (newTime != _eventTime ? newTime : _eventTime) ?? _eventTime;
+  }
+
+  Future<void> _submitEvent() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() => _addingEvent = true);
+      if (_recurringEvent) {
+        final currentWeekDay = DateTime.now().weekday;
+        final offset = (_recurringEventTime - currentWeekDay) % 7;
+        final recurringEventClosestDate = DateTime.now().add(Duration(days: offset));
+        final events = eventsAtInterval(
+          title: _eventTitle,
+          range: DateTimeRange(
+              start: recurringEventClosestDate.subtract(const Duration(days: 14)),
+              end: recurringEventClosestDate.add(const Duration(days: 15))),
+          frequency: Frequency.weekly,
+        );
+        for (final event in events) {
+          context.read(eventProvider).add(event);
+        }
+      } else {
+        await context.read(eventProvider).add(Event(_eventTitle, _eventTime));
+      }
+      widget.onSubmit();
+    }
   }
 }
