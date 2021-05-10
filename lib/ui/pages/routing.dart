@@ -97,7 +97,13 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
           else if (_selectedEvent != null)
             MaterialPage(
               key: ValueKey('/events/${_selectedEvent?.id ?? ""}'),
-              child: EventDetailsPage(event: _selectedEvent!),
+              child: EventDetailsPage(
+                event: _selectedEvent!,
+                onDeleteEvent: () {
+                  _selectedEvent = null;
+                  notifyListeners();
+                },
+              ),
             ),
         ],
         onPopPage: (route, result) {
