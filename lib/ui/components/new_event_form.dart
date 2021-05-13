@@ -208,7 +208,6 @@ class _NewEventFormState extends State<NewEventForm> {
 
   Future<void> _submitEvent() async {
     if (_formKey.currentState!.validate()) {
-      print("adding...");
       setState(() => _addingEvent = true);
       if (_eventFrequency != Frequency.once) {
         final events = eventsAtInterval(
@@ -217,7 +216,6 @@ class _NewEventFormState extends State<NewEventForm> {
           frequency: _eventFrequency,
         );
         for (final event in events) {
-          print(event);
           context.read(eventProvider).add(event);
         }
       } else {

@@ -27,11 +27,4 @@ main() {
 
     expect(find.widgetWithText(ElevatedButton, "Submit"), findsOneWidget);
   });
-
-  // testWidgets("The new-event executes a callback when the submit button is pressed", (WidgetTester tester) async {
-  //   await tester.pumpWidget(ProviderScope(child: MaterialApp(home: NewEventForm(onSubmit: () {}))));
-  //
-  //   await tester.tap(find.widgetWithText(ElevatedButton, "Submit"));
-  //   expect(onSubmit, neverCalled);
-  // });
 }
