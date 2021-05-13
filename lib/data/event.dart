@@ -40,10 +40,14 @@ class Event implements Comparable {
 }
 
 /// Frequency at which an [Event] can occur.
-enum Frequency { daily, weekly, biWeekly, monthly, biMonthly, annually }
+enum Frequency { once, daily, weekly, biWeekly, monthly, biMonthly, annually }
 
 /// Get a sequence of events named [title] with time inside [range], recurring at [frequency].
 Iterable<Event> eventsAtInterval({required String title, required DateTimeRange range, required Frequency frequency}) {
+  if (frequency == Frequency.once) {
+    return [Event(title, range.start)];
+  }
+
   final actions = <Frequency, DateTime Function(DateTime)>{
     Frequency.daily: (DateTime t) =>
         DateTime(t.year, t.month, t.day + 1, t.hour, t.minute, t.second, t.millisecond, t.microsecond),

@@ -22,16 +22,16 @@ class _NewEventFormState extends State<NewEventForm> {
     'nuts before sleeping',
     'good sleep',
     'bad sleep',
-  ];
+  ]; // TODO suggest titles previously entered by user
 
-  static const _weekDays = {
-    DateTime.monday: "Monday",
-    DateTime.tuesday: "Tuesday",
-    DateTime.wednesday: "Wednesday",
-    DateTime.thursday: "Thursday",
-    DateTime.friday: "Friday",
-    DateTime.saturday: "Saturday",
-    DateTime.sunday: "Sunday",
+  static const _frequencies = {
+    Frequency.once: "Does not repeat",
+    Frequency.daily: "Every day",
+    Frequency.weekly: "Every week",
+    Frequency.biWeekly: "Every other week",
+    Frequency.monthly: "Every month",
+    Frequency.biMonthly: "Every other month",
+    Frequency.annually: "Every year",
   };
 
   final _formKey = GlobalKey<FormState>();
@@ -40,14 +40,19 @@ class _NewEventFormState extends State<NewEventForm> {
 
   String _eventTitle = "";
   DateTime _eventTime = DateTime.now();
-  bool _recurringEvent = false; // whether the event being creates recurs at a precise time interval
-  int _recurringEventTime = DateTime.monday; // when the event being created occurs, if it is a recurring one
+  Frequency _eventFrequency = Frequency.once; // frequency with which the event being created occurs
   bool _addingEvent = false; // whether an event is in the process of being added
 
   @override
   void initState() {
     _dateFieldController.text = _eventTime.toString();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _dateFieldController.dispose();
+    super.dispose();
   }
 
   @override
@@ -137,40 +142,35 @@ class _NewEventFormState extends State<NewEventForm> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          const Text("Recurring event?"),
-                          Switch(value: _recurringEvent, onChanged: (v) => setState(() => _recurringEvent = v)),
-                        ],
+                      child: TextFormField(
+                        readOnly: true,
+                        controller: _dateFieldController,
+                        onTap: () async {
+                          final newTime = await _selectDate(context);
+                          setState(() => _eventTime = newTime);
+                          _dateFieldController.text = newTime.toString();
+                        },
+                        decoration: const InputDecoration(
+                          icon: Icon(Icons.calendar_today),
+                          border: OutlineInputBorder(),
+                          labelText: 'Event time',
+                        ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: _recurringEvent
-                          ? Column(
-                              children: [
-                                for (final weekDay in _weekDays.keys)
-                                  RadioListTile<int>(
-                                    title: Text("Every ${_weekDays[weekDay]}"),
-                                    value: weekDay,
-                                    groupValue: _recurringEventTime,
-                                    onChanged: (v) => setState(() => _recurringEventTime = v ?? _recurringEventTime),
-                                  ),
-                              ],
-                            )
-                          : TextFormField(
-                              controller: _dateFieldController,
-                              onTap: () async {
-                                final newTime = await _selectDate(context);
-                                setState(() => _eventTime = newTime);
-                                _dateFieldController.text = newTime.toString();
-                              },
-                              decoration: const InputDecoration(
-                                icon: Icon(Icons.calendar_today),
-                                border: OutlineInputBorder(),
-                                labelText: 'Event time',
-                              ),
-                            ),
+                    ExpansionTile(
+                      leading: const Icon(Icons.repeat),
+                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                      title: Text(_frequencies[_eventFrequency]!),
+                      children: [
+                        for (final frequency in Frequency.values)
+                          RadioListTile<Frequency>(
+                            title: Text(_frequencies[frequency]!),
+                            value: frequency,
+                            groupValue: _eventFrequency,
+                            onChanged: (v) => setState(() => _eventFrequency = v ?? _eventFrequency),
+                            dense: true,
+                          ),
+                      ],
                     ),
                   ],
                 ),
@@ -201,19 +201,16 @@ class _NewEventFormState extends State<NewEventForm> {
 
   Future<void> _submitEvent() async {
     if (_formKey.currentState!.validate()) {
+      print("adding...");
       setState(() => _addingEvent = true);
-      if (_recurringEvent) {
-        final currentWeekDay = DateTime.now().weekday;
-        final offset = (_recurringEventTime - currentWeekDay) % 7;
-        final recurringEventClosestDate = DateTime.now().add(Duration(days: offset));
+      if (_eventFrequency != Frequency.once) {
         final events = eventsAtInterval(
           title: _eventTitle,
-          range: DateTimeRange(
-              start: recurringEventClosestDate.subtract(const Duration(days: 14)),
-              end: recurringEventClosestDate.add(const Duration(days: 15))),
-          frequency: Frequency.weekly,
+          range: DateTimeRange(start: _eventTime, end: _eventTime.add(const Duration(days: 90))),
+          frequency: _eventFrequency,
         );
         for (final event in events) {
+          print(event);
           context.read(eventProvider).add(event);
         }
       } else {
