@@ -12,14 +12,14 @@ void main() {
       100,
       (_) => Event(
         "title",
-        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
       ),
     );
     final series2 = List.generate(
       30,
       (_) => Event(
         "title",
-        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
       ),
     );
     final result = similarity(series1, series2);
@@ -31,14 +31,14 @@ void main() {
       100,
       (_) => Event(
         "title",
-        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
       ),
     );
     final series2 = List.generate(
       30,
       (_) => Event(
         "title",
-        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
       ),
     );
     final result = similarity(series1, series2);
@@ -50,7 +50,7 @@ void main() {
       30,
       (_) => Event(
         "title",
-        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
       ),
     );
     final result = similarity(series, series);
@@ -62,7 +62,7 @@ void main() {
       30,
       (_) => Event(
         "title",
-        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
       ),
     ).toSet().toList();
     final result = similarity(series.sublist(0, series.length ~/ 2), series.sublist(series.length ~/ 2));
@@ -74,14 +74,14 @@ void main() {
       randomGenerator.nextInt(50),
       (_) => Event(
         "title",
-        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
       ),
     );
     final series2 = List.generate(
       randomGenerator.nextInt(50),
       (_) => Event(
         "title",
-        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
       ),
     );
     final result = similarity(series1, series2);
@@ -93,10 +93,28 @@ void main() {
       30,
       (_) => Event(
         "title",
-        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(28 + 1)),
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
       ),
     );
     final series2 = [...series1.sublist(0, 29), Event("title", series1.last.time.add(const Duration(days: 1)))];
     expect(similarity(series1, series1), greaterThan(similarity(series1, series2)));
+  });
+
+  test("similarity is commutative in the two arguments that it takes", () {
+    final series1 = List.generate(
+      randomGenerator.nextInt(50),
+      (_) => Event(
+        "title",
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
+      ),
+    );
+    final series2 = List.generate(
+      randomGenerator.nextInt(50),
+      (_) => Event(
+        "title",
+        DateTime(randomGenerator.nextInt(200) + 1850, randomGenerator.nextInt(12 + 1), randomGenerator.nextInt(31 + 1)),
+      ),
+    );
+    expect(similarity(series1, series2), equals(similarity(series2, series1)));
   });
 }
