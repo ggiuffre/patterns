@@ -84,6 +84,8 @@ class _DeleteAllEventsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AlertDialog(
         title: const Text("Confirmation"),
+        content: const Text("This will permanently delete all the events that you entered, "
+            "and all the patterns calculated from those events."),
         actions: <Widget>[
           TextButton(
             child: Text('Cancel'),
