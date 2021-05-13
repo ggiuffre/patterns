@@ -91,6 +91,13 @@ class _NewEventFormState extends State<NewEventForm> {
                               labelText: 'Event title',
                             ),
                             textInputAction: TextInputAction.next,
+                            autovalidateMode: AutovalidateMode.onUserInteraction,
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return 'Please enter a title for this event';
+                              }
+                              return null;
+                            },
                           );
                         },
                         optionsViewBuilder: (context, onSelected, options) => Padding(
