@@ -25,22 +25,44 @@ class EventDetailsPage extends StatelessWidget {
                 ),
               ),
               Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextButton.icon(
-                    onPressed: () async {
-                      await context.read(eventProvider).delete(event.id);
-                      onDeleteEvent();
-                    },
-                    icon: const Icon(
-                      Icons.delete,
-                      color: Colors.red,
+                child: ExpansionTile(
+                  leading: const Icon(Icons.warning),
+                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                  title: const Text("Danger zone"),
+                  children: [
+                    TextButton.icon(
+                      onPressed: () async {
+                        await context.read(eventProvider).delete(event.id);
+                        onDeleteEvent();
+                      },
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
+                      label: Text(
+                        "Delete this event",
+                        style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+                      ),
                     ),
-                    label: Text(
-                      "Delete",
-                      style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+                    TextButton.icon(
+                      onPressed: () async {
+                        final allEvents = await context.read(eventProvider).list;
+                        final eventsInCategory = allEvents.where((e) => e.title == event.title);
+                        for (final e in eventsInCategory) {
+                          await context.read(eventProvider).delete(e.id);
+                        }
+                        onDeleteEvent();
+                      },
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                      ),
+                      label: Text(
+                        "Delete all events with this title",
+                        style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ],
