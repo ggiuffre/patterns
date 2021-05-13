@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/repositories/events.dart';
 import '../../data/theme_mode_provider.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -29,6 +30,41 @@ class SettingsPage extends StatelessWidget {
                 ),
               ),
             ),
+            Card(
+              child: ExpansionTile(
+                leading: const Icon(Icons.warning),
+                expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                title: const Text("Danger zone"),
+                children: [
+                  TextButton.icon(
+                    onPressed: () async {
+                      final shouldDeleteEvents = await showDialog<bool>(
+                            context: context,
+                            builder: (innerContext) => _DeleteAllEventsDialog(),
+                          ) ??
+                          false;
+                      if (shouldDeleteEvents) {
+                        final allEvents = await context.read(eventProvider).list;
+                        for (final e in allEvents) {
+                          await context.read(eventProvider).delete(e.id);
+                        }
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('All your events have been deleted 😅')),
+                        );
+                      }
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                    label: Text(
+                      "Delete all events",
+                      style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       );
@@ -40,4 +76,26 @@ class SettingsPage extends StatelessWidget {
       return MediaQuery.platformBrightnessOf(context) == Brightness.dark;
     }
   }
+}
+
+class _DeleteAllEventsDialog extends StatelessWidget {
+  const _DeleteAllEventsDialog({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+        title: const Text("Confirmation"),
+        actions: <Widget>[
+          TextButton(
+            child: Text('Cancel'),
+            onPressed: () => Navigator.of(context).pop(false),
+          ),
+          TextButton(
+            child: Text(
+              'Delete all my events',
+              style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+          ),
+        ],
+      );
 }
