@@ -14,59 +14,57 @@ class EventDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: UserAppBar(title: Text(event.title)),
-        body: Padding(
+        body: ListView(
           padding: const EdgeInsets.all(8.0),
-          child: ListView(
-            children: [
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text("${event.title}, on ${event.time}"),
-                ),
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("${event.title}, on ${event.time}"),
               ),
-              Card(
-                child: ExpansionTile(
-                  leading: const Icon(Icons.warning),
-                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                  title: const Text("Danger zone"),
-                  children: [
-                    TextButton.icon(
-                      onPressed: () async {
-                        await context.read(eventProvider).delete(event.id);
-                        onDeleteEvent();
-                      },
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                      ),
-                      label: Text(
-                        "Delete this event",
-                        style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
-                      ),
+            ),
+            Card(
+              child: ExpansionTile(
+                leading: const Icon(Icons.warning),
+                expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                title: const Text("Danger zone"),
+                children: [
+                  TextButton.icon(
+                    onPressed: () async {
+                      await context.read(eventProvider).delete(event.id);
+                      onDeleteEvent();
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
                     ),
-                    TextButton.icon(
-                      onPressed: () async {
-                        final allEvents = await context.read(eventProvider).list;
-                        final eventsInCategory = allEvents.where((e) => e.title == event.title);
-                        for (final e in eventsInCategory) {
-                          await context.read(eventProvider).delete(e.id);
-                        }
-                        onDeleteEvent();
-                      },
-                      icon: const Icon(
-                        Icons.delete,
-                        color: Colors.red,
-                      ),
-                      label: Text(
-                        "Delete all events with this title",
-                        style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
-                      ),
+                    label: Text(
+                      "Delete this event",
+                      style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
                     ),
-                  ],
-                ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () async {
+                      final allEvents = await context.read(eventProvider).list;
+                      final eventsInCategory = allEvents.where((e) => e.title == event.title);
+                      for (final e in eventsInCategory) {
+                        await context.read(eventProvider).delete(e.id);
+                      }
+                      onDeleteEvent();
+                    },
+                    icon: const Icon(
+                      Icons.delete,
+                      color: Colors.red,
+                    ),
+                    label: Text(
+                      "Delete all events with this title",
+                      style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+                    ),
+                  ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       );
 }
