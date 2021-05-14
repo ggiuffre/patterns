@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../event.dart';
 
+/// A repository of [Event] objects.
 abstract class EventRepository {
   /// Get the event identified by [id].
   Future<Event> get(String id);
@@ -24,8 +25,9 @@ abstract class EventRepository {
 }
 
 /// Currently selected implementation of [EventRepository].
-final eventProvider = Provider((_) => FirestoreEventRepository());
+final eventProvider = Provider<EventRepository>((_) => FirestoreEventRepository());
 
+/// Implementation of [EventRepository] with a Firestore back-end.
 class FirestoreEventRepository implements EventRepository {
   final _userId = FirebaseAuth.instance.currentUser?.uid;
 
@@ -88,6 +90,7 @@ class FirestoreEventRepository implements EventRepository {
   }
 }
 
+/// Implementation of [EventRepository] that keeps events in memory until the app closes.
 class InMemoryEventRepository implements EventRepository {
   List<Event> events = [];
 
@@ -110,7 +113,7 @@ class InMemoryEventRepository implements EventRepository {
       events[j + 1] = key;
     }
 
-    throw UnimplementedError();
+    return Future.value(event.id);
   }
 
   @override
@@ -122,4 +125,24 @@ class InMemoryEventRepository implements EventRepository {
   @override
   Future<Iterable<Event>> sorted({bool descending = false}) =>
       descending ? list.then((v) => v.toList().reversed) : list;
+}
+
+/// Mock implementation of [EventRepository], meant to be used in widget tests.
+class DummyEventRepository implements EventRepository {
+  @override
+  Future<Event> get(String id) => Future.value(Event("title", DateTime(2020, 1, 1)));
+
+  @override
+  Future<String> add(Event event) => Future.value("id");
+
+  @override
+  Future<void> delete(String id) async {
+    await Future.value(1);
+  }
+
+  @override
+  Future<Iterable<Event>> get list => Future.value([]);
+
+  @override
+  Future<Iterable<Event>> sorted({bool descending = false}) => Future.value([]);
 }
