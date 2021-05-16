@@ -72,6 +72,7 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
                     return null;
                   },
                   obscureText: _isPasswordObscured,
+                  autocorrect: false,
                 ),
                 Container(
                   padding: const EdgeInsets.all(16.0),

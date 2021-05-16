@@ -75,6 +75,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                     return null;
                   },
                   obscureText: _isPasswordObscured,
+                  autocorrect: false,
                 ),
                 Container(
                   padding: const EdgeInsets.all(16.0),
