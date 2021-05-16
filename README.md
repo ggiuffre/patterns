@@ -1,5 +1,7 @@
 # patterns
 
+[![CI/CD](https://github.com/ggiuffre/patterns/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/ggiuffre/patterns/actions/workflows/build-and-test.yml)
+
 
 
 This is the source code for _Patterns_, a mobile and web app that tracks
