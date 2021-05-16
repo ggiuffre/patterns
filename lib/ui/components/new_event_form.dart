@@ -64,7 +64,7 @@ class _NewEventFormState extends State<NewEventForm> {
           children: [
             ConstrainedCard(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -102,7 +102,7 @@ class _NewEventFormState extends State<NewEventForm> {
                           );
                         },
                         optionsViewBuilder: (context, onSelected, options) => Padding(
-                          padding: EdgeInsets.only(left: (IconTheme.of(context).size ?? 24.0) + 16.0, right: 32.0),
+                          padding: EdgeInsets.only(left: (IconTheme.of(context).size ?? 24.0) + 16.0, right: 56.0),
                           child: Align(
                             alignment: Alignment.topLeft,
                             child: Material(
@@ -140,7 +140,7 @@ class _NewEventFormState extends State<NewEventForm> {
             ),
             ConstrainedCard(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -188,12 +188,15 @@ class _NewEventFormState extends State<NewEventForm> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 680.0),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                  padding: const EdgeInsets.all(4.0),
                   child: _addingEvent
                       ? const Center(child: CircularProgressIndicator.adaptive())
-                      : ElevatedButton(
-                          onPressed: _submitEvent,
-                          child: const Text("Submit"),
+                      : SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _submitEvent,
+                            child: const Text("Submit"),
+                          ),
                         ),
                 ),
               ),
