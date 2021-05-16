@@ -46,8 +46,8 @@ class _NewEventFormState extends State<NewEventForm> {
 
   @override
   void initState() {
-    _dateFieldController.text = _eventTime.toString();
     super.initState();
+    _dateFieldController.text = _eventTime.toString();
   }
 
   @override
