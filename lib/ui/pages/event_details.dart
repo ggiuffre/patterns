@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/data/repositories/events.dart';
 
 import '../../data/event.dart';
+import '../../data/repositories/events.dart';
 import '../components/user_app_bar.dart';
 
 class EventDetailsPage extends StatelessWidget {

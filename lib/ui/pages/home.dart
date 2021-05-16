@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:patterns/ui/pages/settings.dart';
 
 import '../../data/event.dart';
 import '../components/events_index.dart';
 import '../components/patterns_index.dart';
 import '../components/user_app_bar.dart';
+import 'settings.dart';
 
 class HomePage extends StatelessWidget {
   final int selectedNavigationItem;

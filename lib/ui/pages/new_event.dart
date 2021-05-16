@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:patterns/ui/components/new_event_form.dart';
 
+import '../components/new_event_form.dart';
 import '../components/user_app_bar.dart';
 
 class NewEventPage extends StatelessWidget {
