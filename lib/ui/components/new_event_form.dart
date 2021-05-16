@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
+import 'constrained_card.dart';
 
 class NewEventForm extends StatefulWidget {
   final void Function() onSubmit;
@@ -61,7 +62,7 @@ class _NewEventFormState extends State<NewEventForm> {
         child: ListView(
           padding: const EdgeInsets.all(8.0),
           children: [
-            Card(
+            ConstrainedCard(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Column(
@@ -137,7 +138,7 @@ class _NewEventFormState extends State<NewEventForm> {
                 ),
               ),
             ),
-            Card(
+            ConstrainedCard(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: Column(
@@ -183,14 +184,19 @@ class _NewEventFormState extends State<NewEventForm> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-              child: _addingEvent
-                  ? const Center(child: CircularProgressIndicator.adaptive())
-                  : ElevatedButton(
-                      onPressed: _submitEvent,
-                      child: const Text("Submit"),
-                    ),
+            Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 680.0),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+                  child: _addingEvent
+                      ? const Center(child: CircularProgressIndicator.adaptive())
+                      : ElevatedButton(
+                          onPressed: _submitEvent,
+                          child: const Text("Submit"),
+                        ),
+                ),
+              ),
             ),
           ],
         ),

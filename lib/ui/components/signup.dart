@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import 'constrained_card.dart';
+
 class SignUpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
@@ -28,7 +30,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
   @override
   Widget build(BuildContext context) => Form(
         key: _formKey,
-        child: Card(
+        child: ConstrainedCard(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(

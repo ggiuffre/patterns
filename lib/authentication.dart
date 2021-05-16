@@ -32,7 +32,7 @@ class SignUpLogInSelector extends StatelessWidget {
           body: ListView(
             children: [
               SignUpScreen(),
-              const _OrText(),
+              Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 680.0), child: const _OrText())),
               LogInScreen(),
             ],
           ),

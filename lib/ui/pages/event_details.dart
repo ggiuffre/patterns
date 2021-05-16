@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
+import '../components/constrained_card.dart';
 import '../components/user_app_bar.dart';
 
 class EventDetailsPage extends StatelessWidget {
@@ -17,13 +18,13 @@ class EventDetailsPage extends StatelessWidget {
         body: ListView(
           padding: const EdgeInsets.all(8.0),
           children: [
-            Card(
+            ConstrainedCard(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Text("${event.title}, on ${event.time}"),
               ),
             ),
-            Card(
+            ConstrainedCard(
               child: ExpansionTile(
                 leading: const Icon(Icons.warning),
                 expandedCrossAxisAlignment: CrossAxisAlignment.start,
