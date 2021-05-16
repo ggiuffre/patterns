@@ -10,9 +10,9 @@ void main() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     ProviderScope(
-      child: FirebaseEnabler(
-        child: AuthenticationGuard(
-          child: LocalPreferencesEnabler(
+      child: LocalPreferencesEnabler(
+        child: FirebaseEnabler(
+          child: AuthenticationGuard(
             child: PatternsApp(),
           ),
         ),
