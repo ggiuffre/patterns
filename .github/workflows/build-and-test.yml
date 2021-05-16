@@ -1,4 +1,4 @@
-name: Build and test Flutter app
+name: CI/CD
 on: [push]
 jobs:
   build-and-test:
@@ -16,11 +16,9 @@ jobs:
           channel: 'stable'
       - run: flutter pub get
       - run: flutter test
-#      - run: flutter build appbundle
-#      - run: flutter config --enable-web
       - name: Build web
         run: flutter build web
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
