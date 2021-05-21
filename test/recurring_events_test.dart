@@ -57,7 +57,6 @@ void main() {
   test("eventsAtInterval returns events that are one day apart, if given a frequency of 'daily'", () {
     final range = DateTimeRange(start: DateTime(1492, 1, 1), end: DateTime(1492, 3, 28));
     final events = eventsAtInterval(title: "title", range: range, frequency: Frequency.daily);
-    const interval = Duration(days: 1);
     DateTime previousDate = events.first.time;
     for (final event in events.skip(1)) {
       expect(DateTime(event.time.year, event.time.month, event.time.day - 1), previousDate);
