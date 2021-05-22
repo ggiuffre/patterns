@@ -37,7 +37,6 @@ class _NewEventFormState extends State<NewEventForm> {
 
   final _formKey = GlobalKey<FormState>();
   final _dateFieldController = TextEditingController();
-  late TextEditingController _textFieldController;
 
   String _eventTitle = "";
   DateTime _eventTime = DateTime.now();
@@ -74,64 +73,10 @@ class _NewEventFormState extends State<NewEventForm> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: RawAutocomplete<String>(
-                        optionsBuilder: (textEditingValue) => textEditingValue.text == ''
-                            ? const Iterable<String>.empty()
-                            : _textFieldHints
-                                .where((option) => option.toLowerCase().contains(textEditingValue.text.toLowerCase())),
-                        onSelected: (selection) => setState(() => _eventTitle = selection),
-                        fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) {
-                          _textFieldController = textEditingController;
-                          return TextFormField(
-                            controller: _textFieldController,
-                            focusNode: focusNode,
-                            onChanged: (newTitle) => setState(() => _eventTitle = newTitle),
-                            decoration: const InputDecoration(
-                              icon: Icon(Icons.info),
-                              border: OutlineInputBorder(),
-                              labelText: 'Event title',
-                            ),
-                            textInputAction: TextInputAction.next,
-                            autovalidateMode: AutovalidateMode.onUserInteraction,
-                            validator: (value) {
-                              if (value?.isEmpty ?? true) {
-                                return 'Please enter a title for this event';
-                              }
-                              return null;
-                            },
-                          );
-                        },
-                        optionsViewBuilder: (context, onSelected, options) => Padding(
-                          padding: EdgeInsets.only(left: (IconTheme.of(context).size ?? 24.0) + 16.0, right: 56.0),
-                          child: Align(
-                            alignment: Alignment.topLeft,
-                            child: Material(
-                              elevation: 4.0,
-                              child: SizedBox(
-                                height: 200.0,
-                                child: ListView.builder(
-                                  padding: EdgeInsets.all(8.0),
-                                  itemCount: options.length + 1,
-                                  itemBuilder: (context, index) {
-                                    if (index >= options.length) {
-                                      return TextButton(
-                                        child: const Text('clear'),
-                                        onPressed: () => _textFieldController.clear(),
-                                      );
-                                    }
-                                    final option = options.elementAt(index);
-                                    return GestureDetector(
-                                      onTap: () => onSelected(option),
-                                      child: ListTile(
-                                        title: Text(option),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
+                      child: _EventTitleTextField(
+                        hints: _textFieldHints,
+                        onHintSelected: (selection) => setState(() => _eventTitle = selection),
+                        onFieldChanged: (newTitle) => setState(() => _eventTitle = newTitle),
                       ),
                     ),
                   ],
@@ -233,4 +178,71 @@ class _NewEventFormState extends State<NewEventForm> {
       widget.onSubmit();
     }
   }
+}
+
+class _EventTitleTextField extends StatelessWidget {
+  final Iterable<String> hints;
+  final void Function(String) onHintSelected;
+  final void Function(String) onFieldChanged;
+
+  const _EventTitleTextField({
+    Key? key,
+    required this.hints,
+    required this.onHintSelected,
+    required this.onFieldChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Autocomplete<String>(
+        optionsBuilder: (textEditingValue) => textEditingValue.text == ''
+            ? const Iterable<String>.empty()
+            : hints.where((option) => option.toLowerCase().contains(textEditingValue.text.toLowerCase())),
+        onSelected: onHintSelected,
+        fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextFormField(
+          controller: textEditingController,
+          focusNode: focusNode,
+          onChanged: onFieldChanged,
+          decoration: const InputDecoration(
+            icon: Icon(Icons.info),
+            border: OutlineInputBorder(),
+            labelText: 'Event title',
+          ),
+          textInputAction: TextInputAction.next,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          validator: (value) {
+            if (value?.isEmpty ?? true) {
+              return 'Please enter a title for this event';
+            }
+            return null;
+          },
+        ),
+        optionsViewBuilder: (context, onSelected, options) => Padding(
+          padding: EdgeInsets.only(left: (IconTheme.of(context).size ?? 24.0) + 16.0, right: 56.0),
+          child: Align(
+            alignment: Alignment.topLeft,
+            child: Material(
+              elevation: 4.0,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: SizedBox(
+                  height: 200.0,
+                  child: ListView.builder(
+                    padding: EdgeInsets.all(8.0),
+                    itemCount: options.length,
+                    itemBuilder: (context, index) {
+                      final option = options.elementAt(index);
+                      return GestureDetector(
+                        onTap: () => onSelected(option),
+                        child: ListTile(
+                          title: Text(option),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }
