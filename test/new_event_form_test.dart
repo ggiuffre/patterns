@@ -7,32 +7,44 @@ import 'package:patterns/ui/components/new_event_form.dart';
 main() {
   group("The new-event form", () {
     testWidgets("shows a text field to enter a title", (WidgetTester tester) async {
-      await tester.pumpWidget(ProviderScope(child: MaterialApp(home: NewEventForm(onSubmit: () {}))));
+      await tester.pumpWidget(ProviderScope(
+        overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
+        child: MaterialApp(home: NewEventForm(onSubmit: () {})),
+      ));
 
       expect(find.widgetWithText(TextFormField, "Event title"), findsOneWidget);
     });
 
     testWidgets("shows a text field to enter a time", (WidgetTester tester) async {
-      await tester.pumpWidget(ProviderScope(child: MaterialApp(home: NewEventForm(onSubmit: () {}))));
+      await tester.pumpWidget(ProviderScope(
+        overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
+        child: MaterialApp(home: NewEventForm(onSubmit: () {})),
+      ));
 
       expect(find.widgetWithText(TextFormField, "Event time"), findsOneWidget);
     });
 
     testWidgets("shows a radio list to select a frequency", (WidgetTester tester) async {
-      await tester.pumpWidget(ProviderScope(child: MaterialApp(home: NewEventForm(onSubmit: () {}))));
+      await tester.pumpWidget(ProviderScope(
+        overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
+        child: MaterialApp(home: NewEventForm(onSubmit: () {})),
+      ));
 
       expect(find.byType(ExpansionTile), findsOneWidget);
     });
 
     testWidgets("shows a submit button", (WidgetTester tester) async {
-      await tester.pumpWidget(ProviderScope(child: MaterialApp(home: NewEventForm(onSubmit: () {}))));
+      await tester.pumpWidget(ProviderScope(
+        overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
+        child: MaterialApp(home: NewEventForm(onSubmit: () {})),
+      ));
 
       expect(find.widgetWithText(ElevatedButton, "Submit"), findsOneWidget);
     });
 
     testWidgets("shows a progress indicator upon form submission", (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
-        overrides: [eventProvider.overrideWithProvider(Provider((_) => DummyEventRepository()))],
+        overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
 
@@ -46,7 +58,7 @@ main() {
       bool formSubmitted = false;
       final onSubmit = () => formSubmitted = true;
       await tester.pumpWidget(ProviderScope(
-        overrides: [eventProvider.overrideWithProvider(Provider((_) => DummyEventRepository()))],
+        overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
         child: MaterialApp(home: NewEventForm(onSubmit: onSubmit)),
       ));
 
@@ -58,7 +70,7 @@ main() {
 
     testWidgets("shows an error if the event title is empty upon submission", (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
-        overrides: [eventProvider.overrideWithProvider(Provider((_) => DummyEventRepository()))],
+        overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
 

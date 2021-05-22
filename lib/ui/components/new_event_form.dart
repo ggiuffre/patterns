@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,16 +17,6 @@ class NewEventForm extends StatefulWidget {
 }
 
 class _NewEventFormState extends State<NewEventForm> {
-  static const _textFieldHints = [
-    'breakfast with cereals',
-    'breakfast with bread+butter',
-    'dinner with carbs',
-    'dinner without carbs',
-    'nuts before sleeping',
-    'good sleep',
-    'bad sleep',
-  ]; // TODO suggest titles previously entered by user
-
   static const _frequencies = {
     Frequency.once: "Does not repeat",
     Frequency.daily: "Every day",
@@ -74,7 +66,6 @@ class _NewEventFormState extends State<NewEventForm> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: _EventTitleTextField(
-                        hints: _textFieldHints,
                         onHintSelected: (selection) => setState(() => _eventTitle = selection),
                         onFieldChanged: (newTitle) => setState(() => _eventTitle = newTitle),
                       ),
@@ -181,68 +172,74 @@ class _NewEventFormState extends State<NewEventForm> {
 }
 
 class _EventTitleTextField extends StatelessWidget {
-  final Iterable<String> hints;
   final void Function(String) onHintSelected;
   final void Function(String) onFieldChanged;
 
   const _EventTitleTextField({
     Key? key,
-    required this.hints,
     required this.onHintSelected,
     required this.onFieldChanged,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Autocomplete<String>(
-        optionsBuilder: (textEditingValue) => textEditingValue.text == ''
-            ? const Iterable<String>.empty()
-            : hints.where((option) => option.toLowerCase().contains(textEditingValue.text.toLowerCase())),
-        onSelected: onHintSelected,
-        fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextFormField(
-          controller: textEditingController,
-          focusNode: focusNode,
-          onChanged: onFieldChanged,
-          decoration: const InputDecoration(
-            icon: Icon(Icons.info),
-            border: OutlineInputBorder(),
-            labelText: 'Event title',
-          ),
-          textInputAction: TextInputAction.next,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          validator: (value) {
-            if (value?.isEmpty ?? true) {
-              return 'Please enter a title for this event';
-            }
-            return null;
-          },
-        ),
-        optionsViewBuilder: (context, onSelected, options) => Padding(
-          padding: EdgeInsets.only(left: (IconTheme.of(context).size ?? 24.0) + 16.0, right: 56.0),
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: Material(
-              elevation: 4.0,
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 400),
-                child: SizedBox(
-                  height: 200.0,
-                  child: ListView.builder(
-                    padding: EdgeInsets.all(8.0),
-                    itemCount: options.length,
-                    itemBuilder: (context, index) {
-                      final option = options.elementAt(index);
-                      return GestureDetector(
-                        onTap: () => onSelected(option),
-                        child: ListTile(
-                          title: Text(option),
-                        ),
-                      );
-                    },
+  Widget build(BuildContext context) => FutureBuilder<Set<String>>(
+        future: context.read(eventProvider).list.then((events) => events.map((e) => e.title).toSet()),
+        builder: (context, snapshot) {
+          final hints = (snapshot.connectionState == ConnectionState.done)
+              ? snapshot.data ?? const Iterable<String>.empty()
+              : const Iterable<String>.empty();
+          return Autocomplete<String>(
+            optionsBuilder: (textEditingValue) => textEditingValue.text == ''
+                ? const Iterable<String>.empty()
+                : hints.where((option) => option.toLowerCase().contains(textEditingValue.text.toLowerCase())),
+            onSelected: onHintSelected,
+            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextFormField(
+              controller: textEditingController,
+              focusNode: focusNode,
+              onChanged: onFieldChanged,
+              decoration: const InputDecoration(
+                icon: Icon(Icons.info),
+                border: OutlineInputBorder(),
+                labelText: 'Event title',
+              ),
+              textInputAction: TextInputAction.next,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              validator: (value) {
+                if (value?.isEmpty ?? true) {
+                  return 'Please enter a title for this event';
+                }
+                return null;
+              },
+            ),
+            optionsViewBuilder: (context, onSelected, options) => Padding(
+              padding: EdgeInsets.only(left: (IconTheme.of(context).size ?? 24.0) + 16.0, right: 56.0),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: Material(
+                  elevation: 4.0,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: SizedBox(
+                      height: min(options.length * 75.0, 200.0),
+                      child: ListView.builder(
+                        padding: EdgeInsets.all(8.0),
+                        itemCount: options.length,
+                        itemBuilder: (context, index) {
+                          final option = options.elementAt(index);
+                          return GestureDetector(
+                            onTap: () => onSelected(option),
+                            child: ListTile(
+                              title: Text(option),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       );
 }

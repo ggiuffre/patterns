@@ -129,6 +129,8 @@ class InMemoryEventRepository implements EventRepository {
 
 /// Mock implementation of [EventRepository], meant to be used in widget tests.
 class DummyEventRepository implements EventRepository {
+  const DummyEventRepository();
+
   @override
   Future<Event> get(String id) => Future.value(Event("title", DateTime(2020, 1, 1)));
 
