@@ -17,11 +17,11 @@ abstract class EventRepository {
   /// Delete [event] from the repository.
   Future<void> delete(String id);
 
-  /// Iterable of all events stored in the repository.
-  Future<Iterable<Event>> get list;
+  /// Stream of iterable with all events stored in the repository.
+  Stream<Iterable<Event>> get list;
 
-  /// Iterable of all events stored in the repository, sorted by date (default ascending).
-  Future<Iterable<Event>> sorted({bool descending = false});
+  /// Stream of iterable with all events stored in the repository, sorted by date (default ascending).
+  Stream<Iterable<Event>> sorted({bool descending = false});
 }
 
 /// Currently selected implementation of [EventRepository].
@@ -66,27 +66,30 @@ class FirestoreEventRepository implements EventRepository {
   }
 
   @override
-  Future<Iterable<Event>> get list {
+  Stream<Iterable<Event>> get list {
     if (_userId != null) {
-      return FirebaseFirestore.instance.collection("users").doc(_userId).collection("events").get().then(
-          (collection) => collection.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"], e.id)));
+      return FirebaseFirestore.instance
+          .collection("users")
+          .doc(_userId)
+          .collection("events")
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"], e.id)));
     }
-    throw Future.error("Couldn't retrieve events from Cloud Firestore.");
+    throw Stream.error("Couldn't stream events from Cloud Firestore.");
   }
 
   @override
-  Future<Iterable<Event>> sorted({bool descending = false}) {
+  Stream<Iterable<Event>> sorted({bool descending = false}) {
     if (_userId != null) {
       return FirebaseFirestore.instance
           .collection("users")
           .doc(_userId)
           .collection("events")
           .orderBy('time', descending: descending)
-          .get()
-          .then((collection) =>
-              collection.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"], e.id)));
+          .snapshots()
+          .map((snapshot) => snapshot.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"], e.id)));
     }
-    throw Future.error("Couldn't retrieve events from Cloud Firestore.");
+    throw Stream.error("Couldn't stream events from Cloud Firestore.");
   }
 }
 
@@ -120,11 +123,11 @@ class InMemoryEventRepository implements EventRepository {
   Future<void> delete(String id) => Future(() => events.removeWhere((e) => e.id == id));
 
   @override
-  Future<Iterable<Event>> get list => Future.value(events);
+  Stream<Iterable<Event>> get list => Stream.value(events);
 
   @override
-  Future<Iterable<Event>> sorted({bool descending = false}) =>
-      descending ? list.then((v) => v.toList().reversed) : list;
+  Stream<Iterable<Event>> sorted({bool descending = false}) =>
+      Future.value(descending ? events.reversed : events).asStream();
 }
 
 /// Mock implementation of [EventRepository], meant to be used in widget tests.
@@ -143,8 +146,8 @@ class DummyEventRepository implements EventRepository {
   }
 
   @override
-  Future<Iterable<Event>> get list => Future.value([]);
+  Stream<Iterable<Event>> get list => Stream.value([]);
 
   @override
-  Future<Iterable<Event>> sorted({bool descending = false}) => Future.value([]);
+  Stream<Iterable<Event>> sorted({bool descending = false}) => Stream.value([]);
 }

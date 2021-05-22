@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/ui/components/error_card.dart';
 
 import '../../data/date_formatting.dart';
 import '../../data/event.dart';
@@ -11,14 +12,14 @@ class EventsIndex extends ConsumerWidget {
   const EventsIndex({Key? key, required this.onEventTapped}) : super(key: key);
 
   @override
-  Widget build(context, watch) => FutureBuilder<Iterable<Event>>(
-        future: context.read(eventProvider).sorted(descending: true),
+  Widget build(context, watch) => StreamBuilder<Iterable<Event>>(
+        stream: context.read(eventProvider).sorted(descending: true),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text("Couldn't retrieve events."));
+            return const ErrorCard(text: "Couldn't retrieve events.");
           }
 
-          if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
             final events = snapshot.data?.toList() ?? [];
             return events.isEmpty
                 ? const Padding(

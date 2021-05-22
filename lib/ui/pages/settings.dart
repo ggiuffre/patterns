@@ -44,7 +44,7 @@ class SettingsPage extends StatelessWidget {
                         ) ??
                         false;
                     if (shouldDeleteEvents) {
-                      final allEvents = await context.read(eventProvider).list;
+                      final allEvents = await context.read(eventProvider).list.first;
                       for (final e in allEvents) {
                         await context.read(eventProvider).delete(e.id);
                       }
@@ -53,13 +53,13 @@ class SettingsPage extends StatelessWidget {
                       );
                     }
                   },
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.delete,
-                    color: Colors.red,
+                    color: Theme.of(context).errorColor,
                   ),
                   label: Text(
                     "Delete all events",
-                    style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+                    style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Theme.of(context).errorColor),
                   ),
                 ),
               ],
@@ -93,7 +93,7 @@ class _DeleteAllEventsDialog extends StatelessWidget {
           TextButton(
             child: Text(
               'Delete all my events',
-              style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+              style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Theme.of(context).errorColor),
             ),
             onPressed: () => Navigator.of(context).pop(true),
           ),

@@ -90,7 +90,7 @@ main() {
       await tester.enterText(find.widgetWithText(TextFormField, "Event title"), eventTitle);
       await tester.tap(find.widgetWithText(ElevatedButton, "Submit"));
       await tester.pump();
-      final events = await eventRepository.list;
+      final events = await eventRepository.list.first;
       expect(events.first.title, equals(eventTitle));
     });
   });

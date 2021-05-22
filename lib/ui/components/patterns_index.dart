@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/ui/components/error_card.dart';
 
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
@@ -9,14 +10,14 @@ class PatternsIndex extends ConsumerWidget {
   const PatternsIndex({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) => FutureBuilder<Iterable<Event>>(
-        future: context.read(eventProvider).sorted(),
+  Widget build(context, watch) => StreamBuilder<Iterable<Event>>(
+        stream: context.read(eventProvider).sorted(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return const Center(child: Text("Couldn't retrieve events needed to extract patterns."));
+            return const ErrorCard(text: "Couldn't retrieve events needed to extract patterns.");
           }
 
-          if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
             final events = snapshot.data?.toList() ?? [];
             final categories = events.map((e) => e.title).toSet();
             final coefficients = similarities(events, categories).reversed.toList();

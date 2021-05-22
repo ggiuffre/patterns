@@ -35,31 +35,31 @@ class EventDetailsPage extends StatelessWidget {
                       await context.read(eventProvider).delete(event.id);
                       onDeleteEvent();
                     },
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.delete,
-                      color: Colors.red,
+                      color: Theme.of(context).errorColor,
                     ),
                     label: Text(
                       "Delete this event",
-                      style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+                      style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Theme.of(context).errorColor),
                     ),
                   ),
                   TextButton.icon(
                     onPressed: () async {
-                      final allEvents = await context.read(eventProvider).list;
+                      final allEvents = await context.read(eventProvider).list.first;
                       final eventsInCategory = allEvents.where((e) => e.title == event.title);
                       for (final e in eventsInCategory) {
                         await context.read(eventProvider).delete(e.id);
                       }
                       onDeleteEvent();
                     },
-                    icon: const Icon(
+                    icon: Icon(
                       Icons.delete,
-                      color: Colors.red,
+                      color: Theme.of(context).errorColor,
                     ),
                     label: Text(
                       "Delete all events with this title",
-                      style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Colors.red),
+                      style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Theme.of(context).errorColor),
                     ),
                   ),
                 ],
