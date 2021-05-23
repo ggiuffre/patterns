@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:patterns/ui/components/error_card.dart';
 
 class ErrorPage extends StatelessWidget {
   const ErrorPage({Key? key}) : super(key: key);
@@ -6,6 +7,6 @@ class ErrorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(title: const Text("Page not found")),
-        body: Center(child: const Text("Error 404: the page you requested could not be found.")),
+        body: const ErrorCard(text: "Error 404: the page you requested could not be found."),
       );
 }

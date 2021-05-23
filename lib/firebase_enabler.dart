@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/ui/components/error_card.dart';
 
 import 'data/theme_mode_provider.dart';
 import 'theme.dart';
@@ -22,7 +23,7 @@ class FirebaseEnabler extends StatelessWidget {
             darkTheme: AppTheme.dark,
             themeMode: context.read(themeModeProvider),
             title: 'Patterns',
-            home: const Scaffold(body: Center(child: Text("Couldn't initialize storage."))),
+            home: const Scaffold(body: ErrorCard(text: "Couldn't initialize storage.")),
           );
         }
 
