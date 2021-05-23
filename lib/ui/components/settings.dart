@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/repositories/events.dart';
 import '../../data/theme_mode_provider.dart';
-import '../components/constrained_card.dart';
+import 'constrained_card.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);

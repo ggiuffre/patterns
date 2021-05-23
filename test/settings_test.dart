@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patterns/data/theme_mode_provider.dart';
-import 'package:patterns/ui/pages/settings.dart';
+import 'package:patterns/ui/components/settings.dart';
 
 void main() {
   testWidgets("The dark mode switch is off if the system's brightness is light.", (WidgetTester tester) async {
