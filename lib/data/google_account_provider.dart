@@ -12,10 +12,9 @@ class GoogleAccountProvider extends StateNotifier<bool> {
   set enabled(bool newValue) => state = newValue;
 
   final _googleSignIn = GoogleSignIn(
-    clientId: '167017995146-aepmap83bupauu9mp4u3btei4vu60nn8.apps.googleusercontent.com',
     scopes: const <String>[
       'email',
-      // 'https://www.googleapis.com/auth/calendar.calendars.readonly',
+      'https://www.googleapis.com/auth/calendar.calendars.readonly',
       CalendarApi.calendarEventsReadonlyScope,
     ],
   );

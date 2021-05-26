@@ -9,7 +9,10 @@ void main() {
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
     await tester.pumpWidget(ProviderScope(child: MaterialApp(home: SettingsPage())));
 
-    final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
+    final darkModeSwitch = tester.widget<Switch>(find.descendant(
+      of: find.widgetWithText(Card, "Dark mode"),
+      matching: find.byType(Switch),
+    ));
     expect(darkModeSwitch.value, false);
   });
 
@@ -17,7 +20,10 @@ void main() {
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpWidget(ProviderScope(child: MaterialApp(home: SettingsPage())));
 
-    final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
+    final darkModeSwitch = tester.widget<Switch>(find.descendant(
+      of: find.widgetWithText(Card, "Dark mode"),
+      matching: find.byType(Switch),
+    ));
     expect(darkModeSwitch.value, true);
   });
 
@@ -26,11 +32,25 @@ void main() {
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
     await tester.pumpWidget(ProviderScope(child: MaterialApp(home: SettingsPage())));
 
-    expect(tester.widget<Switch>(find.byType(Switch)).value, false);
+    expect(
+        tester
+            .widget<Switch>(find.descendant(
+              of: find.widgetWithText(Card, "Dark mode"),
+              matching: find.byType(Switch),
+            ))
+            .value,
+        false);
 
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpAndSettle();
-    expect(tester.widget<Switch>(find.byType(Switch)).value, true);
+    expect(
+        tester
+            .widget<Switch>(find.descendant(
+              of: find.widgetWithText(Card, "Dark mode"),
+              matching: find.byType(Switch),
+            ))
+            .value,
+        true);
   });
 
   testWidgets("The dark mode switch turns off if the system's brightness changes from dark to light.",
@@ -38,11 +58,25 @@ void main() {
     tester.binding.window.platformBrightnessTestValue = Brightness.dark;
     await tester.pumpWidget(ProviderScope(child: MaterialApp(home: SettingsPage())));
 
-    expect(tester.widget<Switch>(find.byType(Switch)).value, true);
+    expect(
+        tester
+            .widget<Switch>(find.descendant(
+              of: find.widgetWithText(Card, "Dark mode"),
+              matching: find.byType(Switch),
+            ))
+            .value,
+        true);
 
     tester.binding.window.platformBrightnessTestValue = Brightness.light;
     await tester.pumpAndSettle();
-    expect(tester.widget<Switch>(find.byType(Switch)).value, false);
+    expect(
+        tester
+            .widget<Switch>(find.descendant(
+              of: find.widgetWithText(Card, "Dark mode"),
+              matching: find.byType(Switch),
+            ))
+            .value,
+        false);
   });
 
   testWidgets("The dark mode switch is off if the user-defined theme mode is light.", (WidgetTester tester) async {
@@ -51,7 +85,10 @@ void main() {
       child: MaterialApp(home: SettingsPage()),
     ));
 
-    final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
+    final darkModeSwitch = tester.widget<Switch>(find.descendant(
+      of: find.widgetWithText(Card, "Dark mode"),
+      matching: find.byType(Switch),
+    ));
     expect(darkModeSwitch.value, false);
   });
 
@@ -61,7 +98,10 @@ void main() {
       child: MaterialApp(home: SettingsPage()),
     ));
 
-    final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
+    final darkModeSwitch = tester.widget<Switch>(find.descendant(
+      of: find.widgetWithText(Card, "Dark mode"),
+      matching: find.byType(Switch),
+    ));
     expect(darkModeSwitch.value, true);
   });
 
@@ -73,7 +113,10 @@ void main() {
       child: MaterialApp(home: SettingsPage()),
     ));
 
-    final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
+    final darkModeSwitch = tester.widget<Switch>(find.descendant(
+      of: find.widgetWithText(Card, "Dark mode"),
+      matching: find.byType(Switch),
+    ));
     expect(darkModeSwitch.value, false);
   });
 }

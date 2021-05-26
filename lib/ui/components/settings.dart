@@ -80,7 +80,9 @@ class SettingsPage extends StatelessWidget {
                         if (newValue) {
                           await innerContext.read(googleAccountProvider.notifier).signIn();
                           final currentUser = innerContext.read(googleAccountProvider.notifier).currentUser;
-                          innerContext.read(googleAccountProvider.notifier).enabled = newValue;
+                          if (currentUser != null) {
+                            innerContext.read(googleAccountProvider.notifier).enabled = newValue;
+                          }
                           print("Signed in to $currentUser's Google Calendar");
                         } else {
                           await innerContext.read(googleAccountProvider.notifier).signOut();
