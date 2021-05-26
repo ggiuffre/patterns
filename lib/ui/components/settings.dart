@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/data/google_account_provider.dart';
 
 import '../../data/repositories/events.dart';
 import '../../data/theme_mode_provider.dart';
@@ -63,6 +64,32 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
               ],
+            ),
+          ),
+          ConstrainedCard(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Allow to see my Google Calendar events"),
+                  Consumer(
+                    builder: (innerContext, watch, _) => Switch.adaptive(
+                      value: watch(googleAccountProvider),
+                      onChanged: (newValue) async {
+                        if (newValue) {
+                          await innerContext.read(googleAccountProvider.notifier).signIn();
+                          final currentUser = innerContext.read(googleAccountProvider.notifier).currentUser;
+                          innerContext.read(googleAccountProvider.notifier).enabled = newValue;
+                          print("Signed in to $currentUser's Google Calendar");
+                        } else {
+                          await innerContext.read(googleAccountProvider.notifier).signOut();
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

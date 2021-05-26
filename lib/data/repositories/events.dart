@@ -1,8 +1,10 @@
-import 'dart:async';
+import 'dart:async' show Future, Stream;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:googleapis/calendar/v3.dart' show CalendarApi;
+import 'package:http/http.dart' as http;
 
 import '../event.dart';
 
@@ -91,6 +93,45 @@ class FirestoreEventRepository implements EventRepository {
     }
     throw Stream.error("Couldn't stream events from Cloud Firestore.");
   }
+}
+
+/// Implementation of [EventRepository] that reads events from Google Calendar (and is not able to create new events).
+class GoogleCalendarEventsRepository implements EventRepository {
+  final _calendarApi = CalendarApi(http.Client());
+
+  @override
+  Future<String> add(Event event) {
+    // TODO: implement add
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> delete(String id) {
+    // TODO: implement delete
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<Event> get(String id) {
+    // TODO: implement get
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<Iterable<Event>> get list => _calendarApi.calendarList.list().then((calendars) async {
+        final calendarId = calendars.items?.first.id;
+        if (calendarId != null) {
+          final events = await _calendarApi.events.list(calendarId);
+          return events.items?.map((e) => Event(e.summary ?? "", e.start?.dateTime ?? DateTime.now())) ??
+              Iterable<Event>.empty();
+        } else {
+          return Iterable<Event>.empty();
+        }
+      }).asStream();
+
+  @override
+  // TODO: implement sorted
+  Stream<Iterable<Event>> sorted({bool descending = false}) => list;
 }
 
 /// Implementation of [EventRepository] that keeps events in memory until the app closes.

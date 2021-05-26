@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "167017995146-2dqv5j0afrq24m2k0b07q7ppiur3qr1b.apps.googleusercontent.com",
+          "client_id": "167017995146-aepmap83bupauu9mp4u3btei4vu60nn8.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "io.github.ggiuffre.patterns",
-            "certificate_hash": "55f7c1543f738cb2e5c56a0400b6cf60b6571f3e"
+            "certificate_hash": "9b5b62e29cddce630d5eb07e19d7d24c83dceee4"
           }
         },
         {
