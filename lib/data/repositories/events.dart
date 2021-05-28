@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' show CalendarApi;
 import 'package:http/http.dart' as http;
+import 'package:patterns/data/google_account_provider.dart';
 
 import '../event.dart';
 
@@ -95,9 +96,16 @@ class FirestoreEventRepository implements EventRepository {
   }
 }
 
+final googleCalendarEventProvider = FutureProvider<EventRepository>((ref) async => GoogleCalendarEventsRepository(
+    await ref.watch(googleAccountProvider.notifier).currentUser?.authHeaders ?? const <String, String>{}));
+
 /// Implementation of [EventRepository] that reads events from Google Calendar (and is not able to create new events).
 class GoogleCalendarEventsRepository implements EventRepository {
-  final _calendarApi = CalendarApi(http.Client());
+  final CalendarApi _calendarApi;
+
+  GoogleCalendarEventsRepository(Map<String, String> headers) : _calendarApi = CalendarApi(_GoogleAuthClient(headers)) {
+    print(headers);
+  }
 
   @override
   Future<String> add(Event event) {
@@ -132,6 +140,15 @@ class GoogleCalendarEventsRepository implements EventRepository {
   @override
   // TODO: implement sorted
   Stream<Iterable<Event>> sorted({bool descending = false}) => list;
+}
+
+class _GoogleAuthClient extends http.BaseClient {
+  final Map<String, String> _headers;
+  final http.Client _client = http.Client();
+
+  _GoogleAuthClient(this._headers);
+
+  Future<http.StreamedResponse> send(http.BaseRequest request) => _client.send(request..headers.addAll(_headers));
 }
 
 /// Implementation of [EventRepository] that keeps events in memory until the app closes.

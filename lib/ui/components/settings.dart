@@ -78,14 +78,18 @@ class SettingsPage extends StatelessWidget {
                       value: watch(googleAccountProvider),
                       onChanged: (newValue) async {
                         if (newValue) {
+                          print("Attempting to sign in to a Google account...");
                           await innerContext.read(googleAccountProvider.notifier).signIn();
                           final currentUser = innerContext.read(googleAccountProvider.notifier).currentUser;
-                          if (currentUser != null) {
-                            innerContext.read(googleAccountProvider.notifier).enabled = newValue;
-                          }
-                          print("Signed in to $currentUser's Google Calendar");
+                          print("Signed in to ${currentUser?.displayName}'s Google Calendar");
+                          final someEvents = await innerContext
+                              .read(googleCalendarEventProvider.future)
+                              .then((provider) => provider.list.first);
+                          print(someEvents);
                         } else {
+                          print("Attempting to sign out of a Google account...");
                           await innerContext.read(googleAccountProvider.notifier).signOut();
+                          print("Signed out.");
                         }
                       },
                     ),

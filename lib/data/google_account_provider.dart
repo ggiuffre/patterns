@@ -23,7 +23,15 @@ class GoogleAccountProvider extends StateNotifier<bool> {
 
   GoogleSignInAccount? get currentUser => _currentUser;
 
-  Future<GoogleSignInAccount?> signIn() async => _currentUser = await _googleSignIn.signIn();
+  Future<GoogleSignInAccount?> signIn() async {
+    _currentUser = await _googleSignIn.signIn();
+    if (_currentUser != null) {
+      state = true;
+    }
+  }
 
-  Future<GoogleSignInAccount?> signOut() async => _currentUser = await _googleSignIn.signOut();
+  Future<GoogleSignInAccount?> signOut() async {
+    _currentUser = await _googleSignIn.signOut();
+    state = false;
+  }
 }
