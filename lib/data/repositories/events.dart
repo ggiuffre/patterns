@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' show CalendarApi;
 import 'package:http/http.dart' as http;
+import 'package:patterns/data/google_account_provider.dart';
 
 import '../event.dart';
 
@@ -95,7 +96,8 @@ class FirestoreEventRepository implements EventRepository {
   }
 }
 
-final googleCalendarEventProvider = Provider<GoogleCalendarEventsRepository>((_) => GoogleCalendarEventsRepository());
+final googleCalendarEventProvider = Provider<GoogleCalendarEventsRepository>(
+    (ref) => GoogleCalendarEventsRepository(ref.watch(googleAccountProvider.notifier).authHeaders));
 
 /// Implementation of [EventRepository] that reads events from Google Calendar (and is not able to create new events).
 class GoogleCalendarEventsRepository implements EventRepository {
@@ -150,8 +152,14 @@ class GoogleCalendarEventsRepository implements EventRepository {
   }
 
   @override
-  // TODO: implement sorted
-  Stream<Iterable<Event>> sorted({bool descending = false}) => list;
+  Stream<Iterable<Event>> sorted({bool descending = false}) {
+    final result = list.map((events) => events.toList()..sort((a, b) => a.compareTo(b)));
+    if (descending) {
+      return result.map((events) => events.reversed);
+    } else {
+      return result;
+    }
+  }
 }
 
 class _GoogleAuthClient extends http.BaseClient {

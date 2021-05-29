@@ -11,6 +11,7 @@ class GoogleAccountProvider extends StateNotifier<bool> {
 
   set enabled(bool newValue) => state = newValue;
 
+  // TODO can probably be static
   final _googleSignIn = GoogleSignIn(
     scopes: const <String>[
       'email',
@@ -21,17 +22,23 @@ class GoogleAccountProvider extends StateNotifier<bool> {
 
   GoogleSignInAccount? _currentUser;
 
+  Map<String, String>? _authHeaders;
+
   GoogleSignInAccount? get currentUser => _currentUser;
+
+  Map<String, String>? get authHeaders => _authHeaders;
 
   Future<GoogleSignInAccount?> signIn() async {
     _currentUser = await _googleSignIn.signIn();
     if (_currentUser != null) {
       state = true;
+      _authHeaders = await _currentUser?.authHeaders;
     }
   }
 
   Future<GoogleSignInAccount?> signOut() async {
     _currentUser = await _googleSignIn.signOut();
     state = false;
+    _authHeaders = null;
   }
 }
