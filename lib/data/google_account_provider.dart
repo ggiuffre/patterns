@@ -14,7 +14,7 @@ class GoogleAccountProvider extends StateNotifier<bool> {
   final _googleSignIn = GoogleSignIn(
     scopes: const <String>[
       'email',
-      'https://www.googleapis.com/auth/calendar.calendars.readonly',
+      CalendarApi.calendarReadonlyScope,
       CalendarApi.calendarEventsReadonlyScope,
     ],
   );

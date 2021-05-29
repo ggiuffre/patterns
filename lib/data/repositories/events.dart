@@ -5,7 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' show CalendarApi;
 import 'package:http/http.dart' as http;
-import 'package:patterns/data/google_account_provider.dart';
 
 import '../event.dart';
 
@@ -96,16 +95,20 @@ class FirestoreEventRepository implements EventRepository {
   }
 }
 
-final googleCalendarEventProvider = FutureProvider<EventRepository>((ref) async => GoogleCalendarEventsRepository(
-    await ref.watch(googleAccountProvider.notifier).currentUser?.authHeaders ?? const <String, String>{}));
+final googleCalendarEventProvider = Provider<GoogleCalendarEventsRepository>((_) => GoogleCalendarEventsRepository());
 
 /// Implementation of [EventRepository] that reads events from Google Calendar (and is not able to create new events).
 class GoogleCalendarEventsRepository implements EventRepository {
-  final CalendarApi _calendarApi;
+  CalendarApi? _calendarApi;
 
-  GoogleCalendarEventsRepository(Map<String, String> headers) : _calendarApi = CalendarApi(_GoogleAuthClient(headers)) {
-    print(headers);
-  }
+  GoogleCalendarEventsRepository([Map<String, String>? headers])
+      : _calendarApi = headers != null ? CalendarApi(_GoogleAuthClient(headers)) : null;
+
+  void enable(Map<String, String> headers) => _calendarApi = CalendarApi(_GoogleAuthClient(headers));
+
+  void disable() => _calendarApi = null;
+
+  bool get enabled => _calendarApi != null;
 
   @override
   Future<String> add(Event event) {
@@ -126,16 +129,25 @@ class GoogleCalendarEventsRepository implements EventRepository {
   }
 
   @override
-  Stream<Iterable<Event>> get list => _calendarApi.calendarList.list().then((calendars) async {
-        final calendarId = calendars.items?.first.id;
+  Stream<Iterable<Event>> get list {
+    final api = _calendarApi;
+    if (api != null) {
+      print("Retrieving Google calendar events...");
+      return api.calendarList.list().then((calendars) async {
+        final calendarId = calendars.items?.firstWhere((element) => element.summary?.contains("@") ?? false).id;
         if (calendarId != null) {
-          final events = await _calendarApi.events.list(calendarId);
+          final events = await api.events.list(calendarId);
           return events.items?.map((e) => Event(e.summary ?? "", e.start?.dateTime ?? DateTime.now())) ??
               Iterable<Event>.empty();
         } else {
           return Iterable<Event>.empty();
         }
       }).asStream();
+    } else {
+      print("No auth headers to retrieve Google Calendar events.");
+      return Stream.value({});
+    }
+  }
 
   @override
   // TODO: implement sorted
