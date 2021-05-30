@@ -133,7 +133,7 @@ class GoogleCalendarSettingsCard extends StatelessWidget {
                                   )
                                   .toList() ??
                               [];
-                          if (calendarSwitches.length > 0) {
+                          if (calendarSwitches.isNotEmpty) {
                             return Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Column(

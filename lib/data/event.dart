@@ -14,12 +14,12 @@ class Event implements Comparable {
 
   Event.fromFirestore(this.title, Timestamp timestamp, this.id) : time = timestamp.toDate();
 
-  Event.fromJson(Map<String, dynamic> json)
-      : id = json["id"],
-        title = json["title"],
-        time = json["time"];
+  Event.fromJson(Map<String, Object> json)
+      : id = json["id"] as String,
+        title = json["title"] as String,
+        time = json["time"] as DateTime;
 
-  Map<String, dynamic> get asJson => {"id": id, "title": title, "time": time};
+  Map<String, Object> get asJson => {"id": id, "title": title, "time": time};
 
   @override
   int compareTo(other) => time == other.time ? title.compareTo(other.title) : time.compareTo(other.time);
