@@ -97,7 +97,7 @@ class FirestoreEventRepository implements EventRepository {
 }
 
 final googleCalendarEventProvider = Provider<GoogleCalendarEventsRepository>(
-    (ref) => GoogleCalendarEventsRepository(ref.watch(googleAccountProvider.notifier).authHeaders));
+    (ref) => GoogleCalendarEventsRepository(ref.watch(googleAccountProvider).authHeaders));
 
 /// Implementation of [EventRepository] that reads events from Google Calendar (and is not able to create new events).
 class GoogleCalendarEventsRepository implements EventRepository {
@@ -136,7 +136,7 @@ class GoogleCalendarEventsRepository implements EventRepository {
     if (api != null) {
       print("Retrieving Google calendar events...");
       return api.calendarList.list().then((calendars) async {
-        final calendarId = calendars.items?.firstWhere((element) => element.summary?.contains("@") ?? false).id;
+        final calendarId = calendars.items?.firstWhere((event) => event.primary ?? false).id;
         if (calendarId != null) {
           final events = await api.events.list(calendarId);
           return events.items?.map((e) => Event(e.summary ?? "", e.start?.dateTime ?? DateTime.now())) ??
