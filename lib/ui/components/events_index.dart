@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/ui/components/error_card.dart';
 
 import '../../data/date_formatting.dart';
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
+import 'error_card.dart';
 
 class EventsIndex extends ConsumerWidget {
   final void Function(Event) onEventTapped;

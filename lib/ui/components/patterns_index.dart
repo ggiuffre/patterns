@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/ui/components/error_card.dart';
 
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import '../../data/similarities.dart';
+import 'error_card.dart';
 
 class PatternsIndex extends ConsumerWidget {
   const PatternsIndex({Key? key}) : super(key: key);

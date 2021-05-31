@@ -1,10 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/ui/components/error_card.dart';
 
 import 'data/app_settings_provider.dart';
 import 'theme.dart';
+import 'ui/components/error_card.dart';
 
 /// Wrapper that allows any required Firebase service (like authentication or Cloud Firestore) to run.
 class FirebaseEnabler extends StatelessWidget {

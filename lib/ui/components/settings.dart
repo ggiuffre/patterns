@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart';
-import 'package:patterns/data/google_account_provider.dart';
 
 import '../../data/app_settings_provider.dart';
+import '../../data/google_account_provider.dart';
 import '../../data/repositories/events.dart';
 import 'constrained_card.dart';
 

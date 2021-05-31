@@ -5,9 +5,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' show CalendarApi;
 import 'package:http/http.dart' as http;
-import 'package:patterns/data/google_account_provider.dart';
 
 import '../event.dart';
+import '../google_account_provider.dart';
 
 /// A repository of [Event] objects.
 abstract class EventRepository {
