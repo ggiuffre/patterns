@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:patterns/ui/components/error_card.dart';
 
-import 'data/theme_mode_provider.dart';
+import 'data/app_settings_provider.dart';
 import 'theme.dart';
 
 /// Wrapper that allows any required Firebase service (like authentication or Cloud Firestore) to run.
@@ -21,7 +21,7 @@ class FirebaseEnabler extends StatelessWidget {
           return MaterialApp(
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
-            themeMode: context.read(themeModeProvider),
+            themeMode: context.read(appSettingsProvider).themeMode,
             title: 'Patterns',
             home: const Scaffold(body: ErrorCard(text: "Couldn't initialize storage.")),
           );
@@ -34,7 +34,7 @@ class FirebaseEnabler extends StatelessWidget {
         return MaterialApp(
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,
-          themeMode: context.read(themeModeProvider),
+          themeMode: context.read(appSettingsProvider).themeMode,
           title: 'Patterns',
           home: const Scaffold(body: Center(child: CircularProgressIndicator.adaptive())),
         );

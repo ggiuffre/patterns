@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patterns/data/theme_mode_provider.dart';
+import 'package:patterns/data/app_settings_provider.dart';
 import 'package:patterns/ui/components/settings.dart';
 
 void main() {
@@ -46,7 +46,10 @@ void main() {
 
     testWidgets("is off if the user-defined theme mode is light.", (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
-        overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier(ThemeMode.light))],
+        overrides: [
+          appSettingsProvider
+              .overrideWithValue(AppSettingsStateNotifier(appSettings: AppSettings(themeMode: ThemeMode.light)))
+        ],
         child: MaterialApp(home: DarkModeSettingsCard()),
       ));
 
@@ -56,7 +59,10 @@ void main() {
 
     testWidgets("is on if the user-defined theme mode is dark.", (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
-        overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier(ThemeMode.dark))],
+        overrides: [
+          appSettingsProvider
+              .overrideWithValue(AppSettingsStateNotifier(appSettings: AppSettings(themeMode: ThemeMode.dark)))
+        ],
         child: MaterialApp(home: DarkModeSettingsCard()),
       ));
 
@@ -68,7 +74,10 @@ void main() {
         (WidgetTester tester) async {
       tester.binding.window.platformBrightnessTestValue = Brightness.dark;
       await tester.pumpWidget(ProviderScope(
-        overrides: [themeModeProvider.overrideWithValue(ThemeModeStateNotifier(ThemeMode.light))],
+        overrides: [
+          appSettingsProvider
+              .overrideWithValue(AppSettingsStateNotifier(appSettings: AppSettings(themeMode: ThemeMode.light)))
+        ],
         child: MaterialApp(home: DarkModeSettingsCard()),
       ));
 

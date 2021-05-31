@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart';
 import 'package:patterns/data/google_account_provider.dart';
 
+import '../../data/app_settings_provider.dart';
 import '../../data/repositories/events.dart';
-import '../../data/theme_mode_provider.dart';
 import 'constrained_card.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -35,8 +35,8 @@ class DarkModeSettingsCard extends StatelessWidget {
               const Text("Dark mode"),
               Consumer(
                 builder: (innerContext, watch, _) => Switch.adaptive(
-                  value: _isDark(themeMode: watch(themeModeProvider), context: innerContext),
-                  onChanged: (value) async => await innerContext.read(themeModeProvider.notifier).setDarkMode(value),
+                  value: _isDark(themeMode: watch(appSettingsProvider).themeMode, context: innerContext),
+                  onChanged: (value) async => await innerContext.read(appSettingsProvider.notifier).setDarkMode(value),
                 ),
               ),
             ],

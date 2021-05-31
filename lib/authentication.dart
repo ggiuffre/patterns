@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'data/theme_mode_provider.dart';
+import 'data/app_settings_provider.dart';
 import 'theme.dart';
 import 'ui/components/login.dart';
 import 'ui/components/signup.dart';
@@ -25,7 +25,7 @@ class SignUpLogInSelector extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: context.read(themeModeProvider),
+        themeMode: context.read(appSettingsProvider).themeMode,
         title: 'Patterns',
         home: Scaffold(
           appBar: AppBar(title: const Text("Authenticate")),

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'data/theme_mode_provider.dart';
+import 'data/app_settings_provider.dart';
 
 class LocalPreferencesEnabler extends StatelessWidget {
   final Widget child;
@@ -10,7 +10,7 @@ class LocalPreferencesEnabler extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FutureBuilder(
-        future: context.read(themeModeProvider.notifier).syncFromSharedPreferences(),
+        future: context.read(appSettingsProvider.notifier).syncFromSharedPreferences(),
         builder: (_, __) => child,
       );
 }
