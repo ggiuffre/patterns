@@ -8,16 +8,10 @@ final googleAccountProvider = StateNotifierProvider<GoogleAccountProvider, Googl
 class GoogleAccountProvider extends StateNotifier<GoogleUser> {
   CalendarApi? _calendarApi;
 
-  GoogleAccountProvider({GoogleUser googleUser = const GoogleUser()})
-      : super(googleUser.copyWith(
-          enabled: googleUser.enabled,
-          enabledCalendarIds: googleUser.enabledCalendarIds,
-          account: googleUser.account,
-          authHeaders: googleUser.authHeaders,
-        ));
+  GoogleAccountProvider({GoogleUser googleUser = const GoogleUser()}) : super(googleUser);
 
   static final _googleSignIn = GoogleSignIn(
-    scopes: const <String>[
+    scopes: const [
       'email',
       CalendarApi.calendarReadonlyScope,
       CalendarApi.calendarEventsReadonlyScope,
