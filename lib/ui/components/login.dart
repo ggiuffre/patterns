@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'constrained_card.dart';
 
 class LogInScreen extends StatelessWidget {
+  const LogInScreen({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8.0),
+  Widget build(BuildContext context) => const Padding(
+        padding: EdgeInsets.all(8.0),
         child: EmailLogInForm(),
       );
 }
@@ -14,6 +16,8 @@ class LogInScreen extends StatelessWidget {
 enum _AuthState { signed_out, processing, error, signed_in }
 
 class EmailLogInForm extends StatefulWidget {
+  const EmailLogInForm({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _EmailLogInFormState();
 }

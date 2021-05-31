@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'constrained_card.dart';
 
 class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.all(8.0),
+  Widget build(BuildContext context) => const Padding(
+        padding: EdgeInsets.all(8.0),
         child: EmailRegistrationForm(),
       );
 }
@@ -14,6 +16,8 @@ class SignUpScreen extends StatelessWidget {
 enum _AuthState { signed_out, processing, error, signed_in }
 
 class EmailRegistrationForm extends StatefulWidget {
+  const EmailRegistrationForm({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() => _EmailRegistrationFormState();
 }

@@ -16,11 +16,13 @@ class AuthenticationGuard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) => snapshot.data == null ? SignUpLogInSelector() : child,
+        builder: (context, snapshot) => snapshot.data == null ? const SignUpLogInSelector() : child,
       );
 }
 
 class SignUpLogInSelector extends StatelessWidget {
+  const SignUpLogInSelector({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) => MaterialApp(
         theme: AppTheme.light,
@@ -31,9 +33,14 @@ class SignUpLogInSelector extends StatelessWidget {
           appBar: AppBar(title: const Text("Authenticate")),
           body: ListView(
             children: [
-              SignUpScreen(),
-              Center(child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 680.0), child: const _OrText())),
-              LogInScreen(),
+              const SignUpScreen(),
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 680.0),
+                  child: const _OrText(),
+                ),
+              ),
+              const LogInScreen(),
             ],
           ),
         ),
