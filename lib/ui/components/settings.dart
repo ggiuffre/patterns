@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart';
 
 import '../../data/app_settings_provider.dart';
-import '../../data/google_account_provider.dart';
+import '../../data/google_data_provider.dart';
 import '../../data/repositories/events.dart';
 import 'constrained_card.dart';
 
@@ -69,12 +69,12 @@ class GoogleCalendarSettingsCard extends StatelessWidget {
                 const Text("Allow to see my Google Calendar events"),
                 Consumer(
                   builder: (innerContext, watch, _) => Switch.adaptive(
-                    value: watch(googleAccountProvider).enabled,
+                    value: watch(googleDataProvider).enabled,
                     onChanged: (newValue) async {
                       if (newValue) {
                         print("Attempting to sign in to a Google account...");
-                        await innerContext.read(googleAccountProvider.notifier).signIn();
-                        final currentUser = innerContext.read(googleAccountProvider).account;
+                        await innerContext.read(googleDataProvider.notifier).signIn();
+                        final currentUser = innerContext.read(googleDataProvider).account;
                         print("Signed in to ${currentUser?.displayName}'s Google Calendar");
                         await currentUser?.authHeaders
                             .then((headers) => innerContext.read(googleCalendarEventProvider).enable(headers));
@@ -83,7 +83,7 @@ class GoogleCalendarSettingsCard extends StatelessWidget {
                       } else {
                         print("Attempting to sign out of a Google account...");
                         innerContext.read(googleCalendarEventProvider).disable();
-                        await innerContext.read(googleAccountProvider.notifier).signOut();
+                        await innerContext.read(googleDataProvider.notifier).signOut();
                         print("Signed out.");
                       }
                     },
@@ -92,9 +92,9 @@ class GoogleCalendarSettingsCard extends StatelessWidget {
               ],
             ),
             Consumer(builder: (innerContext, watch, _) {
-              return watch(googleAccountProvider).enabled
+              return watch(googleDataProvider).enabled
                   ? FutureBuilder<Iterable<CalendarListEntry>>(
-                      future: innerContext.read(googleAccountProvider.notifier).calendars,
+                      future: innerContext.read(googleDataProvider.notifier).calendars,
                       builder: (context, snapshot) {
                         final errorIndicator = Padding(
                           padding: EdgeInsets.all(8.0),
@@ -123,9 +123,9 @@ class GoogleCalendarSettingsCard extends StatelessWidget {
                                       children: [
                                         Text(calendar.summary ?? "untitled"),
                                         Switch.adaptive(
-                                          value: watch(googleAccountProvider).enabledCalendarIds.contains(calendar.id),
+                                          value: watch(googleDataProvider).enabledCalendarIds.contains(calendar.id),
                                           onChanged: (newValue) => innerContext
-                                              .read(googleAccountProvider.notifier)
+                                              .read(googleDataProvider.notifier)
                                               .setCalendarImportance(calendar, newValue),
                                         ),
                                       ],

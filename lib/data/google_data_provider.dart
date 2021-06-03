@@ -3,12 +3,12 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/calendar/v3.dart';
 import 'package:http/http.dart' as http;
 
-final googleAccountProvider = StateNotifierProvider<GoogleAccountProvider, GoogleUser>((_) => GoogleAccountProvider());
+final googleDataProvider = StateNotifierProvider<GoogleDataProvider, GoogleData>((_) => GoogleDataProvider());
 
-class GoogleAccountProvider extends StateNotifier<GoogleUser> {
+class GoogleDataProvider extends StateNotifier<GoogleData> {
   CalendarApi? _calendarApi;
 
-  GoogleAccountProvider({GoogleUser googleUser = const GoogleUser()}) : super(googleUser);
+  GoogleDataProvider({GoogleData googleData = const GoogleData()}) : super(googleData);
 
   static final _googleSignIn = GoogleSignIn(
     scopes: const [
@@ -69,26 +69,26 @@ class _GoogleAuthClient extends http.BaseClient {
   Future<http.StreamedResponse> send(http.BaseRequest request) => _client.send(request..headers.addAll(_headers));
 }
 
-class GoogleUser {
+class GoogleData {
   final bool enabled;
   final GoogleSignInAccount? account;
   final Map<String, String>? authHeaders;
   final Set<String> enabledCalendarIds;
 
-  const GoogleUser({
+  const GoogleData({
     this.enabled = false,
     this.enabledCalendarIds = const {},
     this.account,
     this.authHeaders,
   });
 
-  GoogleUser copyWith({
+  GoogleData copyWith({
     bool? enabled,
     GoogleSignInAccount? account,
     Map<String, String>? authHeaders,
     Set<String>? enabledCalendarIds,
   }) =>
-      GoogleUser(
+      GoogleData(
         enabled: enabled ?? this.enabled,
         enabledCalendarIds: enabledCalendarIds ?? this.enabledCalendarIds,
         account: (enabled ?? this.enabled) ? (account ?? this.account) : null,
