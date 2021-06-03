@@ -136,7 +136,7 @@ class GoogleCalendarEventsRepository implements EventRepository {
     if (api != null) {
       print("Retrieving Google calendar events...");
       return api.calendarList.list().then((calendars) async {
-        final calendarId = calendars.items?.firstWhere((event) => event.primary ?? false).id;
+        final calendarId = calendars.items?.firstWhere((calendar) => calendar.primary ?? false).id;
         if (calendarId != null) {
           final events = await api.events.list(calendarId);
           return events.items?.map((e) => Event(e.summary ?? "", e.start?.dateTime ?? DateTime.now())) ??
