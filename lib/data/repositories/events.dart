@@ -6,8 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' show CalendarApi;
 import 'package:http/http.dart' as http;
 
+import '../app_settings_provider.dart';
 import '../event.dart';
-import '../google_data_provider.dart';
 
 /// A repository of [Event] objects.
 abstract class EventRepository {
@@ -97,7 +97,7 @@ class FirestoreEventRepository implements EventRepository {
 }
 
 final googleCalendarEventProvider = Provider<GoogleCalendarEventsRepository>(
-    (ref) => GoogleCalendarEventsRepository(ref.watch(googleDataProvider).authHeaders));
+    (ref) => GoogleCalendarEventsRepository(ref.watch(appSettingsProvider).google.authHeaders));
 
 /// Implementation of [EventRepository] that reads events from Google Calendar (and is not able to create new events).
 class GoogleCalendarEventsRepository implements EventRepository {

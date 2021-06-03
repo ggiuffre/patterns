@@ -48,7 +48,7 @@ void main() {
       await tester.pumpWidget(ProviderScope(
         overrides: [
           appSettingsProvider
-              .overrideWithValue(AppSettingsStateNotifier(appSettings: AppSettings(themeMode: ThemeMode.light)))
+              .overrideWithValue(AppSettingsController(appSettings: AppSettings(themeMode: ThemeMode.light)))
         ],
         child: MaterialApp(home: DarkModeSettingsCard()),
       ));
@@ -61,7 +61,7 @@ void main() {
       await tester.pumpWidget(ProviderScope(
         overrides: [
           appSettingsProvider
-              .overrideWithValue(AppSettingsStateNotifier(appSettings: AppSettings(themeMode: ThemeMode.dark)))
+              .overrideWithValue(AppSettingsController(appSettings: AppSettings(themeMode: ThemeMode.dark)))
         ],
         child: MaterialApp(home: DarkModeSettingsCard()),
       ));
@@ -76,7 +76,7 @@ void main() {
       await tester.pumpWidget(ProviderScope(
         overrides: [
           appSettingsProvider
-              .overrideWithValue(AppSettingsStateNotifier(appSettings: AppSettings(themeMode: ThemeMode.light)))
+              .overrideWithValue(AppSettingsController(appSettings: AppSettings(themeMode: ThemeMode.light)))
         ],
         child: MaterialApp(home: DarkModeSettingsCard()),
       ));
