@@ -22,9 +22,14 @@ class AppSettingsController extends StateNotifier<AppSettings> {
   );
 
   Future<void> setDarkMode(bool darkMode) async {
-    final localStorage = await SharedPreferences.getInstance();
     state = state.copyWith(themeMode: darkMode ? ThemeMode.dark : ThemeMode.light);
-    await localStorage.setBool("darkMode", darkMode);
+    try {
+      final localStorage = await SharedPreferences.getInstance();
+      await localStorage.setBool("darkMode", darkMode);
+    } catch (error) {
+      print("Couldn't persist setting 'darkMode' to disk.");
+      print(error);
+    }
   }
 
   Future<void> syncFromSharedPreferences() async {
@@ -37,9 +42,13 @@ class AppSettingsController extends StateNotifier<AppSettings> {
 
     final googleDataEnabled = localStorage.getBool("googleDataEnabled");
     if (googleDataEnabled != null) {
-      final googleAccount = await _googleSignIn.signInSilently();
-      if (googleDataEnabled && googleAccount != null) {
-        state = state.copyWith(google: state.google.copyWith(enabled: true, account: googleAccount));
+      if (googleDataEnabled) {
+        final googleAccount = await _googleSignIn.signInSilently();
+        if (googleAccount != null) {
+          final headers = await googleAccount.authHeaders;
+          state = state.copyWith(
+              google: state.google.copyWith(enabled: true, account: googleAccount, authHeaders: headers));
+        }
       }
     }
 
@@ -50,20 +59,31 @@ class AppSettingsController extends StateNotifier<AppSettings> {
   }
 
   Future<GoogleSignInAccount?> signInToGoogle() async {
-    final localStorage = await SharedPreferences.getInstance();
     final googleAccount = (await _googleSignIn.signInSilently()) ?? (await _googleSignIn.signIn());
     if (googleAccount != null) {
       final headers = await googleAccount.authHeaders;
       _calendarApi = CalendarApi(_GoogleAuthClient(headers));
       state =
           state.copyWith(google: state.google.copyWith(enabled: true, account: googleAccount, authHeaders: headers));
-      await localStorage.setBool("googleDataEnabled", true);
+      try {
+        final localStorage = await SharedPreferences.getInstance();
+        await localStorage.setBool("googleDataEnabled", true);
+      } catch (error) {
+        print("Couldn't persist setting 'googleDataEnabled' to disk.");
+        print(error);
+      }
     }
   }
 
   Future<GoogleSignInAccount?> signOutOfGoogle() async {
-    final localStorage = await SharedPreferences.getInstance();
-    await localStorage.setBool("googleDataEnabled", false);
+    try {
+      final localStorage = await SharedPreferences.getInstance();
+      await localStorage.setBool("googleDataEnabled", false);
+    } catch (error) {
+      print("Couldn't persist setting 'googleDataEnabled' to disk.");
+      print(error);
+    }
+
     final googleAccount = await _googleSignIn.signOut();
     state = state.copyWith(google: state.google.copyWith(enabled: false, account: googleAccount));
     _calendarApi = null;
@@ -81,8 +101,14 @@ class AppSettingsController extends StateNotifier<AppSettings> {
                 }
                 return calendar;
               }))
-          .whenComplete(() => SharedPreferences.getInstance().then((sharedPrefs) =>
-              sharedPrefs.setStringList("enabledGoogleCalendars", state.google.enabledCalendarIds.toList()))) ??
+          .whenComplete(() => SharedPreferences.getInstance()
+                  .then((sharedPrefs) =>
+                      sharedPrefs.setStringList("enabledGoogleCalendars", state.google.enabledCalendarIds.toList()))
+                  .catchError((error) {
+                print("Couldn't persist setting 'enabledGoogleCalendars' to disk.");
+                print(error);
+                return true; // ignore error
+              })) ??
       Future.value([]);
 
   void setGoogleCalendarImportance(CalendarListEntry calendar, bool isEnabled) {
