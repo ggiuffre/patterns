@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import '../components/constrained_card.dart';
-import '../components/user_app_bar.dart';
+import '../components/custom_app_bar.dart';
 
 class EventDetailsPage extends StatelessWidget {
   final Event event;
@@ -14,7 +14,7 @@ class EventDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: UserAppBar(title: Text(event.title)),
+        appBar: CustomAppBar(title: Text(event.title), withLogoutAction: true),
         body: ListView(
           padding: const EdgeInsets.all(8.0),
           children: [

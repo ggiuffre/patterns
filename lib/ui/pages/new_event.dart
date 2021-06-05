@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../components/custom_app_bar.dart';
 import '../components/new_event_form.dart';
-import '../components/user_app_bar.dart';
 
 class NewEventPage extends StatelessWidget {
   final void Function() onSubmit;
@@ -10,8 +10,9 @@ class NewEventPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: UserAppBar(
+        appBar: CustomAppBar(
           title: const Text("New event"),
+          withLogoutAction: true,
         ),
         body: NewEventForm(onSubmit: onSubmit),
       );

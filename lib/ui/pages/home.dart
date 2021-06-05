@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../data/event.dart';
+import '../components/custom_app_bar.dart';
 import '../components/events_index.dart';
 import '../components/patterns_index.dart';
 import '../components/settings.dart';
-import '../components/user_app_bar.dart';
 
 class HomePage extends StatelessWidget {
   final int selectedNavigationItem;
@@ -22,8 +22,9 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-        appBar: UserAppBar(
+        appBar: CustomAppBar(
           title: const Text("Home Page"),
+          withLogoutAction: true,
         ),
         body: selectedNavigationItem == 0
             ? EventsIndex(onEventTapped: onEventTapped)

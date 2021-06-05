@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'data/app_settings_provider.dart';
 import 'theme.dart';
+import 'ui/components/custom_app_bar.dart';
 import 'ui/components/login.dart';
 import 'ui/components/signup.dart';
 
@@ -30,7 +31,7 @@ class SignUpLogInSelector extends StatelessWidget {
         themeMode: context.read(appSettingsProvider).themeMode,
         title: 'Patterns',
         home: Scaffold(
-          appBar: AppBar(title: const Text("Authenticate")),
+          appBar: CustomAppBar(title: const Text("Authenticate")),
           body: ListView(
             children: [
               const SignUpScreen(),
