@@ -6,6 +6,7 @@ class UserAppBar extends AppBar {
       : super(
           key: key,
           title: title,
+          brightness: Brightness.dark,
           actions: [
             PopupMenuButton(
               itemBuilder: (context) => [
@@ -23,3 +24,5 @@ class UserAppBar extends AppBar {
 }
 
 // TODO: UserAppBar should not show a logout button if a user is authenticated with an anonymous session.
+
+// TODO remove explicit `brightness: Brightness.dark` setting once Flutter AppBar sets its brightness automatically (or we have a proper palette)
