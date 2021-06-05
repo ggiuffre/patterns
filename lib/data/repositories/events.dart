@@ -97,14 +97,16 @@ class FirestoreEventRepository implements EventRepository {
 }
 
 final googleCalendarEventProvider = Provider<GoogleCalendarEventsRepository>(
-    (ref) => GoogleCalendarEventsRepository(ref.watch(appSettingsProvider).google.authHeaders));
+    (ref) => GoogleCalendarEventsRepository(ref.watch(appSettingsProvider).google));
 
 /// Implementation of [EventRepository] that reads events from Google Calendar (and is not able to create new events).
 class GoogleCalendarEventsRepository implements EventRepository {
   CalendarApi? _calendarApi;
+  Set<String> _calendarIds;
 
-  GoogleCalendarEventsRepository([Map<String, String>? headers])
-      : _calendarApi = headers != null ? CalendarApi(_GoogleAuthClient(headers)) : null;
+  GoogleCalendarEventsRepository([GoogleData? google])
+      : _calendarIds = google?.enabledCalendarIds ?? const {},
+        _calendarApi = google?.authHeaders != null ? CalendarApi(_GoogleAuthClient(google!.authHeaders!)) : null;
 
   void enable(Map<String, String> headers) => _calendarApi = CalendarApi(_GoogleAuthClient(headers));
 
@@ -135,21 +137,30 @@ class GoogleCalendarEventsRepository implements EventRepository {
     final api = _calendarApi;
     if (api != null) {
       print("Retrieving Google calendar events...");
-      return api.calendarList.list().then((calendars) async {
-        final calendarId = calendars.items?.firstWhere((calendar) => calendar.primary ?? false).id;
-        if (calendarId != null) {
-          final events = await api.events.list(calendarId);
-          return events.items?.map((e) => Event(e.summary ?? "", e.start?.dateTime ?? DateTime.now())) ??
-              Iterable<Event>.empty();
-        } else {
-          return Iterable<Event>.empty();
-        }
-      }).asStream();
+      return _calendarIds
+          .map(_eventsFromCalendarId)
+          .fold(Future.value(Iterable<Event>.empty()), _chainEventComputations)
+          .then((eventsList) => eventsList.toSet())
+          .asStream();
     } else {
       print("No auth headers to retrieve Google Calendar events.");
       return Stream.value({});
     }
   }
+
+  Future<Iterable<Event>> _eventsFromCalendarId(String calendarId) async {
+    final api = _calendarApi;
+    if (api != null) {
+      final eventsComputation = await api.events.list(calendarId);
+      final events = eventsComputation.items ?? const [];
+      return events.map((e) => Event(e.summary ?? "", e.start?.dateTime ?? DateTime.now()));
+    } else {
+      return Future.value(Iterable<Event>.empty());
+    }
+  }
+
+  Future<Iterable<Event>> _chainEventComputations(Future<Iterable<Event>> acc, Future<Iterable<Event>> events) =>
+      acc.then((allEvents) async => allEvents.followedBy(await events));
 
   @override
   Stream<Iterable<Event>> sorted({bool descending = false}) {

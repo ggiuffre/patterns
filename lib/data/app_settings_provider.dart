@@ -91,25 +91,16 @@ class AppSettingsController extends StateNotifier<AppSettings> {
 
   /// Retrieve a list of calendars and assign default settings to any new calendar.
   Future<Iterable<CalendarListEntry>> get googleCalendars =>
-      _calendarApi?.calendarList
-          .list()
-          .then((calendars) => calendars.items ?? <CalendarListEntry>[])
-          .then((calendars) => calendars.map((calendar) {
-                if (!state.google.enabledCalendarIds.contains(calendar.id)) {
-                  final isEnabledByDefault = calendar.primary ?? false;
-                  setGoogleCalendarImportance(calendar, isEnabledByDefault);
-                }
-                return calendar;
-              }))
-          .whenComplete(() => SharedPreferences.getInstance()
-                  .then((sharedPrefs) =>
-                      sharedPrefs.setStringList("enabledGoogleCalendars", state.google.enabledCalendarIds.toList()))
-                  .catchError((error) {
-                print("Couldn't persist setting 'enabledGoogleCalendars' to disk.");
-                print(error);
-                return true; // ignore error
-              })) ??
-      Future.value([]);
+      _calendarApi?.calendarList.list().then((calendars) => calendars.items ?? <CalendarListEntry>[]).whenComplete(() =>
+          SharedPreferences.getInstance()
+              .then((sharedPrefs) =>
+                  sharedPrefs.setStringList("enabledGoogleCalendars", state.google.enabledCalendarIds.toList()))
+              .catchError((error) {
+            print("Couldn't persist setting 'enabledGoogleCalendars' to disk.");
+            print(error);
+            return true; // ignore error
+          })) ??
+      Future.value(const {});
 
   void setGoogleCalendarImportance(CalendarListEntry calendar, bool isEnabled) {
     final calendarId = calendar.id;

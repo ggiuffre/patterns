@@ -120,7 +120,9 @@ class GoogleCalendarSettingsCard extends StatelessWidget {
                                     (calendar) => Row(
                                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(calendar.summary ?? "untitled"),
+                                        Expanded(
+                                            child:
+                                                Text(_calendarEntryTitle(calendar), overflow: TextOverflow.ellipsis)),
                                         Switch.adaptive(
                                           value: watch(appSettingsProvider)
                                               .google
@@ -166,6 +168,17 @@ class GoogleCalendarSettingsCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _calendarEntryTitle(CalendarListEntry calendar) {
+    final isPrimary = calendar.primary ?? false;
+    final calendarSummary = calendar.summary;
+    if (calendarSummary != null) {
+      // TODO remove soft hyphens once Flutter allows to specify word hyphenation
+      return isPrimary ? "Primary calendar (${calendarSummary.split('').join('\u00ad')})" : calendarSummary;
+    } else {
+      return "Untitled";
+    }
   }
 }
 
