@@ -28,7 +28,46 @@ abstract class EventRepository {
 }
 
 /// Currently selected implementation of [EventRepository].
-final eventProvider = Provider<EventRepository>((_) => FirestoreEventRepository());
+final eventProvider = Provider<EventRepository>((ref) => HybridEventRepository(repositories: [
+      FirestoreEventRepository(),
+      GoogleCalendarEventsRepository(ref.watch(appSettingsProvider).google),
+    ]));
+
+/// Implementation of [EventRepository] that merges the events coming from several other repositories
+class HybridEventRepository implements EventRepository {
+  final Iterable<EventRepository> repositories;
+
+  HybridEventRepository({required this.repositories});
+
+  @override
+  Future<String> add(Event event) => repositories.first.add(event);
+
+  @override
+  Future<void> delete(String id) => repositories.first.delete(id);
+
+  @override
+  Future<Event> get(String id) => list.map((events) => events.firstWhere((element) => element.id == id)).last;
+
+  @override
+  Stream<Iterable<Event>> get list => repositories
+      .map(
+        (repository) => repository.list,
+      )
+      .fold(
+        Stream.value(Iterable<Event>.empty()),
+        (accumulator, events) => accumulator.asyncMap((value) async => value.followedBy(await events.first)),
+      );
+
+  @override
+  Stream<Iterable<Event>> sorted({bool descending = false}) {
+    final result = list.map((events) => events.toList()..sort((a, b) => a.compareTo(b)));
+    if (descending) {
+      return result.map((events) => events.reversed);
+    } else {
+      return result;
+    }
+  }
+}
 
 /// Implementation of [EventRepository] with a Firestore back-end.
 class FirestoreEventRepository implements EventRepository {

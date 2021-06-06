@@ -4,13 +4,10 @@ import 'package:patterns/data/event.dart';
 import 'package:patterns/data/similarities.dart';
 import 'package:test/test.dart';
 
+import 'factories.dart';
+
 void main() {
   final randomGenerator = Random();
-  final randomDate = () => DateTime(
-        randomGenerator.nextInt(200) + 1850,
-        randomGenerator.nextInt(12 + 1),
-        randomGenerator.nextInt(31 + 1),
-      );
 
   test("similarity is at least -1", () {
     final series1 = List.generate(100, (_) => Event("title", randomDate()));
