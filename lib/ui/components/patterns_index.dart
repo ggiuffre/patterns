@@ -10,7 +10,7 @@ class PatternsIndex extends ConsumerWidget {
   const PatternsIndex({Key? key}) : super(key: key);
 
   @override
-  Widget build(context, watch) => StreamBuilder<Iterable<Event>>(
+  Widget build(BuildContext context, ScopedReader watch) => StreamBuilder<Iterable<Event>>(
         stream: context.read(eventProvider).sorted(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {

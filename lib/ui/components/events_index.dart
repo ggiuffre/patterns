@@ -12,7 +12,7 @@ class EventsIndex extends ConsumerWidget {
   const EventsIndex({Key? key, required this.onEventTapped}) : super(key: key);
 
   @override
-  Widget build(context, watch) => StreamBuilder<Iterable<Event>>(
+  Widget build(BuildContext context, ScopedReader watch) => StreamBuilder<Iterable<Event>>(
         stream: context.read(eventProvider).sorted(descending: true),
         builder: (context, snapshot) {
           if (snapshot.hasError) {

@@ -10,7 +10,7 @@ class PatternsApp extends ConsumerWidget {
   final EventRouteInformationParser _routeInformationParser = EventRouteInformationParser();
 
   @override
-  Widget build(BuildContext context, watch) => MaterialApp.router(
+  Widget build(BuildContext context, ScopedReader watch) => MaterialApp.router(
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: watch(appSettingsProvider).themeMode,

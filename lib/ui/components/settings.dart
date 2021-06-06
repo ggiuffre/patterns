@@ -52,123 +52,111 @@ class DarkModeSettingsCard extends StatelessWidget {
   }
 }
 
-class GoogleCalendarSettingsCard extends StatelessWidget {
+class GoogleCalendarSettingsCard extends ConsumerWidget {
   const GoogleCalendarSettingsCard({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    return ConstrainedCard(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Allow to see my Google Calendar events"),
-                Consumer(
-                  builder: (innerContext, watch, _) => Switch.adaptive(
+  Widget build(BuildContext context, ScopedReader watch) => ConstrainedCard(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text("Allow to see my Google Calendar events"),
+                  Switch.adaptive(
                     value: watch(appSettingsProvider).google.enabled,
                     onChanged: (newValue) async {
                       if (newValue) {
                         print("Attempting to sign in to a Google account...");
-                        await innerContext.read(appSettingsProvider.notifier).signInToGoogle();
-                        final currentUser = innerContext.read(appSettingsProvider).google.account;
-                        print("Signed in to ${currentUser?.displayName}'s Google Calendar");
+                        await context.read(appSettingsProvider.notifier).signInToGoogle();
+                        final currentUser = context.read(appSettingsProvider).google.account;
+                        print("Signed in to ${currentUser?.displayName ?? "[anonymous]"}'s Google Calendar");
                         await currentUser?.authHeaders
-                            .then((headers) => innerContext.read(googleCalendarEventProvider).enable(headers));
-                        final someEvents = await innerContext.read(googleCalendarEventProvider).list.last;
-                        print(someEvents.map((e) => "${e.title} on ${e.time}"));
+                            .then((headers) => context.read(googleCalendarEventProvider).enable(headers));
                       } else {
                         print("Attempting to sign out of a Google account...");
-                        innerContext.read(googleCalendarEventProvider).disable();
-                        await innerContext.read(appSettingsProvider.notifier).signOutOfGoogle();
+                        context.read(googleCalendarEventProvider).disable();
+                        await context.read(appSettingsProvider.notifier).signOutOfGoogle();
                         print("Signed out.");
                       }
                     },
                   ),
-                ),
-              ],
-            ),
-            Consumer(builder: (innerContext, watch, _) {
-              return watch(appSettingsProvider).google.enabled
-                  ? FutureBuilder<Iterable<CalendarListEntry>>(
-                      future: innerContext.read(appSettingsProvider.notifier).googleCalendars,
-                      builder: (context, snapshot) {
-                        final errorIndicator = Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Row(
-                            children: [
-                              Icon(Icons.error, color: Theme.of(context).errorColor),
-                              const Flexible(
-                                child: Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: Text("Couldn't retrieve your list of calendars from Google Calendar."),
+                ],
+              ),
+              if (watch(appSettingsProvider).google.enabled)
+                FutureBuilder<Iterable<CalendarListEntry>>(
+                  future: context.read(appSettingsProvider.notifier).googleCalendars,
+                  builder: (context, snapshot) {
+                    final errorIndicator = Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          Icon(Icons.error, color: Theme.of(context).errorColor),
+                          const Flexible(
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text("Couldn't retrieve your list of calendars from Google Calendar."),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (snapshot.hasError) {
+                      return errorIndicator;
+                    }
+
+                    if (snapshot.hasData) {
+                      final calendarSwitches = snapshot.data
+                              ?.map(
+                                (calendar) => Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(_calendarEntryTitle(calendar), overflow: TextOverflow.ellipsis),
+                                    ),
+                                    Switch.adaptive(
+                                      value: watch(appSettingsProvider).google.enabledCalendarIds.contains(calendar.id),
+                                      onChanged: (newValue) => context
+                                          .read(appSettingsProvider.notifier)
+                                          .setGoogleCalendarImportance(calendar, newValue),
+                                    ),
+                                  ],
                                 ),
+                              )
+                              .toList() ??
+                          [];
+                      if (calendarSwitches.isNotEmpty) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 8.0),
+                                child: Text("Read (or ignore) events from my calendars:"),
                               ),
+                              ...calendarSwitches
                             ],
                           ),
                         );
+                      } else {
+                        return errorIndicator;
+                      }
+                    }
 
-                        if (snapshot.hasError) {
-                          return errorIndicator;
-                        }
-
-                        if (snapshot.hasData) {
-                          final calendarSwitches = snapshot.data
-                                  ?.map(
-                                    (calendar) => Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                            child:
-                                                Text(_calendarEntryTitle(calendar), overflow: TextOverflow.ellipsis)),
-                                        Switch.adaptive(
-                                          value: watch(appSettingsProvider)
-                                              .google
-                                              .enabledCalendarIds
-                                              .contains(calendar.id),
-                                          onChanged: (newValue) => innerContext
-                                              .read(appSettingsProvider.notifier)
-                                              .setGoogleCalendarImportance(calendar, newValue),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                  .toList() ??
-                              [];
-                          if (calendarSwitches.isNotEmpty) {
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 8.0),
-                                    child: Text("Read (or ignore) events from my calendars:"),
-                                  ),
-                                  ...calendarSwitches
-                                ],
-                              ),
-                            );
-                          } else {
-                            return errorIndicator;
-                          }
-                        }
-
-                        return const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Center(child: CircularProgressIndicator.adaptive()),
-                        );
-                      },
-                    )
-                  : Container();
-            }),
-          ],
+                    return const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Center(child: CircularProgressIndicator.adaptive()),
+                    );
+                  },
+                ),
+            ],
+          ),
         ),
-      ),
-    );
-  }
+      );
 
   String _calendarEntryTitle(CalendarListEntry calendar) {
     final isPrimary = calendar.primary ?? false;
