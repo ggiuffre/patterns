@@ -45,7 +45,7 @@ enum Frequency { once, daily, weekly, biWeekly, monthly, biMonthly, annually }
 /// Get a sequence of events named [title] with time inside [range], recurring at [frequency].
 Iterable<Event> eventsAtInterval({required String title, required DateTimeRange range, required Frequency frequency}) {
   if (frequency == Frequency.once) {
-    return [Event(title, range.start)];
+    return {Event(title, range.start)};
   }
 
   final actions = <Frequency, DateTime Function(DateTime)>{
