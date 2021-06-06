@@ -22,7 +22,7 @@ main() {
     final nEvents = randomGenerator.nextInt(20) + 20;
     final eventRepository = InMemoryEventRepository();
     eventRepository.events = List.generate(nEvents, (_) => randomEvent());
-    final events = await eventRepository.list.first;
+    final events = await eventRepository.list.last;
     final categories = events.map((e) => e.title).toSet();
     final coefficients = similarities(events, categories).reversed.toList();
     final nPatterns = coefficients.length;

@@ -132,10 +132,8 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
     if (path.isDetailsPage) {
       if (path.id?.startsWith("/events/") ?? false) {
         final eventId = path.id?.replaceFirst("/events/", "");
-        // final eventRepo = FirestoreEventRepository();
-        // final events = await eventRepo.list;
         final container = ProviderContainer();
-        final events = await container.read(eventProvider).list.first;
+        final events = await container.read(eventProvider).list.last;
         _selectedEvent = events.firstWhere((element) => element.id == eventId);
       } else {
         _show404 = true;

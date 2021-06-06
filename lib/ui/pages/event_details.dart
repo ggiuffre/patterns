@@ -46,7 +46,7 @@ class EventDetailsPage extends StatelessWidget {
                   ),
                   TextButton.icon(
                     onPressed: () async {
-                      final allEvents = await context.read(eventProvider).list.first;
+                      final allEvents = await context.read(eventProvider).list.last;
                       final eventsInCategory = allEvents.where((e) => e.title == event.title);
                       for (final e in eventsInCategory) {
                         await context.read(eventProvider).delete(e.id);

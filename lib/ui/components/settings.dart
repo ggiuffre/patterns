@@ -77,7 +77,7 @@ class GoogleCalendarSettingsCard extends StatelessWidget {
                         print("Signed in to ${currentUser?.displayName}'s Google Calendar");
                         await currentUser?.authHeaders
                             .then((headers) => innerContext.read(googleCalendarEventProvider).enable(headers));
-                        final someEvents = await innerContext.read(googleCalendarEventProvider).list.first;
+                        final someEvents = await innerContext.read(googleCalendarEventProvider).list.last;
                         print(someEvents.map((e) => "${e.title} on ${e.time}"));
                       } else {
                         print("Attempting to sign out of a Google account...");
@@ -200,7 +200,7 @@ class DangerZoneSettingsCard extends StatelessWidget {
                     ) ??
                     false;
                 if (shouldDeleteEvents) {
-                  final allEvents = await context.read(eventProvider).list.first;
+                  final allEvents = await context.read(eventProvider).list.last;
                   for (final e in allEvents) {
                     await context.read(eventProvider).delete(e.id);
                   }

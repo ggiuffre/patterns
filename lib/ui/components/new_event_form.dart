@@ -183,7 +183,7 @@ class _EventTitleTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => FutureBuilder<Set<String>>(
-        future: context.read(eventProvider).list.first.then((events) => events.map((e) => e.title).toSet()),
+        future: context.read(eventProvider).list.last.then((events) => events.map((e) => e.title).toSet()),
         builder: (context, snapshot) {
           final hints = (snapshot.connectionState == ConnectionState.done)
               ? snapshot.data ?? const Iterable<String>.empty()
