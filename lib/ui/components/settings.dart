@@ -69,17 +69,9 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                     value: watch(appSettingsProvider).google.enabled,
                     onChanged: (newValue) async {
                       if (newValue) {
-                        print("Attempting to sign in to a Google account...");
                         await context.read(appSettingsProvider.notifier).signInToGoogle();
-                        final currentUser = context.read(appSettingsProvider).google.account;
-                        print("Signed in to ${currentUser?.displayName ?? "[anonymous]"}'s Google Calendar");
-                        await currentUser?.authHeaders
-                            .then((headers) => context.read(googleCalendarEventProvider).enable(headers));
                       } else {
-                        print("Attempting to sign out of a Google account...");
-                        context.read(googleCalendarEventProvider).disable();
                         await context.read(appSettingsProvider.notifier).signOutOfGoogle();
-                        print("Signed out.");
                       }
                     },
                   ),

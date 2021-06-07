@@ -59,17 +59,16 @@ class HybridEventRepository implements EventRepository {
       );
 
   @override
-  Stream<Iterable<Event>> sorted({bool descending = false}) {
-    final result = list.map((events) => events.toList()..sort((a, b) => a.compareTo(b)));
-    if (descending) {
-      return result.map((events) => events.reversed);
-    } else {
-      return result;
-    }
-  }
+  Stream<Iterable<Event>> sorted({bool descending = false}) => descending
+      ? list.map((events) => events.toList()..sort((a, b) => b.compareTo(a)))
+      : list.map((events) => events.toList()..sort((a, b) => a.compareTo(b)));
 }
 
 /// Implementation of [EventRepository] with a Firestore back-end.
+///
+/// Events are only read from (and persisted to) Cloud Firestore if the app
+/// user is currently logged via Firebase. Otherwise all methods of this class
+/// return a future that resolves in an error.
 class FirestoreEventRepository implements EventRepository {
   final _userId = FirebaseAuth.instance.currentUser?.uid;
 
@@ -135,23 +134,20 @@ class FirestoreEventRepository implements EventRepository {
   }
 }
 
-final googleCalendarEventProvider = Provider<GoogleCalendarEventsRepository>(
-    (ref) => GoogleCalendarEventsRepository(ref.watch(appSettingsProvider).google));
-
-/// Implementation of [EventRepository] that reads events from Google Calendar (and is not able to create new events).
+/// Implementation of [EventRepository] that reads events from Google Calendar
+/// (and is not able to create new events).
+///
+/// Events from Google Calendar are only read if [GoogleCalendarEventsRepository]
+/// is passed a [GoogleData] object whose user is signed in. Until the
+/// [GoogleData] object's user is not signed in, this class will provide an
+/// empty list of events.
 class GoogleCalendarEventsRepository implements EventRepository {
-  CalendarApi? _calendarApi;
-  Set<String> _calendarIds;
+  final CalendarApi? _calendarApi;
+  final Set<String> _calendarIds;
 
   GoogleCalendarEventsRepository([GoogleData? google])
       : _calendarIds = google?.enabledCalendarIds ?? const {},
         _calendarApi = google?.authHeaders != null ? CalendarApi(_GoogleAuthClient(google!.authHeaders!)) : null;
-
-  void enable(Map<String, String> headers) => _calendarApi = CalendarApi(_GoogleAuthClient(headers));
-
-  void disable() => _calendarApi = null;
-
-  bool get enabled => _calendarApi != null;
 
   @override
   Future<String> add(Event event) {
@@ -202,14 +198,9 @@ class GoogleCalendarEventsRepository implements EventRepository {
       acc.then((allEvents) async => allEvents.followedBy(await events));
 
   @override
-  Stream<Iterable<Event>> sorted({bool descending = false}) {
-    final result = list.map((events) => events.toList()..sort((a, b) => a.compareTo(b)));
-    if (descending) {
-      return result.map((events) => events.reversed);
-    } else {
-      return result;
-    }
-  }
+  Stream<Iterable<Event>> sorted({bool descending = false}) => descending
+      ? list.map((events) => events.toList()..sort((a, b) => b.compareTo(a)))
+      : list.map((events) => events.toList()..sort((a, b) => a.compareTo(b)));
 }
 
 class _GoogleAuthClient extends http.BaseClient {
@@ -254,8 +245,7 @@ class InMemoryEventRepository implements EventRepository {
   Stream<Iterable<Event>> get list => Stream.value(events);
 
   @override
-  Stream<Iterable<Event>> sorted({bool descending = false}) =>
-      Future.value(descending ? events.reversed : events).asStream();
+  Stream<Iterable<Event>> sorted({bool descending = false}) => Stream.value(descending ? events.reversed : events);
 }
 
 /// Mock implementation of [EventRepository], meant to be used in widget tests.
@@ -269,13 +259,11 @@ class DummyEventRepository implements EventRepository {
   Future<String> add(Event event) => Future.value("id");
 
   @override
-  Future<void> delete(String id) async {
-    await Future.value(1);
-  }
+  Future<void> delete(String id) => Future.value(() {});
 
   @override
-  Stream<Iterable<Event>> get list => Stream.value([]);
+  Stream<Iterable<Event>> get list => Stream.value(const {});
 
   @override
-  Stream<Iterable<Event>> sorted({bool descending = false}) => Stream.value([]);
+  Stream<Iterable<Event>> sorted({bool descending = false}) => Stream.value(const {});
 }
