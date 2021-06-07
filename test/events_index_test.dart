@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,8 +8,6 @@ import 'package:patterns/ui/components/events_index.dart';
 import 'factories.dart';
 
 main() {
-  final randomGenerator = Random();
-
   testWidgets("shows events as a list of tiles", (WidgetTester tester) async {
     const nEvents = 3;
     final eventRepository = InMemoryEventRepository();
