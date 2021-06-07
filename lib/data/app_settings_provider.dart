@@ -13,7 +13,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
 
   CalendarApi? _calendarApi;
 
-  static final _googleSignIn = GoogleSignIn(
+  static final _googleApiAuth = GoogleSignIn(
     scopes: const [
       'email',
       CalendarApi.calendarReadonlyScope,
@@ -44,7 +44,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
 
     if (googleDataEnabled != null) {
       if (googleDataEnabled) {
-        final googleAccount = await _googleSignIn.signInSilently();
+        final googleAccount = await _googleApiAuth.signInSilently();
         if (googleAccount != null) {
           final headers = await googleAccount.authHeaders;
           if (headers.isNotEmpty) {
@@ -64,7 +64,10 @@ class AppSettingsController extends StateNotifier<AppSettings> {
   }
 
   Future<GoogleSignInAccount?> signInToGoogle() async {
-    final googleAccount = (await _googleSignIn.signInSilently()) ?? (await _googleSignIn.signIn());
+    final googleAccount = await _googleApiAuth
+        .signInSilently()
+        .then((account) async => account != null ? account : await _googleApiAuth.signIn());
+
     if (googleAccount != null) {
       final headers = await googleAccount.authHeaders;
       _calendarApi = CalendarApi(_GoogleAuthClient(headers));
@@ -77,6 +80,8 @@ class AppSettingsController extends StateNotifier<AppSettings> {
         print("Couldn't persist setting 'googleDataEnabled' to disk. $error");
       }
     }
+
+    return googleAccount;
   }
 
   Future<GoogleSignInAccount?> signOutOfGoogle() async {
@@ -87,9 +92,11 @@ class AppSettingsController extends StateNotifier<AppSettings> {
       print("Couldn't persist setting 'googleDataEnabled' to disk. $error");
     }
 
-    final googleAccount = await _googleSignIn.signOut();
+    final googleAccount = await _googleApiAuth.signOut();
     state = state.copyWith(google: state.google.copyWith(enabled: false, account: googleAccount));
     _calendarApi = null;
+
+    return googleAccount;
   }
 
   /// Retrieve a list of calendars and assign default settings to any new calendar.
