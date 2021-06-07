@@ -27,8 +27,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
       final localStorage = await SharedPreferences.getInstance();
       await localStorage.setBool("darkMode", darkMode);
     } catch (error) {
-      print("Couldn't persist setting 'darkMode' to disk.");
-      print(error);
+      print("Couldn't persist setting 'darkMode' to disk. $error");
     }
   }
 
@@ -41,20 +40,26 @@ class AppSettingsController extends StateNotifier<AppSettings> {
     }
 
     final googleDataEnabled = localStorage.getBool("googleDataEnabled");
+    final enabledGoogleCalendars = localStorage.getStringList("enabledGoogleCalendars") ?? const <String>{};
+
     if (googleDataEnabled != null) {
       if (googleDataEnabled) {
         final googleAccount = await _googleSignIn.signInSilently();
         if (googleAccount != null) {
           final headers = await googleAccount.authHeaders;
-          state = state.copyWith(
-              google: state.google.copyWith(enabled: true, account: googleAccount, authHeaders: headers));
+          if (headers.isNotEmpty) {
+            _calendarApi = CalendarApi(_GoogleAuthClient(headers));
+            state = state.copyWith(
+              google: state.google.copyWith(
+                enabled: true,
+                account: googleAccount,
+                authHeaders: headers,
+                enabledCalendarIds: enabledGoogleCalendars.toSet(),
+              ),
+            );
+          }
         }
       }
-    }
-
-    final enabledGoogleCalendars = localStorage.getStringList("enabledGoogleCalendars");
-    if (enabledGoogleCalendars != null) {
-      state = state.copyWith(google: state.google.copyWith(enabledCalendarIds: enabledGoogleCalendars.toSet()));
     }
   }
 
@@ -69,8 +74,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
         final localStorage = await SharedPreferences.getInstance();
         await localStorage.setBool("googleDataEnabled", true);
       } catch (error) {
-        print("Couldn't persist setting 'googleDataEnabled' to disk.");
-        print(error);
+        print("Couldn't persist setting 'googleDataEnabled' to disk. $error");
       }
     }
   }
@@ -80,8 +84,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
       final localStorage = await SharedPreferences.getInstance();
       await localStorage.setBool("googleDataEnabled", false);
     } catch (error) {
-      print("Couldn't persist setting 'googleDataEnabled' to disk.");
-      print(error);
+      print("Couldn't persist setting 'googleDataEnabled' to disk. $error");
     }
 
     final googleAccount = await _googleSignIn.signOut();
@@ -96,8 +99,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
               .then((sharedPrefs) =>
                   sharedPrefs.setStringList("enabledGoogleCalendars", state.google.enabledCalendarIds.toList()))
               .catchError((error) {
-            print("Couldn't persist setting 'enabledGoogleCalendars' to disk.");
-            print(error);
+            print("Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
             return true; // ignore error
           })) ??
       Future.value(const {});
