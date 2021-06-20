@@ -8,9 +8,7 @@ class Event implements Comparable<Event> {
   final String title;
   final DateTime time;
 
-  Event(this.title, DateTime time)
-      : time = DateTime(time.year, time.month, time.day),
-        id = "$time$title";
+  const Event(this.title, this.time) : id = "$time$title";
 
   Event.fromFirestore(this.title, Timestamp timestamp, this.id) : time = timestamp.toDate();
 
@@ -19,7 +17,7 @@ class Event implements Comparable<Event> {
         title = json["title"] as String,
         time = json["time"] as DateTime;
 
-  Map<String, Object> get asJson => {"id": id, "title": title, "time": time};
+  Map<String, String> get asJson => {"id": id, "title": title, "time": time.toIso8601String()};
 
   @override
   int compareTo(other) => time == other.time ? title.compareTo(other.title) : time.compareTo(other.time);
