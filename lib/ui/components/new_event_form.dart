@@ -208,7 +208,6 @@ class _EventTitleTextField extends StatelessWidget {
                 border: OutlineInputBorder(),
                 labelText: 'Event title',
               ),
-              textInputAction: TextInputAction.next,
               autovalidateMode: AutovalidateMode.onUserInteraction,
               validator: (value) {
                 if (value?.isEmpty ?? true) {
