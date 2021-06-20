@@ -17,23 +17,14 @@ class NewEventForm extends StatefulWidget {
 }
 
 class _NewEventFormState extends State<NewEventForm> {
-  static const _frequencies = {
-    Frequency.once: "Does not repeat",
-    Frequency.daily: "Every day",
-    Frequency.weekly: "Every week",
-    Frequency.biWeekly: "Every other week",
-    Frequency.monthly: "Every month",
-    Frequency.biMonthly: "Every other month",
-    Frequency.annually: "Every year",
-  };
-
   final _formKey = GlobalKey<FormState>();
   final _dateFieldController = TextEditingController();
 
   String _eventTitle = "";
   DateTime _eventTime = DateTime.now();
-  Frequency _eventFrequency = Frequency.once; // frequency with which the event being created occurs
-  bool _addingEvent = false; // whether an event is in the process of being added
+  Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
+  int _eventInterval = 1; // days/weeks/months/... (depending on the frequency) between each instance of the new event
+  bool _addingEvent = false; // whether the new event is in the process of being added
 
   @override
   void initState() {
@@ -101,20 +92,15 @@ class _NewEventFormState extends State<NewEventForm> {
                         ),
                       ),
                     ),
-                    ExpansionTile(
-                      leading: const Icon(Icons.repeat),
-                      expandedCrossAxisAlignment: CrossAxisAlignment.start,
-                      title: Text(_frequencies[_eventFrequency]!),
-                      children: [
-                        for (final frequency in Frequency.values)
-                          RadioListTile<Frequency>(
-                            title: Text(_frequencies[frequency]!),
-                            value: frequency,
-                            groupValue: _eventFrequency,
-                            onChanged: (v) => setState(() => _eventFrequency = v ?? _eventFrequency),
-                            dense: true,
-                          ),
-                      ],
+                    _EventFrequencyExpansionTile(
+                      eventFrequency: _eventFrequency,
+                      eventInterval: _eventInterval,
+                      onChangeFrequency: (v) => setState(() {
+                        _eventFrequency = v ?? _eventFrequency;
+                        _eventInterval = 1;
+                      }),
+                      onIncreaseInterval: () => setState(() => _eventInterval++),
+                      onDecreaseInterval: () => setState(() => _eventInterval = max(1, _eventInterval - 1)),
                     ),
                   ],
                 ),
@@ -155,10 +141,11 @@ class _NewEventFormState extends State<NewEventForm> {
     if (_formKey.currentState!.validate()) {
       setState(() => _addingEvent = true);
       if (_eventFrequency != Frequency.once) {
-        final events = eventsAtInterval(
+        final events = recurringEvents(
           title: _eventTitle,
           range: DateTimeRange(start: _eventTime, end: _eventTime.add(const Duration(days: 90))),
           frequency: _eventFrequency,
+          interval: _eventInterval,
         );
         for (final event in events) {
           context.read(eventProvider).add(event);
@@ -242,4 +229,104 @@ class _EventTitleTextField extends StatelessWidget {
           );
         },
       );
+}
+
+class _EventFrequencyExpansionTile extends StatelessWidget {
+  final Frequency eventFrequency;
+  final int eventInterval;
+  final void Function(Frequency?)? onChangeFrequency;
+  final void Function()? onIncreaseInterval;
+  final void Function()? onDecreaseInterval;
+
+  static const _frequencies = {
+    Frequency.once: "Does not repeat",
+    Frequency.daily: "Occurs daily",
+    Frequency.weekly: "Occurs weekly",
+    Frequency.monthly: "Occurs monthly",
+    Frequency.annually: "Occurs yearly",
+  };
+
+  const _EventFrequencyExpansionTile({
+    Key? key,
+    this.eventFrequency = Frequency.once,
+    this.eventInterval = 1,
+    this.onChangeFrequency,
+    this.onIncreaseInterval,
+    this.onDecreaseInterval,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => ExpansionTile(
+        leading: const Icon(Icons.repeat),
+        expandedCrossAxisAlignment: CrossAxisAlignment.start,
+        title: Text(
+          recurringEventStringDescription(frequency: eventFrequency, interval: eventInterval),
+        ),
+        children: [
+          for (final frequency in Frequency.values)
+            RadioListTile<Frequency>(
+              title: Text(_frequencies[frequency]!),
+              value: frequency,
+              groupValue: eventFrequency,
+              onChanged: onChangeFrequency,
+              dense: true,
+            ),
+          if (eventFrequency != Frequency.once)
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text("Occurs every:"),
+                  ),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.remove),
+                            onPressed: onDecreaseInterval,
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Container(
+                              constraints: BoxConstraints(minWidth: 48.0),
+                              alignment: Alignment.center,
+                              child: Text(
+                                _intervalLabel(frequency: eventFrequency, interval: eventInterval),
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: onIncreaseInterval,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+        ],
+      );
+
+  String _intervalLabel({required Frequency frequency, required int interval}) {
+    const intervalTypes = {
+      Frequency.daily: "day",
+      Frequency.weekly: "week",
+      Frequency.monthly: "month",
+      Frequency.annually: "year",
+    };
+
+    final intervalType = intervalTypes[frequency];
+    if (intervalType != null) {
+      return "$interval $intervalType${interval > 1 ? "s" : ""}";
+    } else {
+      return interval.toString();
+    }
+  }
 }

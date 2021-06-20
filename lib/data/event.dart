@@ -20,7 +20,7 @@ class Event implements Comparable<Event> {
   Map<String, String> get asJson => {"id": id, "title": title, "time": time.toIso8601String()};
 
   @override
-  int compareTo(other) => time == other.time ? title.compareTo(other.title) : time.compareTo(other.time);
+  int compareTo(Event other) => time == other.time ? title.compareTo(other.title) : time.compareTo(other.time);
 
   @override
   bool operator ==(Object other) => other is Event && time == other.time && title == other.title;
@@ -38,32 +38,35 @@ class Event implements Comparable<Event> {
 }
 
 /// Frequency at which an [Event] can occur.
-enum Frequency { once, daily, weekly, biWeekly, monthly, biMonthly, annually }
+enum Frequency { once, daily, weekly, monthly, annually }
 
-/// Get a sequence of events named [title] with time inside [range], recurring at [frequency].
-Iterable<Event> eventsAtInterval({required String title, required DateTimeRange range, required Frequency frequency}) {
+/// Get a sequence of events named [title] with time inside [range], recurring
+/// on a [frequency] basis at intervals of [interval].
+Iterable<Event> recurringEvents({
+  required String title,
+  required DateTimeRange range,
+  required Frequency frequency,
+  int interval = 1,
+}) {
   if (frequency == Frequency.once) {
     return {Event(title, range.start)};
   }
 
-  final actions = <Frequency, DateTime Function(DateTime)>{
-    Frequency.daily: (DateTime t) =>
-        DateTime(t.year, t.month, t.day + 1, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-    Frequency.weekly: (DateTime t) =>
-        DateTime(t.year, t.month, t.day + 7, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-    Frequency.biWeekly: (DateTime t) =>
-        DateTime(t.year, t.month, t.day + 14, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-    Frequency.monthly: (DateTime t) => monthsLater(t: t, months: 1),
-    Frequency.biMonthly: (DateTime t) => monthsLater(t: t, months: 2),
-    Frequency.annually: (DateTime t) =>
-        DateTime(t.year + 1, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+  final actions = <Frequency, DateTime Function(DateTime, int)>{
+    Frequency.daily: (DateTime t, int interval) =>
+        DateTime(t.year, t.month, t.day + interval, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+    Frequency.weekly: (DateTime t, int interval) =>
+        DateTime(t.year, t.month, t.day + (7 * interval), t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+    Frequency.monthly: (DateTime t, int interval) => monthsLater(t: t, months: interval),
+    Frequency.annually: (DateTime t, int interval) =>
+        DateTime(t.year + interval, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
   };
 
   List<Event> result = [];
   DateTime time = range.start;
   while (time.isBefore(range.end)) {
     result.add(Event(title, time));
-    time = actions[frequency]!(time);
+    time = actions[frequency]!(time, interval);
   }
 
   return result;
@@ -83,4 +86,44 @@ DateTime monthsLater({required DateTime t, required int months}) {
   }
 
   return candidate;
+}
+
+String recurringEventStringDescription({required Frequency frequency, required int interval}) {
+  if (frequency == Frequency.once) {
+    return "Does not repeat";
+  } else if (frequency == Frequency.daily) {
+    if (interval < 2) {
+      return "Occurs daily";
+    } else if (interval == 2) {
+      return "Occurs every other day";
+    } else {
+      return "Occurs every $interval days";
+    }
+  } else if (frequency == Frequency.weekly) {
+    if (interval < 2) {
+      return "Occurs weekly";
+    } else if (interval == 2) {
+      return "Occurs every other week";
+    } else {
+      return "Occurs every $interval weeks";
+    }
+  } else if (frequency == Frequency.monthly) {
+    if (interval < 2) {
+      return "Occurs monthly";
+    } else if (interval == 2) {
+      return "Occurs every other month";
+    } else {
+      return "Occurs every $interval months";
+    }
+  } else if (frequency == Frequency.annually) {
+    if (interval < 2) {
+      return "Occurs yearly";
+    } else if (interval == 2) {
+      return "Occurs every other year";
+    } else {
+      return "Occurs every $interval years";
+    }
+  } else {
+    return "Does not repeat";
+  }
 }
