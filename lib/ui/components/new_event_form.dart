@@ -23,7 +23,7 @@ class _NewEventFormState extends State<NewEventForm> {
 
   String _eventTitle = "";
   DateTime _eventStartTime = DateTime.now();
-  DateTime? _eventEndTime;
+  DateTime _eventEndTime = DateTime.now();
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
   int _eventInterval = 1; // days/weeks/months/... (depending on the frequency) between each instance of the new event
   bool _addingEvent = false; // whether the new event is in the process of being added
@@ -88,7 +88,7 @@ class _NewEventFormState extends State<NewEventForm> {
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
                         onTap: () async {
-                          final newTime = await _selectDate(context, initialDate: _eventEndTime ?? _eventStartTime);
+                          final newTime = await _selectDate(context, initialDate: _eventEndTime);
                           setState(() => _eventEndTime = newTime);
                         },
                         child: Row(
@@ -98,7 +98,7 @@ class _NewEventFormState extends State<NewEventForm> {
                               padding: const EdgeInsets.all(8.0),
                               child: const Text("End"),
                             ),
-                            Text(formattedDate(_eventEndTime ?? _eventStartTime)),
+                            Text(formattedDate(_eventEndTime)),
                           ],
                         ),
                       ),
@@ -106,9 +106,17 @@ class _NewEventFormState extends State<NewEventForm> {
                     _EventFrequencyExpansionTile(
                       eventFrequency: _eventFrequency,
                       eventInterval: _eventInterval,
-                      onChangeFrequency: (v) => setState(() {
-                        _eventFrequency = v ?? _eventFrequency;
+                      onChangeFrequency: (newFrequency) => setState(() {
+                        // update the frequency to the new value:
+                        _eventFrequency = newFrequency ?? _eventFrequency;
+
+                        // reset the event interval, as it depends on the frequency:
                         _eventInterval = 1;
+
+                        // make sure the event ending date has a sensible value for one-time events:
+                        if (newFrequency == Frequency.once) {
+                          _eventEndTime = _eventStartTime;
+                        }
                       }),
                       onIncreaseInterval: () => setState(() => _eventInterval++),
                       onDecreaseInterval: () => setState(() => _eventInterval = max(1, _eventInterval - 1)),
@@ -154,10 +162,7 @@ class _NewEventFormState extends State<NewEventForm> {
       if (_eventFrequency != Frequency.once) {
         final events = recurringEvents(
           title: _eventTitle,
-          range: DateTimeRange(
-            start: _eventStartTime,
-            end: _eventEndTime ?? _eventStartTime.add(const Duration(days: 90)),
-          ),
+          range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
           frequency: _eventFrequency,
           interval: _eventInterval,
         );
