@@ -15,13 +15,22 @@ main() {
       expect(find.widgetWithText(TextFormField, "Event title"), findsOneWidget);
     });
 
-    testWidgets("shows a text field to enter a time", (WidgetTester tester) async {
+    testWidgets("shows a gesture detector to enter a start time", (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
         overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
 
-      expect(find.widgetWithText(TextFormField, "Event time"), findsOneWidget);
+      expect(find.widgetWithText(GestureDetector, "Start"), findsOneWidget);
+    });
+
+    testWidgets("shows a gesture detector to enter an end time", (WidgetTester tester) async {
+      await tester.pumpWidget(ProviderScope(
+        overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
+        child: MaterialApp(home: NewEventForm(onSubmit: () {})),
+      ));
+
+      expect(find.widgetWithText(GestureDetector, "End"), findsOneWidget);
     });
 
     testWidgets("shows a radio list to select a frequency", (WidgetTester tester) async {

@@ -40,8 +40,9 @@ class Event implements Comparable<Event> {
 /// Frequency at which an [Event] can occur.
 enum Frequency { once, daily, weekly, monthly, annually }
 
-/// Get a sequence of events named [title] with time inside [range], recurring
-/// on a [frequency] basis at intervals of [interval].
+/// Get a sequence of events named [title] with time inside [range] (including
+/// the end), recurring on a [frequency] basis at intervals of [interval]
+/// days/weeks/months/years (depending on the frequency).
 Iterable<Event> recurringEvents({
   required String title,
   required DateTimeRange range,
@@ -64,7 +65,7 @@ Iterable<Event> recurringEvents({
 
   List<Event> result = [];
   DateTime time = range.start;
-  while (time.isBefore(range.end)) {
+  while (!time.isAfter(range.end)) {
     result.add(Event(title, time));
     time = actions[frequency]!(time, interval);
   }

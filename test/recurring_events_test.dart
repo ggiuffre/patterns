@@ -41,7 +41,7 @@ void main() {
         range: range,
         frequency: Frequency.daily,
       );
-      expect(events.length, equals(range.duration.inDays));
+      expect(events.length, equals(range.duration.inDays + 1));
     });
 
     test("returns a singleton if the frequency interval is greater than the range", () {

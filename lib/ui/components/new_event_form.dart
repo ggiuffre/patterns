@@ -1,7 +1,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/data/date_formatting.dart';
 
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
@@ -18,25 +20,13 @@ class NewEventForm extends StatefulWidget {
 
 class _NewEventFormState extends State<NewEventForm> {
   final _formKey = GlobalKey<FormState>();
-  final _dateFieldController = TextEditingController();
 
   String _eventTitle = "";
-  DateTime _eventTime = DateTime.now();
+  DateTime _eventStartTime = DateTime.now();
+  DateTime? _eventEndTime;
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
   int _eventInterval = 1; // days/weeks/months/... (depending on the frequency) between each instance of the new event
   bool _addingEvent = false; // whether the new event is in the process of being added
-
-  @override
-  void initState() {
-    super.initState();
-    _dateFieldController.text = _eventTime.toString();
-  }
-
-  @override
-  void dispose() {
-    _dateFieldController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) => Form(
@@ -77,18 +67,39 @@ class _NewEventFormState extends State<NewEventForm> {
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: TextFormField(
-                        readOnly: true,
-                        controller: _dateFieldController,
+                      child: GestureDetector(
                         onTap: () async {
-                          final newTime = await _selectDate(context);
-                          setState(() => _eventTime = newTime);
-                          _dateFieldController.text = newTime.toString();
+                          final newTime = await _selectDate(context, initialDate: _eventStartTime);
+                          setState(() => _eventStartTime = newTime);
                         },
-                        decoration: const InputDecoration(
-                          icon: Icon(Icons.calendar_today),
-                          border: OutlineInputBorder(),
-                          labelText: 'Event time',
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: const Text("Start"),
+                            ),
+                            Text(formattedDate(_eventStartTime)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                        onTap: () async {
+                          final newTime = await _selectDate(context, initialDate: _eventEndTime ?? _eventStartTime);
+                          setState(() => _eventEndTime = newTime);
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: const Text("End"),
+                            ),
+                            Text(formattedDate(_eventEndTime ?? _eventStartTime)),
+                          ],
                         ),
                       ),
                     ),
@@ -127,14 +138,14 @@ class _NewEventFormState extends State<NewEventForm> {
         ),
       );
 
-  Future<DateTime> _selectDate(BuildContext context) async {
-    final newTime = await showDatePicker(
+  Future<DateTime> _selectDate(BuildContext context, {required DateTime initialDate}) async {
+    final newDate = await showDatePicker(
       context: context,
-      initialDate: _eventTime,
+      initialDate: initialDate,
       firstDate: DateTime(2000),
       lastDate: DateTime(2025),
     );
-    return (newTime != _eventTime ? newTime : _eventTime) ?? _eventTime;
+    return (newDate != initialDate ? newDate : initialDate) ?? initialDate;
   }
 
   Future<void> _submitEvent() async {
@@ -143,7 +154,10 @@ class _NewEventFormState extends State<NewEventForm> {
       if (_eventFrequency != Frequency.once) {
         final events = recurringEvents(
           title: _eventTitle,
-          range: DateTimeRange(start: _eventTime, end: _eventTime.add(const Duration(days: 90))),
+          range: DateTimeRange(
+            start: _eventStartTime,
+            end: _eventEndTime ?? _eventStartTime.add(const Duration(days: 90)),
+          ),
           frequency: _eventFrequency,
           interval: _eventInterval,
         );
@@ -151,7 +165,7 @@ class _NewEventFormState extends State<NewEventForm> {
           context.read(eventProvider).add(event);
         }
       } else {
-        await context.read(eventProvider).add(Event(_eventTitle, _eventTime));
+        await context.read(eventProvider).add(Event(_eventTitle, _eventStartTime));
       }
       widget.onSubmit();
     }
