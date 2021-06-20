@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class Event implements Comparable {
+class Event implements Comparable<Event> {
   final String id;
   final String title;
   final DateTime time;
@@ -30,13 +30,13 @@ class Event implements Comparable {
   @override
   int get hashCode => hashValues(title, time);
 
-  bool operator <(Object other) => compareTo(other) < 0;
+  bool operator <(Event other) => compareTo(other) < 0;
 
-  bool operator <=(Object other) => compareTo(other) <= 0;
+  bool operator <=(Event other) => compareTo(other) <= 0;
 
-  bool operator >=(Object other) => compareTo(other) >= 0;
+  bool operator >=(Event other) => compareTo(other) >= 0;
 
-  bool operator >(Object other) => compareTo(other) > 0;
+  bool operator >(Event other) => compareTo(other) > 0;
 }
 
 /// Frequency at which an [Event] can occur.
