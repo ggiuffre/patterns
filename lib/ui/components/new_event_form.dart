@@ -27,6 +27,7 @@ class _NewEventFormState extends State<NewEventForm> {
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
   int _eventInterval = 1; // days/weeks/months/... (depending on the frequency) between each instance of the new event
   bool _addingEvent = false; // whether the new event is in the process of being added
+  bool _autoValidate = false;
 
   @override
   Widget build(BuildContext context) => Form(
@@ -49,6 +50,7 @@ class _NewEventFormState extends State<NewEventForm> {
                       child: _EventTitleTextField(
                         onHintSelected: (selection) => setState(() => _eventTitle = selection),
                         onFieldChanged: (newTitle) => setState(() => _eventTitle = newTitle),
+                        autoValidate: _autoValidate,
                       ),
                     ),
                   ],
@@ -65,43 +67,12 @@ class _NewEventFormState extends State<NewEventForm> {
                       padding: const EdgeInsets.all(8.0),
                       child: Text("Event time", style: Theme.of(context).textTheme.headline5),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: GestureDetector(
-                        onTap: () async {
-                          final newTime = await _selectDate(context, initialDate: _eventStartTime);
-                          setState(() => _eventStartTime = newTime);
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: const Text("Start"),
-                            ),
-                            Text(formattedDate(_eventStartTime)),
-                          ],
-                        ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: GestureDetector(
-                        onTap: () async {
-                          final newTime = await _selectDate(context, initialDate: _eventEndTime);
-                          setState(() => _eventEndTime = newTime);
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: const Text("End"),
-                            ),
-                            Text(formattedDate(_eventEndTime)),
-                          ],
-                        ),
-                      ),
+                    _EventDateRangeInput(
+                      initialValue: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+                      onChange: (newRange) => setState(() {
+                        _eventStartTime = newRange.start;
+                        _eventEndTime = newRange.end;
+                      }),
                     ),
                     _EventFrequencyExpansionTile(
                       eventFrequency: _eventFrequency,
@@ -146,33 +117,27 @@ class _NewEventFormState extends State<NewEventForm> {
         ),
       );
 
-  Future<DateTime> _selectDate(BuildContext context, {required DateTime initialDate}) async {
-    final newDate = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2025),
-    );
-    return (newDate != initialDate ? newDate : initialDate) ?? initialDate;
-  }
-
   Future<void> _submitEvent() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _addingEvent = true);
-      if (_eventFrequency != Frequency.once) {
-        final events = recurringEvents(
-          title: _eventTitle,
-          range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
-          frequency: _eventFrequency,
-          interval: _eventInterval,
-        );
-        for (final event in events) {
-          context.read(eventProvider).add(event);
+    final formState = _formKey.currentState;
+    if (formState != null) {
+      setState(() => _autoValidate = true);
+      if (formState.validate()) {
+        setState(() => _addingEvent = true);
+        if (_eventFrequency != Frequency.once) {
+          final events = recurringEvents(
+            title: _eventTitle,
+            range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+            frequency: _eventFrequency,
+            interval: _eventInterval,
+          );
+          for (final event in events) {
+            context.read(eventProvider).add(event);
+          }
+        } else {
+          await context.read(eventProvider).add(Event(_eventTitle, _eventStartTime));
         }
-      } else {
-        await context.read(eventProvider).add(Event(_eventTitle, _eventStartTime));
+        widget.onSubmit();
       }
-      widget.onSubmit();
     }
   }
 }
@@ -180,11 +145,13 @@ class _NewEventFormState extends State<NewEventForm> {
 class _EventTitleTextField extends StatelessWidget {
   final void Function(String) onHintSelected;
   final void Function(String) onFieldChanged;
+  final bool autoValidate;
 
   const _EventTitleTextField({
     Key? key,
     required this.onHintSelected,
     required this.onFieldChanged,
+    this.autoValidate = false,
   }) : super(key: key);
 
   @override
@@ -208,7 +175,7 @@ class _EventTitleTextField extends StatelessWidget {
                 border: OutlineInputBorder(),
                 labelText: 'Event title',
               ),
-              autovalidateMode: AutovalidateMode.onUserInteraction,
+              autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
               validator: (value) {
                 if (value?.isEmpty ?? true) {
                   return 'Please enter a title for this event';
@@ -247,6 +214,63 @@ class _EventTitleTextField extends StatelessWidget {
           );
         },
       );
+}
+
+class _EventDateRangeInput extends StatelessWidget {
+  final DateTimeRange initialValue;
+  final void Function(DateTimeRange) onChange;
+
+  const _EventDateRangeInput({Key? key, required this.initialValue, required this.onChange}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GestureDetector(
+              onTap: () async {
+                final newStartTime = await _selectDate(context, initialDate: initialValue.start);
+                final compatibleEndTime = newStartTime.isAfter(initialValue.end) ? newStartTime : initialValue.end;
+                onChange(DateTimeRange(start: newStartTime, end: compatibleEndTime));
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text("Start")),
+                  Text(formattedDate(initialValue.start)),
+                ],
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GestureDetector(
+              onTap: () async {
+                final newEndTime = await _selectDate(context, initialDate: initialValue.end);
+                final compatibleStartTime = newEndTime.isBefore(initialValue.start) ? newEndTime : initialValue.start;
+                onChange(DateTimeRange(start: compatibleStartTime, end: newEndTime));
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Padding(padding: EdgeInsets.all(8.0), child: Text("End")),
+                  Text(formattedDate(initialValue.end)),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+
+  Future<DateTime> _selectDate(BuildContext context, {required DateTime initialDate}) async {
+    final newDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2025),
+    );
+    return (newDate != initialDate ? newDate : initialDate) ?? initialDate;
+  }
 }
 
 class _EventFrequencyExpansionTile extends StatelessWidget {
