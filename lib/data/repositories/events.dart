@@ -3,7 +3,7 @@ import 'dart:async' show Future, Stream;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:googleapis/calendar/v3.dart' show CalendarApi;
+import 'package:googleapis/calendar/v3.dart' as g;
 import 'package:http/http.dart' as http;
 
 import '../app_settings_provider.dart';
@@ -81,7 +81,12 @@ class FirestoreEventRepository implements EventRepository {
           .collection("events")
           .doc(id)
           .get()
-          .then((e) => Event.fromFirestore(e.data()?["title"], e.data()?["time"], id));
+          .then((e) => Event.fromFirestore(
+                e.data()?["title"],
+                start: e.data()?["start"],
+                end: e.data()?["end"],
+                id: id,
+              ));
     }
     throw Future.error("Couldn't retrieve event from Cloud Firestore.");
   }
@@ -93,7 +98,7 @@ class FirestoreEventRepository implements EventRepository {
           .collection("users")
           .doc(_userId)
           .collection("events")
-          .add({"title": event.title, "time": event.time}).then((doc) => doc.id);
+          .add({"title": event.title, "start": event.start, "end": event.end}).then((doc) => doc.id);
     }
     throw Future.error("Couldn't persist event to Cloud Firestore.");
   }
@@ -114,7 +119,12 @@ class FirestoreEventRepository implements EventRepository {
           .doc(_userId)
           .collection("events")
           .snapshots()
-          .map((snapshot) => snapshot.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"], e.id)));
+          .map((snapshot) => snapshot.docs.map((e) => Event.fromFirestore(
+                e.data()["title"],
+                start: e.data()["start"],
+                end: e.data()["end"],
+                id: e.id,
+              )));
     }
     throw Stream.error("Couldn't stream events from Cloud Firestore.");
   }
@@ -126,9 +136,14 @@ class FirestoreEventRepository implements EventRepository {
           .collection("users")
           .doc(_userId)
           .collection("events")
-          .orderBy('time', descending: descending)
+          .orderBy("start", descending: descending)
           .snapshots()
-          .map((snapshot) => snapshot.docs.map((e) => Event.fromFirestore(e.data()["title"], e.data()["time"], e.id)));
+          .map((snapshot) => snapshot.docs.map((e) => Event.fromFirestore(
+                e.data()["title"],
+                start: e.data()["start"],
+                end: e.data()["end"],
+                id: e.id,
+              )));
     }
     throw Stream.error("Couldn't stream events from Cloud Firestore.");
   }
@@ -142,12 +157,12 @@ class FirestoreEventRepository implements EventRepository {
 /// [GoogleData] object's user is not signed in, this class will provide an
 /// empty list of events.
 class GoogleCalendarEventsRepository implements EventRepository {
-  final CalendarApi? _calendarApi;
+  final g.CalendarApi? _calendarApi;
   final Set<String> _calendarIds;
 
   GoogleCalendarEventsRepository([GoogleData? google])
       : _calendarIds = google?.enabledCalendarIds ?? const {},
-        _calendarApi = google?.authHeaders != null ? CalendarApi(_GoogleAuthClient(google!.authHeaders!)) : null;
+        _calendarApi = google?.authHeaders != null ? g.CalendarApi(_GoogleAuthClient(google!.authHeaders!)) : null;
 
   @override
   Future<String> add(Event event) {
@@ -188,9 +203,40 @@ class GoogleCalendarEventsRepository implements EventRepository {
     if (api != null) {
       final eventsComputation = await api.events.list(calendarId);
       final events = eventsComputation.items ?? const [];
-      return events.map((e) => Event(e.summary ?? "", e.start?.dateTime ?? DateTime.now()));
+      return events.map(_eventFromGoogleCalendar);
     } else {
       return Future.value(Iterable<Event>.empty());
+    }
+  }
+
+  Event _eventFromGoogleCalendar(g.Event event) {
+    final eventTitle = event.summary ?? "untitled";
+    final startDate = event.start?.date;
+    final endDate = event.end?.date;
+    final startDateTime = event.start?.dateTime;
+    final endDateTime = event.end?.dateTime;
+    final eventRecurrence = event.recurrence;
+
+    final recurrenceProperties = Event.defaultRecurrence;
+    if (eventRecurrence != null) {
+      recurrenceProperties["rRule"] =
+          eventRecurrence.singleWhere((rule) => rule.startsWith("RRULE:"), orElse: () => "").replaceFirst("RRULE:", "");
+      recurrenceProperties["exRule"] = eventRecurrence
+          .singleWhere((rule) => rule.startsWith("EXRULE:"), orElse: () => "")
+          .replaceFirst("EXRULE:", "");
+      recurrenceProperties["rDate"] =
+          eventRecurrence.singleWhere((date) => date.startsWith("RDATE:"), orElse: () => "").replaceFirst("RDATE:", "");
+      recurrenceProperties["exDate"] = eventRecurrence
+          .singleWhere((date) => date.startsWith("EXDATE:"), orElse: () => "")
+          .replaceFirst("EXDATE:", "");
+    }
+
+    if (startDateTime != null) {
+      return Event(eventTitle, start: startDateTime, end: endDateTime, recurrence: recurrenceProperties);
+    } else if (startDate != null) {
+      return Event(eventTitle, start: startDate, end: endDate, recurrence: recurrenceProperties);
+    } else {
+      return Event(eventTitle, start: DateTime.now());
     }
   }
 
@@ -253,7 +299,7 @@ class DummyEventRepository implements EventRepository {
   const DummyEventRepository();
 
   @override
-  Future<Event> get(String id) => Future.value(Event("title", DateTime(2020, 1, 1)));
+  Future<Event> get(String id) => Future.value(Event("title", start: DateTime(2020, 1, 1)));
 
   @override
   Future<String> add(Event event) => Future.value("id");

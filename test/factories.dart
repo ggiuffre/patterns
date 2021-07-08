@@ -9,4 +9,4 @@ final randomDate = () => DateTime(
       _randomGenerator.nextInt(31 + 1),
     );
 final randomEventTitle = () => ["a", "b", "c"][_randomGenerator.nextInt(3)];
-final randomEvent = () => Event(randomEventTitle(), randomDate());
+final randomEvent = () => Event(randomEventTitle(), start: randomDate());

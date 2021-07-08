@@ -21,7 +21,7 @@ class EventDetailsPage extends StatelessWidget {
             ConstrainedCard(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text("${event.title}, on ${event.time}"),
+                child: Text("${event.title}, on ${event.start}"),
               ),
             ),
             ConstrainedCard(

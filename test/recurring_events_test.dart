@@ -21,7 +21,7 @@ void main() {
         range: DateTimeRange(start: startDate, end: DateTime(1984, 3, 4)),
         frequency: Frequency.weekly,
       );
-      expect(events.any((e) => e.time.isBefore(startDate)), false);
+      expect(events.any((e) => e.start.isBefore(startDate)), false);
     });
 
     test("returns events not after the given time range", () {
@@ -31,7 +31,7 @@ void main() {
         range: DateTimeRange(start: DateTime(1748, 6, 20), end: endDate),
         frequency: Frequency.monthly,
       );
-      expect(events.every((e) => endDate.isAfter(e.time)), true);
+      expect(events.every((e) => endDate.isAfter(e.start)), true);
     });
 
     test("returns as many daily events as there are days in the range", () {
@@ -50,88 +50,88 @@ void main() {
       final events = recurringEvents(
         title: "title",
         range: range,
-        frequency: Frequency.annually,
+        frequency: Frequency.yearly,
       );
-      expect(events, orderedEquals([Event("title", startDate)]));
+      expect(events, orderedEquals([Event("title", start: startDate)]));
     });
 
     test("returns events that are one day apart if given a frequency of 'daily'", () {
       final range = DateTimeRange(start: DateTime(1492, 1, 1), end: DateTime(1492, 3, 28));
       final events = recurringEvents(title: "title", range: range, frequency: Frequency.daily);
-      DateTime previousDate = events.first.time;
+      DateTime previousDate = events.first.start;
       for (final event in events.skip(1)) {
-        expect(DateTime(event.time.year, event.time.month, event.time.day - 1), previousDate);
-        previousDate = event.time;
+        expect(DateTime(event.start.year, event.start.month, event.start.day - 1), previousDate);
+        previousDate = event.start;
       }
     });
 
     test("returns events that are 3 days apart if given a frequency of 'daily' and interval 3", () {
       final range = DateTimeRange(start: DateTime(1492, 1, 1), end: DateTime(1492, 3, 28));
       final events = recurringEvents(title: "title", range: range, frequency: Frequency.daily, interval: 3);
-      DateTime previousDate = events.first.time;
+      DateTime previousDate = events.first.start;
       for (final event in events.skip(1)) {
-        expect(DateTime(event.time.year, event.time.month, event.time.day - 3), previousDate);
-        previousDate = event.time;
+        expect(DateTime(event.start.year, event.start.month, event.start.day - 3), previousDate);
+        previousDate = event.start;
       }
     });
 
     test("returns events that are one week apart if given a frequency of 'weekly'", () {
       final range = DateTimeRange(start: DateTime(1890, 5, 10), end: DateTime(1892, 2, 2));
       final events = recurringEvents(title: "title", range: range, frequency: Frequency.weekly);
-      DateTime previousDate = events.first.time;
+      DateTime previousDate = events.first.start;
       for (final event in events.skip(1)) {
-        expect(DateTime(event.time.year, event.time.month, event.time.day - 7), previousDate);
-        previousDate = event.time;
+        expect(DateTime(event.start.year, event.start.month, event.start.day - 7), previousDate);
+        previousDate = event.start;
       }
     });
 
     test("returns events that are two weeks apart if given a frequency of 'weekly' and interval 2", () {
       final range = DateTimeRange(start: DateTime(2004, 11, 21), end: DateTime(2005, 11, 21));
       final events = recurringEvents(title: "title", range: range, frequency: Frequency.weekly, interval: 2);
-      DateTime previousDate = events.first.time;
+      DateTime previousDate = events.first.start;
       for (final event in events.skip(1)) {
-        expect(DateTime(event.time.year, event.time.month, event.time.day - 14), previousDate);
-        previousDate = event.time;
+        expect(DateTime(event.start.year, event.start.month, event.start.day - 14), previousDate);
+        previousDate = event.start;
       }
     });
 
     test("returns events that are one month apart if given a frequency of 'monthly'", () {
       final range = DateTimeRange(start: DateTime(1999, 1, 31), end: DateTime(1999, 10, 2));
       final events = recurringEvents(title: "title", range: range, frequency: Frequency.monthly);
-      DateTime previousDate = events.first.time;
+      DateTime previousDate = events.first.start;
       for (final event in events.skip(1)) {
-        expect((event.time.month - previousDate.month) % 12, equals(1));
-        previousDate = event.time;
+        expect((event.start.month - previousDate.month) % 12, equals(1));
+        previousDate = event.start;
       }
     });
 
     test("returns events that are two months apart if given a frequency of 'monthly' and interval 2", () {
       final range = DateTimeRange(start: DateTime(1900, 2, 3), end: DateTime(1920, 9, 10));
       final events = recurringEvents(title: "title", range: range, frequency: Frequency.monthly, interval: 2);
-      DateTime previousDate = events.first.time;
+      DateTime previousDate = events.first.start;
       for (final event in events.skip(1)) {
-        expect((event.time.month - previousDate.month) % 12, equals(2));
-        previousDate = event.time;
+        expect((event.start.month - previousDate.month) % 12, equals(2));
+        previousDate = event.start;
       }
     });
 
-    test("returns events that are each one year apart if given a frequency of 'annually'", () {
+    test("returns events that are each one year apart if given a frequency of 'yearly'", () {
       final range = DateTimeRange(start: DateTime(1200, 11, 11), end: DateTime(1234, 5, 6));
-      final events = recurringEvents(title: "title", range: range, frequency: Frequency.annually);
-      DateTime previousDate = events.first.time;
+      final events = recurringEvents(title: "title", range: range, frequency: Frequency.yearly);
+      DateTime previousDate = events.first.start;
       for (final event in events.skip(1)) {
-        expect(event.time.year - previousDate.year, equals(1));
-        previousDate = event.time;
+        expect(event.start.year - previousDate.year, equals(1));
+        previousDate = event.start;
       }
     });
 
-    test("returns events that are each 4 years apart if given a frequency of 'annually' and interval 4", () {
+    test("returns events that are each 4 years apart if given a frequency of 'yearly' and interval 4", () {
       final range = DateTimeRange(start: DateTime(1200, 11, 11), end: DateTime(1234, 5, 6));
-      final events = recurringEvents(title: "title", range: range, frequency: Frequency.annually, interval: 4);
-      DateTime previousDate = events.first.time;
+      final events = recurringEvents(title: "title", range: range, frequency: Frequency.yearly, interval: 4);
+      DateTime previousDate = events.first.start;
       for (final event in events.skip(1)) {
-        expect(event.time.year - previousDate.year, equals(4));
-        previousDate = event.time;
+        expect(event.start.year - previousDate.year, equals(4));
+        previousDate = event.start;
       }
     });
   });

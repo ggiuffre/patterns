@@ -33,7 +33,7 @@ class EventsIndex extends ConsumerWidget {
                     itemBuilder: (BuildContext context, int index) => ListTile(
                       title: Text(events[index].title),
                       onTap: () => onEventTapped(events[index]),
-                      trailing: Text(formattedDate(events[index].time)),
+                      trailing: Text(formattedDate(events[index].start)),
                     ),
                   );
           }

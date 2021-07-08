@@ -1,32 +1,44 @@
 import 'dart:ui';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show DateTimeRange;
 
 class Event implements Comparable<Event> {
   final String id;
   final String title;
-  final DateTime time;
+  final DateTime start;
+  final DateTime? end;
+  final Map<String, String?> recurrence;
 
-  const Event(this.title, this.time) : id = "$time$title";
+  static const defaultRecurrence = <String, String?>{"rRule": null, "exRule": null, "rDate": null, "exDate": null};
 
-  Event.fromFirestore(this.title, Timestamp timestamp, this.id) : time = timestamp.toDate();
+  const Event(this.title, {required this.start, this.end, this.recurrence = defaultRecurrence}) : id = "$start$title";
 
-  Event.fromJson(Map<String, Object> json)
-      : id = json["id"] as String,
-        title = json["title"] as String,
-        time = json["time"] as DateTime;
+  Event.fromFirestore(
+    this.title, {
+    required Timestamp start,
+    Timestamp? end,
+    required this.id,
+    this.recurrence = defaultRecurrence,
+  })  : start = start.toDate(),
+        end = end?.toDate();
 
-  Map<String, String> get asJson => {"id": id, "title": title, "time": time.toIso8601String()};
+  Map<String, String> get asJson => {
+        "id": id,
+        "title": title,
+        "start": start.toIso8601String(),
+        "end": end?.toIso8601String() ?? "",
+        "recurrence": recurrence.toString(),
+      };
 
   @override
-  int compareTo(Event other) => time == other.time ? title.compareTo(other.title) : time.compareTo(other.time);
+  int compareTo(Event other) => start == other.start ? title.compareTo(other.title) : start.compareTo(other.start);
 
   @override
-  bool operator ==(Object other) => other is Event && time == other.time && title == other.title;
+  bool operator ==(Object other) => other is Event && start == other.start && title == other.title;
 
   @override
-  int get hashCode => hashValues(title, time);
+  int get hashCode => hashValues(title, start);
 
   bool operator <(Event other) => compareTo(other) < 0;
 
@@ -35,10 +47,80 @@ class Event implements Comparable<Event> {
   bool operator >=(Event other) => compareTo(other) >= 0;
 
   bool operator >(Event other) => compareTo(other) > 0;
+
+  /// Whether the event is recurring.
+  bool get recurring => recurrence["rRule"] != null && recurrence["rRule"]!.contains("FREQ");
+
+  /// Whether the event is recurring on a daily frequency.
+  bool get daily => recurring && (recurrence["rRule"]?.contains("FREQ:DAILY") ?? false);
+
+  /// Whether the event is recurring on a weekly frequency.
+  bool get weekly => recurring && (recurrence["rRule"]?.contains("FREQ:WEEKLY") ?? false);
+
+  /// Whether the event is recurring on a monthly frequency.
+  bool get monthly => recurring && (recurrence["rRule"]?.contains("FREQ:MONTHLY") ?? false);
+
+  /// Whether the event is recurring on a yearly frequency.
+  bool get yearly => recurring && (recurrence["rRule"]?.contains("FREQ:YEARLY") ?? false);
+
+  /// Frequency at which the event occurs.
+  Frequency get frequency {
+    if (recurring) {
+      if (daily) {
+        return Frequency.daily;
+      } else if (weekly) {
+        return Frequency.weekly;
+      } else if (monthly) {
+        return Frequency.monthly;
+      } else if (yearly) {
+        return Frequency.yearly;
+      }
+    }
+
+    return Frequency.once;
+  }
+
+  /// Interval at which the event occurs (in days/weeks/months/years, depending on the frequency).
+  /// 0 if the event is not a recurring event.
+  int get interval => recurring
+      ? int.tryParse((recurrence["rRule"]?.split(";") ?? [])
+              .firstWhere((rule) => rule.startsWith("INTERVAL"), orElse: () => "INTERVAL=0")
+              .split("=")
+              .last) ??
+          0
+      : 0;
+
+  /// Instances of the event (useful if the event is recurring).
+  Iterable<Event> get instances {
+    final endTime = end;
+
+    if (endTime != null && frequency != Frequency.once) {
+      final actions = <Frequency, DateTime Function(DateTime, int)>{
+        Frequency.daily: (DateTime t, int interval) =>
+            DateTime(t.year, t.month, t.day + interval, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+        Frequency.weekly: (DateTime t, int interval) =>
+            DateTime(t.year, t.month, t.day + (7 * interval), t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+        Frequency.monthly: (DateTime t, int interval) => monthsLater(t: t, months: interval),
+        Frequency.yearly: (DateTime t, int interval) =>
+            DateTime(t.year + interval, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+      };
+
+      List<Event> result = [];
+      DateTime instanceTime = start;
+      while (!instanceTime.isAfter(endTime)) {
+        result.add(Event(title, start: instanceTime));
+        instanceTime = actions[frequency]!(instanceTime, interval);
+      }
+
+      return result;
+    }
+
+    return {Event(title, start: start)};
+  }
 }
 
 /// Frequency at which an [Event] can occur.
-enum Frequency { once, daily, weekly, monthly, annually }
+enum Frequency { once, daily, weekly, monthly, yearly }
 
 /// Get a sequence of events named [title] with time inside [range] (including
 /// the end), recurring on a [frequency] basis at intervals of [interval]
@@ -50,7 +132,7 @@ Iterable<Event> recurringEvents({
   int interval = 1,
 }) {
   if (frequency == Frequency.once) {
-    return {Event(title, range.start)};
+    return {Event(title, start: range.start)};
   }
 
   final actions = <Frequency, DateTime Function(DateTime, int)>{
@@ -59,14 +141,14 @@ Iterable<Event> recurringEvents({
     Frequency.weekly: (DateTime t, int interval) =>
         DateTime(t.year, t.month, t.day + (7 * interval), t.hour, t.minute, t.second, t.millisecond, t.microsecond),
     Frequency.monthly: (DateTime t, int interval) => monthsLater(t: t, months: interval),
-    Frequency.annually: (DateTime t, int interval) =>
+    Frequency.yearly: (DateTime t, int interval) =>
         DateTime(t.year + interval, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
   };
 
   List<Event> result = [];
   DateTime time = range.start;
   while (!time.isAfter(range.end)) {
-    result.add(Event(title, time));
+    result.add(Event(title, start: time));
     time = actions[frequency]!(time, interval);
   }
 
@@ -87,44 +169,4 @@ DateTime monthsLater({required DateTime t, required int months}) {
   }
 
   return candidate;
-}
-
-String recurringEventStringDescription({required Frequency frequency, required int interval}) {
-  if (frequency == Frequency.once) {
-    return "Does not repeat";
-  } else if (frequency == Frequency.daily) {
-    if (interval < 2) {
-      return "Occurs daily";
-    } else if (interval == 2) {
-      return "Occurs every other day";
-    } else {
-      return "Occurs every $interval days";
-    }
-  } else if (frequency == Frequency.weekly) {
-    if (interval < 2) {
-      return "Occurs weekly";
-    } else if (interval == 2) {
-      return "Occurs every other week";
-    } else {
-      return "Occurs every $interval weeks";
-    }
-  } else if (frequency == Frequency.monthly) {
-    if (interval < 2) {
-      return "Occurs monthly";
-    } else if (interval == 2) {
-      return "Occurs every other month";
-    } else {
-      return "Occurs every $interval months";
-    }
-  } else if (frequency == Frequency.annually) {
-    if (interval < 2) {
-      return "Occurs yearly";
-    } else if (interval == 2) {
-      return "Occurs every other year";
-    } else {
-      return "Occurs every $interval years";
-    }
-  } else {
-    return "Does not repeat";
-  }
 }

@@ -14,11 +14,11 @@ double similarity(List<Event> a, List<Event> b) {
   int bIndex = 0;
 
   while (aIndex < a.length && bIndex < b.length) {
-    if (a[aIndex].time == b[bIndex].time) {
+    if (a[aIndex].start == b[bIndex].start) {
       accumulator += 1.0;
       aIndex++;
       bIndex++;
-    } else if (a[aIndex].time.isBefore(b[bIndex].time)) {
+    } else if (a[aIndex].start.isBefore(b[bIndex].start)) {
       accumulator -= 1.0;
       aIndex++;
     } else {

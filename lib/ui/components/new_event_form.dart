@@ -134,7 +134,7 @@ class _NewEventFormState extends State<NewEventForm> {
             context.read(eventProvider).add(event);
           }
         } else {
-          await context.read(eventProvider).add(Event(_eventTitle, _eventStartTime));
+          await context.read(eventProvider).add(Event(_eventTitle, start: _eventStartTime));
         }
         widget.onSubmit();
       }
@@ -285,7 +285,7 @@ class _EventFrequencyExpansionTile extends StatelessWidget {
     Frequency.daily: "Occurs daily",
     Frequency.weekly: "Occurs weekly",
     Frequency.monthly: "Occurs monthly",
-    Frequency.annually: "Occurs yearly",
+    Frequency.yearly: "Occurs yearly",
   };
 
   const _EventFrequencyExpansionTile({
@@ -302,7 +302,7 @@ class _EventFrequencyExpansionTile extends StatelessWidget {
         leading: const Icon(Icons.repeat),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         title: Text(
-          recurringEventStringDescription(frequency: eventFrequency, interval: eventInterval),
+          _recurringEventStringDescription(frequency: eventFrequency, interval: eventInterval),
         ),
         children: [
           for (final frequency in Frequency.values)
@@ -361,7 +361,7 @@ class _EventFrequencyExpansionTile extends StatelessWidget {
       Frequency.daily: "day",
       Frequency.weekly: "week",
       Frequency.monthly: "month",
-      Frequency.annually: "year",
+      Frequency.yearly: "year",
     };
 
     final intervalType = intervalTypes[frequency];
@@ -369,6 +369,46 @@ class _EventFrequencyExpansionTile extends StatelessWidget {
       return "$interval $intervalType${interval > 1 ? "s" : ""}";
     } else {
       return interval.toString();
+    }
+  }
+
+  String _recurringEventStringDescription({required Frequency frequency, required int interval}) {
+    if (frequency == Frequency.once) {
+      return "Does not repeat";
+    } else if (frequency == Frequency.daily) {
+      if (interval < 2) {
+        return "Occurs daily";
+      } else if (interval == 2) {
+        return "Occurs every other day";
+      } else {
+        return "Occurs every $interval days";
+      }
+    } else if (frequency == Frequency.weekly) {
+      if (interval < 2) {
+        return "Occurs weekly";
+      } else if (interval == 2) {
+        return "Occurs every other week";
+      } else {
+        return "Occurs every $interval weeks";
+      }
+    } else if (frequency == Frequency.monthly) {
+      if (interval < 2) {
+        return "Occurs monthly";
+      } else if (interval == 2) {
+        return "Occurs every other month";
+      } else {
+        return "Occurs every $interval months";
+      }
+    } else if (frequency == Frequency.yearly) {
+      if (interval < 2) {
+        return "Occurs yearly";
+      } else if (interval == 2) {
+        return "Occurs every other year";
+      } else {
+        return "Occurs every $interval years";
+      }
+    } else {
+      return "Does not repeat";
     }
   }
 }
