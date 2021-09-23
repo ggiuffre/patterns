@@ -34,6 +34,6 @@ flutter:
   # Enable generation of localized Strings from arb files.
   generate: true
 
-  assets:
-    # Add assets from the images directory to the application.
-    - assets/images/
+#  assets:
+#    # Add assets from the images directory to the application.
+#    - assets/images/
