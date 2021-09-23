@@ -64,9 +64,8 @@ class AppSettingsController extends StateNotifier<AppSettings> {
   }
 
   Future<GoogleSignInAccount?> signInToGoogle() async {
-    final googleAccount = await _googleApiAuth
-        .signInSilently()
-        .then((account) async => account != null ? account : await _googleApiAuth.signIn());
+    final googleAccount =
+        await _googleApiAuth.signInSilently().then((account) async => account ?? await _googleApiAuth.signIn());
 
     if (googleAccount != null) {
       final headers = await googleAccount.authHeaders;
@@ -185,5 +184,6 @@ class _GoogleAuthClient extends http.BaseClient {
 
   _GoogleAuthClient(this._headers);
 
+  @override
   Future<http.StreamedResponse> send(http.BaseRequest request) => _client.send(request..headers.addAll(_headers));
 }

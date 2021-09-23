@@ -82,7 +82,7 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                   future: context.read(appSettingsProvider.notifier).googleCalendars,
                   builder: (context, snapshot) {
                     final errorIndicator = Padding(
-                      padding: EdgeInsets.all(8.0),
+                      padding: const EdgeInsets.all(8.0),
                       child: Row(
                         children: [
                           Icon(Icons.error, color: Theme.of(context).errorColor),
@@ -176,7 +176,7 @@ class DangerZoneSettingsCard extends StatelessWidget {
               onPressed: () async {
                 final shouldDeleteEvents = await showDialog<bool>(
                       context: context,
-                      builder: (innerContext) => _DeleteAllEventsDialog(),
+                      builder: (innerContext) => const _DeleteAllEventsDialog(),
                     ) ??
                     false;
                 if (shouldDeleteEvents) {
@@ -213,7 +213,7 @@ class _DeleteAllEventsDialog extends StatelessWidget {
             "and all the patterns calculated from those events."),
         actions: <Widget>[
           TextButton(
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
             onPressed: () => Navigator.of(context).pop(false),
           ),
           TextButton(

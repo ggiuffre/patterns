@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:patterns/data/event.dart';
+import 'package:patterns/src/data/event.dart';
 import 'package:test/test.dart';
 
 void main() {

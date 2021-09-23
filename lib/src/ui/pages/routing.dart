@@ -49,7 +49,9 @@ class EventRoutePath {
 
 class EventRouterDelegate extends RouterDelegate<EventRoutePath>
     with ChangeNotifier, PopNavigatorRouterDelegateMixin<EventRoutePath> {
+  @override
   final GlobalKey<NavigatorState> navigatorKey;
+
   Event? _selectedEvent;
   int _homePageNavigationItem = 0;
   bool _newEventNeeded = false;
@@ -157,6 +159,7 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
     _show404 = false;
   }
 
+  @override
   EventRoutePath get currentConfiguration {
     if (_show404) {
       return const EventRoutePath.unknown();
@@ -175,29 +178,29 @@ class EventRouteInformationParser extends RouteInformationParser<EventRoutePath>
   Future<EventRoutePath> parseRouteInformation(RouteInformation? routeInformation) async {
     final uri = Uri.parse(routeInformation?.location ?? "/");
 
-    if (uri.pathSegments.length == 0) {
+    if (uri.pathSegments.isEmpty) {
       // Handle '/'
-      return EventRoutePath.home();
+      return const EventRoutePath.home();
     }
 
     // Handle 'patterns', '/new-event' 'events', and 'settings'
     if (uri.pathSegments.length == 1) {
       if (uri.pathSegments[0] == 'patterns') {
-        return EventRoutePath.patterns();
+        return const EventRoutePath.patterns();
       } else if (uri.pathSegments[0] == 'new-event') {
-        return EventRoutePath.newEvent();
+        return const EventRoutePath.newEvent();
       } else if (uri.pathSegments[0] == 'events') {
-        return EventRoutePath.home();
+        return const EventRoutePath.home();
       } else if (uri.pathSegments[0] == 'settings') {
-        return EventRoutePath.settings();
+        return const EventRoutePath.settings();
       } else {
-        return EventRoutePath.unknown();
+        return const EventRoutePath.unknown();
       }
     }
 
     if (uri.pathSegments.length == 2) {
       // Handle '/events/:id'
-      if (uri.pathSegments[0] != 'events') return EventRoutePath.unknown();
+      if (uri.pathSegments[0] != 'events') return const EventRoutePath.unknown();
       final remaining = uri.pathSegments[1];
       final id = remaining;
       // if (id == null) return EventRoutePath.unknown();
@@ -205,21 +208,21 @@ class EventRouteInformationParser extends RouteInformationParser<EventRoutePath>
     }
 
     // Handle unknown routes
-    return EventRoutePath.unknown();
+    return const EventRoutePath.unknown();
   }
 
   @override
   RouteInformation? restoreRouteInformation(EventRoutePath path) {
     if (path.isUnknown) {
-      return RouteInformation(location: '/404');
+      return const RouteInformation(location: '/404');
     } else if (path.isHomePage) {
-      return RouteInformation(location: '/');
+      return const RouteInformation(location: '/');
     } else if (path.isPatternsPage) {
-      return RouteInformation(location: '/patterns');
+      return const RouteInformation(location: '/patterns');
     } else if (path.isNewEventPage) {
-      return RouteInformation(location: '/new-event');
+      return const RouteInformation(location: '/new-event');
     } else if (path.isSettingsPage) {
-      return RouteInformation(location: '/settings');
+      return const RouteInformation(location: '/settings');
     } else if (path.isDetailsPage) {
       return RouteInformation(location: path.id);
     }

@@ -1,7 +1,7 @@
 import 'dart:math';
 
-import 'package:patterns/data/event.dart';
-import 'package:patterns/data/similarities.dart';
+import 'package:patterns/src/data/event.dart';
+import 'package:patterns/src/data/similarities.dart';
 import 'package:test/test.dart';
 
 import 'factories.dart';

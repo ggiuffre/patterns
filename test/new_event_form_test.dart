@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patterns/data/repositories/events.dart';
-import 'package:patterns/ui/components/new_event_form.dart';
+import 'package:patterns/src/data/repositories/events.dart';
+import 'package:patterns/src/ui/components/new_event_form.dart';
 
 main() {
   group("The new-event form", () {

@@ -9,6 +9,8 @@ class PatternsApp extends ConsumerWidget {
   final EventRouterDelegate _routerDelegate = EventRouterDelegate();
   final EventRouteInformationParser _routeInformationParser = EventRouteInformationParser();
 
+  PatternsApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context, ScopedReader watch) => MaterialApp.router(
         theme: AppTheme.light,

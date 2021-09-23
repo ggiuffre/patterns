@@ -1,11 +1,13 @@
-import 'package:patterns/data/repositories/events.dart';
+import 'package:patterns/src/data/repositories/events.dart';
 import 'package:test/test.dart';
 
 import 'factories.dart';
 
 main() {
   test("A HybridEventRepository stores as many events as its child repositories have in total", () async {
-    final repository1 = InMemoryEventRepository()..add(randomEvent())..add(randomEvent());
+    final repository1 = InMemoryEventRepository()
+      ..add(randomEvent())
+      ..add(randomEvent());
     final repository2 = InMemoryEventRepository()..add(randomEvent());
     final hybridRepository = HybridEventRepository(repositories: [repository1, repository2]);
     final eventsLength = await hybridRepository.list.last.then((events) => events.length);

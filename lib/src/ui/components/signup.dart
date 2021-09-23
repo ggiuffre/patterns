@@ -3,32 +3,32 @@ import 'package:flutter/material.dart';
 
 import 'constrained_card.dart';
 
-class LogInScreen extends StatelessWidget {
-  const LogInScreen({Key? key}) : super(key: key);
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => const Padding(
         padding: EdgeInsets.all(8.0),
-        child: EmailLogInForm(),
+        child: EmailRegistrationForm(),
       );
 }
 
-enum _AuthState { signed_out, processing, error, signed_in }
+enum _AuthState { signedOut, processing, error, signedIn }
 
-class EmailLogInForm extends StatefulWidget {
-  const EmailLogInForm({Key? key}) : super(key: key);
+class EmailRegistrationForm extends StatefulWidget {
+  const EmailRegistrationForm({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _EmailLogInFormState();
+  State<StatefulWidget> createState() => _EmailRegistrationFormState();
 }
 
-class _EmailLogInFormState extends State<EmailLogInForm> {
+class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  _AuthState _authState = _AuthState.signed_out;
+  _AuthState _authState = _AuthState.signedOut;
   bool _isPasswordObscured = true;
 
   @override
@@ -42,7 +42,7 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text("Log in", style: Theme.of(context).textTheme.headline5),
+                  child: Text("Register for free", style: Theme.of(context).textTheme.headline5),
                 ),
                 TextFormField(
                   controller: _emailController,
@@ -71,7 +71,10 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
                   ),
                   validator: (String? value) {
                     if (value?.isEmpty ?? true) {
-                      return 'Please enter your password';
+                      return 'Please enter a password';
+                    }
+                    if ((value?.length ?? 0) < 4) {
+                      return 'Please enter a slightly longer password';
                     }
                     return null;
                   },
@@ -81,20 +84,20 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   alignment: Alignment.center,
-                  child: _authState == _AuthState.signed_out || _authState == _AuthState.error
+                  child: _authState == _AuthState.signedOut || _authState == _AuthState.error
                       ? TextButton.icon(
-                          icon: const Icon(Icons.login),
+                          icon: const Icon(Icons.person_add),
                           onPressed: () async {
                             if (_formKey.currentState?.validate() ?? false) {
-                              await _logIn();
+                              await _register();
                             }
                           },
-                          label: const Text('Log in'),
+                          label: const Text('Register'),
                         )
                       : const CircularProgressIndicator.adaptive(),
                 ),
-                if (_authState == _AuthState.error) const Center(child: Text('Login failed')),
-                if (_authState == _AuthState.signed_in) const Center(child: Text('Successfully logged in')),
+                if (_authState == _AuthState.error) const Center(child: Text('Registration failed')),
+                if (_authState == _AuthState.signedIn) const Center(child: Text('Successfully registered new user')),
               ],
             ),
           ),
@@ -108,21 +111,28 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
     super.dispose();
   }
 
-  Future<void> _logIn() async {
+  Future<void> _register() async {
     setState(() => _authState = _AuthState.processing);
+    UserCredential? userCredential;
     try {
-      await _auth.signInWithEmailAndPassword(
+      userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
-      setState(() => _authState = _AuthState.signed_in);
     } on FirebaseAuthException catch (e) {
-      if ({'user-not-found', 'wrong-password'}.contains(e.code)) {
-        print('Wrong username or password.');
+      if (e.code == 'weak-password') {
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        print('An account already exists for this email.');
       }
-      setState(() => _authState = _AuthState.error);
     } catch (e) {
       print(e);
+    }
+
+    final user = userCredential?.user;
+    if (user != null) {
+      setState(() => _authState = _AuthState.signedIn);
+    } else {
       setState(() => _authState = _AuthState.error);
     }
   }

@@ -22,7 +22,7 @@ class PatternsIndex extends ConsumerWidget {
             final categories = events.map((e) => e.title).toSet();
             final coefficients = similarities(events, categories).reversed.toList();
             return coefficients.isEmpty
-                ? Padding(
+                ? const Padding(
                     padding: EdgeInsets.all(8.0),
                     child: Center(child: Text("No patterns yet")),
                   )

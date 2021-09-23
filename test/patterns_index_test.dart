@@ -3,9 +3,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patterns/data/repositories/events.dart';
-import 'package:patterns/data/similarities.dart';
-import 'package:patterns/ui/components/patterns_index.dart';
+import 'package:patterns/src/data/repositories/events.dart';
+import 'package:patterns/src/data/similarities.dart';
+import 'package:patterns/src/ui/components/patterns_index.dart';
 
 import 'factories.dart';
 
@@ -22,7 +22,7 @@ main() {
     final nPatterns = coefficients.length;
     await tester.pumpWidget(ProviderScope(
       overrides: [eventProvider.overrideWithProvider(Provider((_) => eventRepository))],
-      child: MaterialApp(home: Scaffold(body: PatternsIndex())),
+      child: const MaterialApp(home: Scaffold(body: PatternsIndex())),
     ));
     await tester.pumpAndSettle();
 

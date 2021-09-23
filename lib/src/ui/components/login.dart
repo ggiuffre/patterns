@@ -3,32 +3,32 @@ import 'package:flutter/material.dart';
 
 import 'constrained_card.dart';
 
-class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+class LogInScreen extends StatelessWidget {
+  const LogInScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => const Padding(
         padding: EdgeInsets.all(8.0),
-        child: EmailRegistrationForm(),
+        child: EmailLogInForm(),
       );
 }
 
-enum _AuthState { signed_out, processing, error, signed_in }
+enum _AuthState { signedOut, processing, error, signedIn }
 
-class EmailRegistrationForm extends StatefulWidget {
-  const EmailRegistrationForm({Key? key}) : super(key: key);
+class EmailLogInForm extends StatefulWidget {
+  const EmailLogInForm({Key? key}) : super(key: key);
 
   @override
-  State<StatefulWidget> createState() => _EmailRegistrationFormState();
+  State<StatefulWidget> createState() => _EmailLogInFormState();
 }
 
-class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
+class _EmailLogInFormState extends State<EmailLogInForm> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  _AuthState _authState = _AuthState.signed_out;
+  _AuthState _authState = _AuthState.signedOut;
   bool _isPasswordObscured = true;
 
   @override
@@ -42,7 +42,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text("Register for free", style: Theme.of(context).textTheme.headline5),
+                  child: Text("Log in", style: Theme.of(context).textTheme.headline5),
                 ),
                 TextFormField(
                   controller: _emailController,
@@ -71,10 +71,7 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                   ),
                   validator: (String? value) {
                     if (value?.isEmpty ?? true) {
-                      return 'Please enter a password';
-                    }
-                    if ((value?.length ?? 0) < 4) {
-                      return 'Please enter a slightly longer password';
+                      return 'Please enter your password';
                     }
                     return null;
                   },
@@ -84,20 +81,20 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   alignment: Alignment.center,
-                  child: _authState == _AuthState.signed_out || _authState == _AuthState.error
+                  child: _authState == _AuthState.signedOut || _authState == _AuthState.error
                       ? TextButton.icon(
-                          icon: const Icon(Icons.person_add),
+                          icon: const Icon(Icons.login),
                           onPressed: () async {
                             if (_formKey.currentState?.validate() ?? false) {
-                              await _register();
+                              await _logIn();
                             }
                           },
-                          label: const Text('Register'),
+                          label: const Text('Log in'),
                         )
                       : const CircularProgressIndicator.adaptive(),
                 ),
-                if (_authState == _AuthState.error) const Center(child: Text('Registration failed')),
-                if (_authState == _AuthState.signed_in) const Center(child: Text('Successfully registered new user')),
+                if (_authState == _AuthState.error) const Center(child: Text('Login failed')),
+                if (_authState == _AuthState.signedIn) const Center(child: Text('Successfully logged in')),
               ],
             ),
           ),
@@ -111,28 +108,21 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
     super.dispose();
   }
 
-  Future<void> _register() async {
+  Future<void> _logIn() async {
     setState(() => _authState = _AuthState.processing);
-    UserCredential? userCredential;
     try {
-      userCredential = await _auth.createUserWithEmailAndPassword(
+      await _auth.signInWithEmailAndPassword(
         email: _emailController.text,
         password: _passwordController.text,
       );
+      setState(() => _authState = _AuthState.signedIn);
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        print('An account already exists for this email.');
+      if ({'user-not-found', 'wrong-password'}.contains(e.code)) {
+        print('Wrong username or password.');
       }
+      setState(() => _authState = _AuthState.error);
     } catch (e) {
       print(e);
-    }
-
-    final user = userCredential?.user;
-    if (user != null) {
-      setState(() => _authState = _AuthState.signed_in);
-    } else {
       setState(() => _authState = _AuthState.error);
     }
   }

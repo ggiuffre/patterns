@@ -3,8 +3,8 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/data/date_formatting.dart';
 
+import '../../data/date_formatting.dart';
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import 'constrained_card.dart';
@@ -194,7 +194,7 @@ class _EventTitleTextField extends StatelessWidget {
                     child: SizedBox(
                       height: min(options.length * 75.0, 200.0),
                       child: ListView.builder(
-                        padding: EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
                         itemCount: options.length,
                         itemBuilder: (context, index) {
                           final option = options.elementAt(index);
@@ -319,8 +319,8 @@ class _EventFrequencyExpansionTile extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
+                  const Padding(
+                    padding: EdgeInsets.all(8.0),
                     child: Text("Occurs every:"),
                   ),
                   Card(
@@ -335,7 +335,7 @@ class _EventFrequencyExpansionTile extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16.0),
                             child: Container(
-                              constraints: BoxConstraints(minWidth: 48.0),
+                              constraints: const BoxConstraints(minWidth: 48.0),
                               alignment: Alignment.center,
                               child: Text(
                                 _intervalLabel(frequency: eventFrequency, interval: eventInterval),

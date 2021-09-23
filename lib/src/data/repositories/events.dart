@@ -54,7 +54,7 @@ class HybridEventRepository implements EventRepository {
         (repository) => repository.list,
       )
       .fold(
-        Stream.value(Iterable<Event>.empty()),
+        Stream.value(const Iterable<Event>.empty()),
         (accumulator, events) => accumulator.asyncMap((value) async => value.followedBy(await events.first)),
       );
 
@@ -189,7 +189,7 @@ class GoogleCalendarEventsRepository implements EventRepository {
       print("Retrieving Google calendar events...");
       return _calendarIds
           .map(_eventsFromCalendarId)
-          .fold(Future.value(Iterable<Event>.empty()), _chainEventComputations)
+          .fold(Future.value(const Iterable<Event>.empty()), _chainEventComputations)
           .then((eventsList) => eventsList.toSet())
           .asStream();
     } else {
@@ -205,7 +205,7 @@ class GoogleCalendarEventsRepository implements EventRepository {
       final events = eventsComputation.items ?? const [];
       return events.map(_eventFromGoogleCalendar);
     } else {
-      return Future.value(Iterable<Event>.empty());
+      return Future.value(const Iterable<Event>.empty());
     }
   }
 
@@ -217,7 +217,7 @@ class GoogleCalendarEventsRepository implements EventRepository {
     final endDateTime = event.end?.dateTime;
     final eventRecurrence = event.recurrence;
 
-    final recurrenceProperties = Event.defaultRecurrence;
+    const recurrenceProperties = Event.defaultRecurrence;
     if (eventRecurrence != null) {
       recurrenceProperties["rRule"] =
           eventRecurrence.singleWhere((rule) => rule.startsWith("RRULE:"), orElse: () => "").replaceFirst("RRULE:", "");
@@ -255,6 +255,7 @@ class _GoogleAuthClient extends http.BaseClient {
 
   _GoogleAuthClient(this._headers);
 
+  @override
   Future<http.StreamedResponse> send(http.BaseRequest request) => _client.send(request..headers.addAll(_headers));
 }
 

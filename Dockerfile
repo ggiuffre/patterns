@@ -19,6 +19,6 @@ WORKDIR /patterns
 RUN flutter config --enable-web
 RUN flutter build web
 
- # Android build
- WORKDIR /patterns
- RUN flutter build appbundle
+# Android build
+WORKDIR /patterns
+RUN flutter build appbundle
