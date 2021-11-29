@@ -80,6 +80,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
       }
     }
 
+    print(googleAccount);
     return googleAccount;
   }
 

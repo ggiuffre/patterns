@@ -33,7 +33,7 @@ class TemperatureEventRepository implements EventRepository {
   @override
   Stream<Iterable<Event>> get list => weatherApi
       .history(start: DateTime(2021), end: DateTime(2021, 1, 15))
-      .then((weatherEvents) => weatherEvents.map((e) => Event(e.rainVolume > 0.0 ? "rain" : "no rain", start: e.time)))
+      .then((weatherEvents) => weatherEvents.map((e) => Event("rain", value: e.rainVolume, start: e.time)))
       .asStream();
 
   @override

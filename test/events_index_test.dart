@@ -11,7 +11,7 @@ main() {
   testWidgets("shows events as a list of tiles", (WidgetTester tester) async {
     const nEvents = 3;
     final eventRepository = InMemoryEventRepository();
-    eventRepository.events = List.generate(nEvents, (_) => Event("title", start: randomDate()));
+    eventRepository.events = List.generate(nEvents, (_) => Event("title", value: 1, start: randomDate()));
     await tester.pumpWidget(ProviderScope(
       overrides: [eventProvider.overrideWithProvider(Provider((_) => eventRepository))],
       child: MaterialApp(home: Scaffold(body: EventsIndex(onEventTapped: (_) {}))),

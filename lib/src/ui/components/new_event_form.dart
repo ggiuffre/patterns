@@ -125,6 +125,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         if (_eventFrequency != Frequency.once) {
           final events = recurringEvents(
             title: _eventTitle,
+            value: 1, // TODO allow user to set event value != 1
             range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
             frequency: _eventFrequency,
             interval: _eventInterval,
@@ -133,7 +134,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
             ref.read(eventProvider).add(event);
           }
         } else {
-          await ref.read(eventProvider).add(Event(_eventTitle, start: _eventStartTime));
+          // TODO allow user to set event value != 1
+          await ref.read(eventProvider).add(Event(_eventTitle, value: 1, start: _eventStartTime));
         }
         widget.onSubmit();
       }

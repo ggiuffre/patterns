@@ -83,6 +83,7 @@ class FirestoreEventRepository implements EventRepository {
           .get()
           .then((e) => Event.fromFirestore(
                 e.data()?["title"],
+                value: double.tryParse(e.data()?["value"] ?? "0") ?? 0,
                 start: e.data()?["start"],
                 end: e.data()?["end"],
                 id: id,
@@ -121,6 +122,7 @@ class FirestoreEventRepository implements EventRepository {
           .snapshots()
           .map((snapshot) => snapshot.docs.map((e) => Event.fromFirestore(
                 e.data()["title"],
+                value: double.tryParse(e.data()["value"] ?? "0") ?? 0,
                 start: e.data()["start"],
                 end: e.data()["end"],
                 id: e.id,
@@ -140,6 +142,7 @@ class FirestoreEventRepository implements EventRepository {
           .snapshots()
           .map((snapshot) => snapshot.docs.map((e) => Event.fromFirestore(
                 e.data()["title"],
+                value: double.tryParse(e.data()["value"] ?? "0") ?? 0,
                 start: e.data()["start"],
                 end: e.data()["end"],
                 id: e.id,
@@ -232,11 +235,11 @@ class GoogleCalendarEventsRepository implements EventRepository {
     }
 
     if (startDateTime != null) {
-      return Event(eventTitle, start: startDateTime, end: endDateTime, recurrence: recurrenceProperties);
+      return Event(eventTitle, value: 1, start: startDateTime, end: endDateTime, recurrence: recurrenceProperties);
     } else if (startDate != null) {
-      return Event(eventTitle, start: startDate, end: endDate, recurrence: recurrenceProperties);
+      return Event(eventTitle, value: 1, start: startDate, end: endDate, recurrence: recurrenceProperties);
     } else {
-      return Event(eventTitle, start: DateTime.now());
+      return Event(eventTitle, value: 1, start: DateTime.now());
     }
   }
 
@@ -300,7 +303,7 @@ class DummyEventRepository implements EventRepository {
   const DummyEventRepository();
 
   @override
-  Future<Event> get(String id) => Future.value(Event("title", start: DateTime(2020, 1, 1)));
+  Future<Event> get(String id) => Future.value(Event("title", value: 1, start: DateTime(2020, 1, 1)));
 
   @override
   Future<String> add(Event event) => Future.value("id");

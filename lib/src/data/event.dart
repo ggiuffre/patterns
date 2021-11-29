@@ -9,13 +9,21 @@ class Event implements Comparable<Event> {
   final DateTime start;
   final DateTime? end;
   final Map<String, String?> recurrence;
+  final double value;
 
   static const defaultRecurrence = <String, String?>{"rRule": null, "exRule": null, "rDate": null, "exDate": null};
 
-  const Event(this.title, {required this.start, this.end, this.recurrence = defaultRecurrence}) : id = "$start$title";
+  const Event(
+    this.title, {
+    required this.value,
+    required this.start,
+    this.end,
+    this.recurrence = defaultRecurrence,
+  }) : id = "$start$title";
 
   Event.fromFirestore(
     this.title, {
+    required this.value,
     required Timestamp start,
     Timestamp? end,
     required this.id,
@@ -26,6 +34,7 @@ class Event implements Comparable<Event> {
   Map<String, String> get asJson => {
         "id": id,
         "title": title,
+        "value": value.toString(),
         "start": start.toIso8601String(),
         "end": end?.toIso8601String() ?? "",
         "recurrence": recurrence.toString(),
@@ -108,14 +117,14 @@ class Event implements Comparable<Event> {
       List<Event> result = [];
       DateTime instanceTime = start;
       while (!instanceTime.isAfter(endTime)) {
-        result.add(Event(title, start: instanceTime));
+        result.add(Event(title, value: value, start: instanceTime));
         instanceTime = actions[frequency]!(instanceTime, interval);
       }
 
       return result;
     }
 
-    return {Event(title, start: start)};
+    return {Event(title, value: value, start: start)};
   }
 }
 
@@ -127,12 +136,13 @@ enum Frequency { once, daily, weekly, monthly, yearly }
 /// days/weeks/months/years (depending on the frequency).
 Iterable<Event> recurringEvents({
   required String title,
+  required double value,
   required DateTimeRange range,
   required Frequency frequency,
   int interval = 1,
 }) {
   if (frequency == Frequency.once) {
-    return {Event(title, start: range.start)};
+    return {Event(title, value: value, start: range.start)};
   }
 
   final actions = <Frequency, DateTime Function(DateTime, int)>{
@@ -148,7 +158,7 @@ Iterable<Event> recurringEvents({
   List<Event> result = [];
   DateTime time = range.start;
   while (!time.isAfter(range.end)) {
-    result.add(Event(title, start: time));
+    result.add(Event(title, value: value, start: time));
     time = actions[frequency]!(time, interval);
   }
 

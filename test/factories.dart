@@ -12,4 +12,8 @@ DateTime randomDate() => DateTime(
 
 String randomEventTitle() => ["a", "b", "c"][_randomGenerator.nextInt(3)];
 
-Event randomEvent() => Event(randomEventTitle(), start: randomDate());
+double randomEventValue({double? max}) =>
+    max == null ? _randomGenerator.nextDouble() : _randomGenerator.nextDouble() * max;
+
+Event randomEvent({double? maxValue}) =>
+    Event(randomEventTitle(), value: randomEventValue(max: maxValue), start: randomDate());
