@@ -3,11 +3,10 @@ import 'dart:async' show Future, Stream;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:googleapis/calendar/v3.dart' as g;
-import 'package:http/http.dart' as http;
 
 import '../app_settings_provider.dart';
 import '../event.dart';
+import 'google_calendar.dart';
 
 /// A repository of [Event] objects.
 abstract class EventRepository {
@@ -150,116 +149,6 @@ class FirestoreEventRepository implements EventRepository {
     }
     throw Stream.error("Couldn't stream events from Cloud Firestore.");
   }
-}
-
-/// Implementation of [EventRepository] that reads events from Google Calendar
-/// (and is not able to create new events).
-///
-/// Events from Google Calendar are only read if [GoogleCalendarEventsRepository]
-/// is passed a [GoogleData] object whose user is signed in. Until the
-/// [GoogleData] object's user is not signed in, this class will provide an
-/// empty list of events.
-class GoogleCalendarEventsRepository implements EventRepository {
-  final g.CalendarApi? _calendarApi;
-  final Set<String> _calendarIds;
-
-  GoogleCalendarEventsRepository([GoogleData? google])
-      : _calendarIds = google?.enabledCalendarIds ?? const {},
-        _calendarApi = google?.authHeaders != null ? g.CalendarApi(_GoogleAuthClient(google!.authHeaders!)) : null;
-
-  @override
-  Future<String> add(Event event) {
-    // TODO: implement add
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> delete(String id) {
-    // TODO: implement delete
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Event> get(String id) {
-    // TODO: implement get
-    throw UnimplementedError();
-  }
-
-  @override
-  Stream<Iterable<Event>> get list {
-    final api = _calendarApi;
-    if (api != null) {
-      print("Retrieving Google calendar events...");
-      return _calendarIds
-          .map(_eventsFromCalendarId)
-          .fold(Future.value(const Iterable<Event>.empty()), _chainEventComputations)
-          .then((eventsList) => eventsList.toSet())
-          .asStream();
-    } else {
-      print("No auth headers to retrieve Google Calendar events.");
-      return Stream.value({});
-    }
-  }
-
-  Future<Iterable<Event>> _eventsFromCalendarId(String calendarId) async {
-    final api = _calendarApi;
-    if (api != null) {
-      final eventsComputation = await api.events.list(calendarId);
-      final events = eventsComputation.items ?? const [];
-      return events.map(_eventFromGoogleCalendar);
-    } else {
-      return Future.value(const Iterable<Event>.empty());
-    }
-  }
-
-  Event _eventFromGoogleCalendar(g.Event event) {
-    final eventTitle = event.summary ?? "untitled";
-    final startDate = event.start?.date;
-    final endDate = event.end?.date;
-    final startDateTime = event.start?.dateTime;
-    final endDateTime = event.end?.dateTime;
-    final eventRecurrence = event.recurrence;
-
-    const recurrenceProperties = Event.defaultRecurrence;
-    if (eventRecurrence != null) {
-      recurrenceProperties["rRule"] =
-          eventRecurrence.singleWhere((rule) => rule.startsWith("RRULE:"), orElse: () => "").replaceFirst("RRULE:", "");
-      recurrenceProperties["exRule"] = eventRecurrence
-          .singleWhere((rule) => rule.startsWith("EXRULE:"), orElse: () => "")
-          .replaceFirst("EXRULE:", "");
-      recurrenceProperties["rDate"] =
-          eventRecurrence.singleWhere((date) => date.startsWith("RDATE:"), orElse: () => "").replaceFirst("RDATE:", "");
-      recurrenceProperties["exDate"] = eventRecurrence
-          .singleWhere((date) => date.startsWith("EXDATE:"), orElse: () => "")
-          .replaceFirst("EXDATE:", "");
-    }
-
-    if (startDateTime != null) {
-      return Event(eventTitle, value: 1, start: startDateTime, end: endDateTime, recurrence: recurrenceProperties);
-    } else if (startDate != null) {
-      return Event(eventTitle, value: 1, start: startDate, end: endDate, recurrence: recurrenceProperties);
-    } else {
-      return Event(eventTitle, value: 1, start: DateTime.now());
-    }
-  }
-
-  Future<Iterable<Event>> _chainEventComputations(Future<Iterable<Event>> acc, Future<Iterable<Event>> events) =>
-      acc.then((allEvents) async => allEvents.followedBy(await events));
-
-  @override
-  Stream<Iterable<Event>> sorted({bool descending = false}) => descending
-      ? list.map((events) => events.toList()..sort((a, b) => b.compareTo(a)))
-      : list.map((events) => events.toList()..sort((a, b) => a.compareTo(b)));
-}
-
-class _GoogleAuthClient extends http.BaseClient {
-  final Map<String, String> _headers;
-  final http.Client _client = http.Client();
-
-  _GoogleAuthClient(this._headers);
-
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) => _client.send(request..headers.addAll(_headers));
 }
 
 /// Implementation of [EventRepository] that keeps events in memory until the app closes.
