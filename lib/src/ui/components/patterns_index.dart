@@ -10,8 +10,8 @@ class PatternsIndex extends ConsumerWidget {
   const PatternsIndex({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) => StreamBuilder<Iterable<Event>>(
-        stream: context.read(eventProvider).sorted(),
+  Widget build(BuildContext context, WidgetRef ref) => StreamBuilder<Iterable<Event>>(
+        stream: ref.read(eventProvider).sorted(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const ErrorCard(text: "Couldn't retrieve events needed to extract patterns.");

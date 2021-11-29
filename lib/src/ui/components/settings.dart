@@ -33,9 +33,9 @@ class DarkModeSettingsCard extends StatelessWidget {
             children: [
               const Text("Dark mode"),
               Consumer(
-                builder: (innerContext, watch, _) => Switch.adaptive(
-                  value: _isDark(themeMode: watch(appSettingsProvider).themeMode, context: innerContext),
-                  onChanged: (value) async => await innerContext.read(appSettingsProvider.notifier).setDarkMode(value),
+                builder: (innerContext, ref, _) => Switch.adaptive(
+                  value: _isDark(themeMode: ref.watch(appSettingsProvider).themeMode, context: innerContext),
+                  onChanged: (value) async => await ref.read(appSettingsProvider.notifier).setDarkMode(value),
                 ),
               ),
             ],
@@ -56,7 +56,7 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
   const GoogleCalendarSettingsCard({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) => ConstrainedCard(
+  Widget build(BuildContext context, WidgetRef ref) => ConstrainedCard(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
@@ -66,20 +66,20 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                 children: [
                   const Text("Allow to see my Google Calendar events"),
                   Switch.adaptive(
-                    value: watch(appSettingsProvider).google.enabled,
+                    value: ref.watch(appSettingsProvider).google.enabled,
                     onChanged: (newValue) async {
                       if (newValue) {
-                        await context.read(appSettingsProvider.notifier).signInToGoogle();
+                        await ref.read(appSettingsProvider.notifier).signInToGoogle();
                       } else {
-                        await context.read(appSettingsProvider.notifier).signOutOfGoogle();
+                        await ref.read(appSettingsProvider.notifier).signOutOfGoogle();
                       }
                     },
                   ),
                 ],
               ),
-              if (watch(appSettingsProvider).google.enabled)
+              if (ref.watch(appSettingsProvider).google.enabled)
                 FutureBuilder<Iterable<CalendarListEntry>>(
-                  future: context.read(appSettingsProvider.notifier).googleCalendars,
+                  future: ref.read(appSettingsProvider.notifier).googleCalendars,
                   builder: (context, snapshot) {
                     final errorIndicator = Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -110,8 +110,12 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                                       child: Text(_calendarEntryTitle(calendar), overflow: TextOverflow.ellipsis),
                                     ),
                                     Switch.adaptive(
-                                      value: watch(appSettingsProvider).google.enabledCalendarIds.contains(calendar.id),
-                                      onChanged: (newValue) => context
+                                      value: ref
+                                          .watch(appSettingsProvider)
+                                          .google
+                                          .enabledCalendarIds
+                                          .contains(calendar.id),
+                                      onChanged: (newValue) => ref
                                           .read(appSettingsProvider.notifier)
                                           .setGoogleCalendarImportance(calendar, newValue),
                                     ),
@@ -162,11 +166,11 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
   }
 }
 
-class DangerZoneSettingsCard extends StatelessWidget {
+class DangerZoneSettingsCard extends ConsumerWidget {
   const DangerZoneSettingsCard({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => ConstrainedCard(
+  Widget build(BuildContext context, WidgetRef ref) => ConstrainedCard(
         child: ExpansionTile(
           leading: const Icon(Icons.warning),
           expandedCrossAxisAlignment: CrossAxisAlignment.start,
@@ -180,9 +184,9 @@ class DangerZoneSettingsCard extends StatelessWidget {
                     ) ??
                     false;
                 if (shouldDeleteEvents) {
-                  final allEvents = await context.read(eventProvider).list.last;
+                  final allEvents = await ref.read(eventProvider).list.last;
                   for (final e in allEvents) {
-                    await context.read(eventProvider).delete(e.id);
+                    await ref.read(eventProvider).delete(e.id);
                   }
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('All your events have been deleted 😅')),

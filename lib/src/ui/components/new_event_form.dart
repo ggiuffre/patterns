@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../data/date_formatting.dart';
@@ -9,7 +8,7 @@ import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import 'constrained_card.dart';
 
-class NewEventForm extends StatefulWidget {
+class NewEventForm extends ConsumerStatefulWidget {
   final void Function() onSubmit;
 
   const NewEventForm({Key? key, required this.onSubmit}) : super(key: key);
@@ -18,7 +17,7 @@ class NewEventForm extends StatefulWidget {
   _NewEventFormState createState() => _NewEventFormState();
 }
 
-class _NewEventFormState extends State<NewEventForm> {
+class _NewEventFormState extends ConsumerState<NewEventForm> {
   final _formKey = GlobalKey<FormState>();
 
   String _eventTitle = "";
@@ -131,10 +130,10 @@ class _NewEventFormState extends State<NewEventForm> {
             interval: _eventInterval,
           );
           for (final event in events) {
-            context.read(eventProvider).add(event);
+            ref.read(eventProvider).add(event);
           }
         } else {
-          await context.read(eventProvider).add(Event(_eventTitle, start: _eventStartTime));
+          await ref.read(eventProvider).add(Event(_eventTitle, start: _eventStartTime));
         }
         widget.onSubmit();
       }
@@ -142,7 +141,7 @@ class _NewEventFormState extends State<NewEventForm> {
   }
 }
 
-class _EventTitleTextField extends StatelessWidget {
+class _EventTitleTextField extends ConsumerWidget {
   final void Function(String) onHintSelected;
   final void Function(String) onFieldChanged;
   final bool autoValidate;
@@ -155,8 +154,8 @@ class _EventTitleTextField extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<Set<String>>(
-        future: context.read(eventProvider).list.last.then((events) => events.map((e) => e.title).toSet()),
+  Widget build(BuildContext context, WidgetRef ref) => FutureBuilder<Set<String>>(
+        future: ref.read(eventProvider).list.last.then((events) => events.map((e) => e.title).toSet()),
         builder: (context, snapshot) {
           final hints = (snapshot.connectionState == ConnectionState.done)
               ? snapshot.data ?? const Iterable<String>.empty()

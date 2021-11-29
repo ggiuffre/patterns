@@ -21,14 +21,14 @@ class AuthenticationGuard extends StatelessWidget {
       );
 }
 
-class SignUpLogInSelector extends StatelessWidget {
+class SignUpLogInSelector extends ConsumerWidget {
   const SignUpLogInSelector({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) => MaterialApp(
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: context.read(appSettingsProvider).themeMode,
+        themeMode: ref.read(appSettingsProvider).themeMode,
         title: 'Patterns',
         home: Scaffold(
           appBar: CustomAppBar(title: const Text("Authenticate")),

@@ -12,8 +12,8 @@ class EventsIndex extends ConsumerWidget {
   const EventsIndex({Key? key, required this.onEventTapped}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) => StreamBuilder<Iterable<Event>>(
-        stream: context.read(eventProvider).sorted(descending: true),
+  Widget build(BuildContext context, WidgetRef ref) => StreamBuilder<Iterable<Event>>(
+        stream: ref.read(eventProvider).sorted(descending: true),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const ErrorCard(text: "Couldn't retrieve events.");

@@ -6,14 +6,14 @@ import '../../data/repositories/events.dart';
 import '../components/constrained_card.dart';
 import '../components/custom_app_bar.dart';
 
-class EventDetailsPage extends StatelessWidget {
+class EventDetailsPage extends ConsumerWidget {
   final Event event;
   final void Function() onDeleteEvent;
 
   const EventDetailsPage({Key? key, required this.event, required this.onDeleteEvent}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context, WidgetRef ref) => Scaffold(
         appBar: CustomAppBar(title: Text(event.title), withLogoutAction: true),
         body: ListView(
           padding: const EdgeInsets.all(8.0),
@@ -32,7 +32,7 @@ class EventDetailsPage extends StatelessWidget {
                 children: [
                   TextButton.icon(
                     onPressed: () async {
-                      await context.read(eventProvider).delete(event.id);
+                      await ref.read(eventProvider).delete(event.id);
                       onDeleteEvent();
                     },
                     icon: Icon(
@@ -46,10 +46,10 @@ class EventDetailsPage extends StatelessWidget {
                   ),
                   TextButton.icon(
                     onPressed: () async {
-                      final allEvents = await context.read(eventProvider).list.last;
+                      final allEvents = await ref.read(eventProvider).list.last;
                       final eventsInCategory = allEvents.where((e) => e.title == event.title);
                       for (final e in eventsInCategory) {
-                        await context.read(eventProvider).delete(e.id);
+                        await ref.read(eventProvider).delete(e.id);
                       }
                       onDeleteEvent();
                     },

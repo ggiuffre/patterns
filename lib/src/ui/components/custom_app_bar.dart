@@ -6,7 +6,6 @@ class CustomAppBar extends AppBar {
       : super(
           key: key,
           title: title,
-          brightness: Brightness.dark,
           actions: withLogoutAction
               ? [
                   PopupMenuButton(
@@ -24,5 +23,3 @@ class CustomAppBar extends AppBar {
               : null,
         );
 }
-
-// TODO remove explicit `brightness: Brightness.dark` setting once Flutter AppBar sets its brightness automatically (or we have a proper palette)

@@ -306,7 +306,7 @@ class DummyEventRepository implements EventRepository {
   Future<String> add(Event event) => Future.value("id");
 
   @override
-  Future<void> delete(String id) => Future.value(() {});
+  Future<void> delete(String id) => Future.value();
 
   @override
   Stream<Iterable<Event>> get list => Stream.value(const {});

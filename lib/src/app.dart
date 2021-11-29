@@ -12,10 +12,10 @@ class PatternsApp extends ConsumerWidget {
   PatternsApp({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, ScopedReader watch) => MaterialApp.router(
+  Widget build(BuildContext context, WidgetRef ref) => MaterialApp.router(
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: watch(appSettingsProvider).themeMode,
+        themeMode: ref.watch(appSettingsProvider).themeMode,
         title: 'Patterns',
         routerDelegate: _routerDelegate,
         routeInformationParser: _routeInformationParser,
