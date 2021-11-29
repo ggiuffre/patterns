@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:flutter/material.dart' show DateTimeRange;
 
 class Event implements Comparable<Event> {

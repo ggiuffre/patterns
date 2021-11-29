@@ -55,17 +55,14 @@ List<Similarity> similarities(Iterable<Event> events, Set<String>? categories) {
     visitedCategories.add(a);
   }
 
-  List<Similarity> coefficients = [
-    for (final couple in couples)
-      Similarity(
-        {couple.first, couple.last},
-        similarity(
-          events.where((e) => e.title == couple.first).toList(),
-          events.where((e) => e.title == couple.last).toList(),
-        ),
-      ),
-  ];
-
-  coefficients.sort((a, b) => a.coefficient.compareTo(b.coefficient));
-  return coefficients;
+  return couples
+      .map((couple) => Similarity(
+            {couple.first, couple.last},
+            similarity(
+              events.where((e) => e.title == couple.first).toList(),
+              events.where((e) => e.title == couple.last).toList(),
+            ),
+          ))
+      .toList()
+    ..sort((a, b) => a.coefficient.compareTo(b.coefficient));
 }
