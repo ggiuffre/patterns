@@ -10,7 +10,7 @@ import 'events.dart';
 class TemperatureEventRepository implements EventRepository {
   const TemperatureEventRepository();
 
-  static const weatherApi = MeteostatApi();
+  static const weatherApi = _MeteostatApi();
 
   @override
   Future<String> add(Event event) {
@@ -41,8 +41,8 @@ class TemperatureEventRepository implements EventRepository {
       descending ? list.map((events) => events.toList()..sort((a, b) => b.compareTo(a))) : list;
 }
 
-class MeteostatApi {
-  const MeteostatApi();
+class _MeteostatApi {
+  const _MeteostatApi();
 
   static const cityId = "06660";
   static const apiKey = String.fromEnvironment("METEOSTAT_API_KEY");
