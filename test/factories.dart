@@ -4,8 +4,8 @@ import 'package:patterns/src/data/event.dart';
 
 final _randomGenerator = Random();
 
-DateTime randomDate() => DateTime(
-      _randomGenerator.nextInt(200) + 1850,
+DateTime randomDate({int sinceYear = 1850}) => DateTime(
+      _randomGenerator.nextInt(DateTime.now().year - sinceYear) + sinceYear,
       _randomGenerator.nextInt(12 + 1),
       _randomGenerator.nextInt(31 + 1),
     );

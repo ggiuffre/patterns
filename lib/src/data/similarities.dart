@@ -7,6 +7,40 @@ class Similarity {
   const Similarity(this.labels, this.coefficient);
 }
 
+List<Event> interpolated(List<Event> events) {
+  events.sort();
+
+  if (events.length < 2) {
+    return events;
+  }
+
+  final title = events.first.title;
+  final missingEvents = <Event>[];
+
+  var previousEvent = events.first;
+  for (final event in events.skip(1)) {
+    final previousDate = previousEvent.start;
+    final distanceFromPreviousEvent = event.start.difference(previousDate).inDays;
+    if (distanceFromPreviousEvent > 1) {
+      missingEvents.addAll(
+        List.generate(
+          distanceFromPreviousEvent - 1,
+          (index) => Event(
+            title,
+            value: previousEvent.value + ((event.value - previousEvent.value) / (index + 1)),
+            start: previousDate.add(Duration(days: index + 1)),
+          ),
+        ),
+      );
+    }
+    previousEvent = event;
+  }
+
+  events.addAll(missingEvents);
+  events.sort();
+  return events;
+}
+
 double similarity(List<Event> a, List<Event> b) {
   double accumulator = 0.0;
   int samplesVisited = 0;
