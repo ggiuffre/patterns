@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'event.dart';
 
 class Similarity {
@@ -6,6 +8,38 @@ class Similarity {
 
   const Similarity(this.labels, this.coefficient);
 }
+
+double covariance(List<Event> a, List<Event> b) {
+  if (a.length != b.length) {
+    throw "Cannot compute the covariance between lists of different length: ${a.length} != ${b.length}";
+  }
+
+  if (a.isEmpty) {
+    return 1;
+  }
+
+  final n = a.length;
+
+  return List.generate(n, (index) => index)
+          .map((i) => a[i].value - average(a) * b[i].value - average(b))
+          .reduce((x, y) => x + y) /
+      n;
+}
+
+double stdDev(List<Event> events) {
+  if (events.isEmpty) {
+    return 1;
+  }
+
+  final n = events.length;
+
+  return sqrt(List.generate(n, (index) => index)
+          .map((i) => events[i].value - average(events) * events[i].value - average(events))
+          .reduce((x, y) => x + y) /
+      n);
+}
+
+double average(List<Event> events) => events.map((e) => e.value).reduce((a, b) => a + b) / events.length;
 
 List<Event> interpolated(List<Event> events) {
   events.sort();
