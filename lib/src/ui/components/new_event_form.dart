@@ -267,10 +267,10 @@ class _EventDateRangeInput extends StatelessWidget {
     final newDate = await showDatePicker(
       context: context,
       initialDate: initialDate,
-      firstDate: DateTime.utc(2000),
-      lastDate: DateTime.utc(2025),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2025),
     );
-    return ((newDate != initialDate ? newDate : initialDate) ?? initialDate).toUtc();
+    return (newDate != initialDate ? newDate : initialDate) ?? initialDate;
   }
 }
 

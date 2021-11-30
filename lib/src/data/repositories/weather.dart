@@ -32,8 +32,8 @@ class TemperatureEventRepository implements EventRepository {
 
   @override
   Stream<Iterable<Event>> get list => weatherApi
-      .history(start: DateTime.utc(2021), end: DateTime.utc(2021, 1, 15))
-      .then((weatherEvents) => weatherEvents.map((e) => Event("rain", value: e.rainVolume, start: e.time)))
+      .history(start: DateTime(2021).toUtc(), end: DateTime(2021, 1, 15).toUtc())
+      .then((weatherEvents) => weatherEvents.map((e) => Event("rain", value: e.rainVolume, start: e.time.toLocal())))
       .asStream();
 
   @override
@@ -129,7 +129,7 @@ class OpenWeatherApi {
           final snowVolume = parsed(() => snow?["3h"] as double?);
 
           return WeatherData(
-            time: time ?? DateTime.now(),
+            time: time ?? DateTime.now().toUtc(),
             averageTemperature: temperature,
             minTemperature: minTemperature,
             maxTemperature: maxTemperature,
@@ -170,4 +170,4 @@ T? parsed<T>(T Function() callback) {
 }
 
 double nextDayTemperature(DateTime time, double currentTemperature) =>
-    currentTemperature + cos(time.difference(DateTime.utc(time.year, 3, 15)).inDays / 365.0 * 2.0 * pi);
+    currentTemperature + cos(time.difference(DateTime(time.year, 3, 15)).inDays / 365.0 * 2.0 * pi);

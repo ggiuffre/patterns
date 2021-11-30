@@ -192,7 +192,7 @@ class DummyEventRepository implements EventRepository {
   const DummyEventRepository();
 
   @override
-  Future<Event> get(String id) => Future.value(Event("title", value: 1, start: DateTime.utc(2020, 1, 1)));
+  Future<Event> get(String id) => Future.value(Event("title", value: 1, start: DateTime(2020, 1, 1)));
 
   @override
   Future<String> add(Event event) => Future.value("id");
