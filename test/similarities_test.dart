@@ -65,7 +65,7 @@ void main() {
   });
 
   group("interpolated", () {
-    test("contains all the events that it was passed", () {
+    test("returns a list containing all the events that it was passed", () {
       final events = List.generate(randomGenerator.nextInt(50),
           (_) => Event("title", value: randomEventValue(), start: randomDate(sinceYear: DateTime.now().year - 1)));
       expect(interpolated(events), containsAll(events));
