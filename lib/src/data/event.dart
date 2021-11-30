@@ -28,15 +28,15 @@ class Event implements Comparable<Event> {
     Timestamp? end,
     required this.id,
     this.recurrence = defaultRecurrence,
-  })  : start = start.toDate(),
-        end = end?.toDate();
+  })  : start = start.toDate().toUtc(),
+        end = end?.toDate().toUtc();
 
   Map<String, String> get asJson => {
         "id": id,
         "title": title,
         "value": value.toString(),
-        "start": start.toIso8601String(),
-        "end": end?.toIso8601String() ?? "",
+        "start": start.toUtc().toIso8601String(),
+        "end": end?.toUtc().toIso8601String() ?? "",
         "recurrence": recurrence.toString(),
       };
 
@@ -106,12 +106,12 @@ class Event implements Comparable<Event> {
     if (endTime != null && frequency != Frequency.once) {
       final actions = <Frequency, DateTime Function(DateTime, int)>{
         Frequency.daily: (DateTime t, int interval) =>
-            DateTime(t.year, t.month, t.day + interval, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-        Frequency.weekly: (DateTime t, int interval) =>
-            DateTime(t.year, t.month, t.day + (7 * interval), t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+            DateTime.utc(t.year, t.month, t.day + interval, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+        Frequency.weekly: (DateTime t, int interval) => DateTime.utc(
+            t.year, t.month, t.day + (7 * interval), t.hour, t.minute, t.second, t.millisecond, t.microsecond),
         Frequency.monthly: (DateTime t, int interval) => monthsLater(t: t, months: interval),
         Frequency.yearly: (DateTime t, int interval) =>
-            DateTime(t.year + interval, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+            DateTime.utc(t.year + interval, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
       };
 
       List<Event> result = [];
@@ -147,12 +147,12 @@ Iterable<Event> recurringEvents({
 
   final actions = <Frequency, DateTime Function(DateTime, int)>{
     Frequency.daily: (DateTime t, int interval) =>
-        DateTime(t.year, t.month, t.day + interval, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+        DateTime.utc(t.year, t.month, t.day + interval, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
     Frequency.weekly: (DateTime t, int interval) =>
-        DateTime(t.year, t.month, t.day + (7 * interval), t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+        DateTime.utc(t.year, t.month, t.day + (7 * interval), t.hour, t.minute, t.second, t.millisecond, t.microsecond),
     Frequency.monthly: (DateTime t, int interval) => monthsLater(t: t, months: interval),
     Frequency.yearly: (DateTime t, int interval) =>
-        DateTime(t.year + interval, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
+        DateTime.utc(t.year + interval, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
   };
 
   List<Event> result = [];
@@ -166,13 +166,13 @@ Iterable<Event> recurringEvents({
 }
 
 DateTime monthsLater({required DateTime t, required int months}) {
-  DateTime candidate = DateTime(t.year + (t.month + months >= 12 ? 1 : 0), t.month + months, t.day, t.hour, t.minute,
-      t.second, t.millisecond, t.microsecond);
+  DateTime candidate = DateTime.utc(t.year + (t.month + months >= 12 ? 1 : 0), t.month + months, t.day, t.hour,
+      t.minute, t.second, t.millisecond, t.microsecond);
 
   if ((candidate.month - t.month) % 12 > months) {
     int correction = 1;
     while (((candidate.month - t.month) % 12 > months)) {
-      candidate = DateTime(t.year + (t.month + months >= 12 ? 1 : 0), t.month + months, t.day - correction, t.hour,
+      candidate = DateTime.utc(t.year + (t.month + months >= 12 ? 1 : 0), t.month + months, t.day - correction, t.hour,
           t.minute, t.second, t.millisecond, t.microsecond);
       correction++;
     }

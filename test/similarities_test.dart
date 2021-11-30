@@ -72,16 +72,16 @@ void main() {
     });
 
     test("returns events with date in given range, if given only two events", () {
-      final event1 = Event("title", value: randomEventValue(), start: DateTime(1999, 3, 2));
-      final event2 = Event("title", value: randomEventValue(), start: DateTime(1999, 6, 7));
+      final event1 = Event("title", value: randomEventValue(), start: DateTime.utc(1999, 3, 2));
+      final event2 = Event("title", value: randomEventValue(), start: DateTime.utc(1999, 6, 7));
       final result = interpolated([event1, event2]);
       expect(result.every((element) => !event1.start.isAfter(element.start)), isTrue);
       expect(result.every((element) => !element.start.isAfter(event2.start)), isTrue);
     });
 
     test("returns events with value in given range, if given only two events", () {
-      final event1 = Event("title", value: randomEventValue(max: 10), start: DateTime(1999, 3, 2));
-      final event2 = Event("title", value: randomEventValue() + 10, start: DateTime(1999, 6, 7));
+      final event1 = Event("title", value: randomEventValue(max: 10), start: DateTime.utc(1999, 3, 2));
+      final event2 = Event("title", value: randomEventValue() + 10, start: DateTime.utc(1999, 6, 7));
       final result = interpolated([event1, event2]);
       expect(result.every((element) => event1.value <= element.value), isTrue);
       expect(result.every((element) => element.value <= event2.value), isTrue);
@@ -89,10 +89,12 @@ void main() {
 
     test("returns as many events as the number of days between the oldest and newest events", () {
       final events = List.generate(randomGenerator.nextInt(50),
-          (_) => Event("title", value: randomEventValue(), start: randomDate(sinceYear: DateTime.now().year - 1)));
+              (_) => Event("title", value: randomEventValue(), start: randomDate(sinceYear: DateTime.now().year)))
+          .toSet()
+          .toList();
       final result = interpolated(events);
-      final range = events.last.start.difference(events.first.start).inDays - 1;
-      expect(result.length, equals(range + 2));
-    }, skip: true);
+      final range = events.last.start.difference(events.first.start).inDays;
+      expect(result.length, equals(range + 1));
+    });
   });
 }
