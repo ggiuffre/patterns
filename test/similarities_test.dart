@@ -55,7 +55,7 @@ void main() {
       expect(similarity(series1, series1), greaterThan(similarity(series1, series2)));
     });
 
-    test("is commutative in the two arguments that it takes", () {
+    test("is commutative in its arguments", () {
       final series1 = List.generate(
           randomGenerator.nextInt(50), (_) => Event("title", value: randomEventValue(), start: randomDate()));
       final series2 = List.generate(
@@ -96,5 +96,67 @@ void main() {
       final range = events.last.start.difference(events.first.start).inDays;
       expect(result.length, equals(range + 1));
     });
+  });
+
+  group("covariance", () {
+    test("is commutative in its arguments", () {
+      final nEvents = randomGenerator.nextInt(50);
+      final series1 = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final series2 = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      expect(covariance(series1, series2), equals(covariance(series2, series1)));
+    });
+
+    test("respects cov(aX, bY) == ab cov(X, Y)", () {
+      final nEvents = randomGenerator.nextInt(50);
+      final a = randomGenerator.nextDouble();
+      final b = randomGenerator.nextDouble();
+      final x = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final y = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final ax = x.map((e) => Event(e.title, value: a * e.value, start: e.start)).toList();
+      final by = y.map((e) => Event(e.title, value: b * e.value, start: e.start)).toList();
+      expect(covariance(ax, by) - (a * b * covariance(x, y)), lessThan(1e-15));
+    });
+
+    test("respects cov(X + a, Y + b) == cov(X, Y)", () {
+      final nEvents = randomGenerator.nextInt(50);
+      final a = randomGenerator.nextDouble();
+      final b = randomGenerator.nextDouble();
+      final x = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final y = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final xPlusA = x.map((e) => Event(e.title, value: e.value + a, start: e.start)).toList();
+      final yPlusB = y.map((e) => Event(e.title, value: e.value + b, start: e.start)).toList();
+      expect(covariance(xPlusA, yPlusB) - covariance(x, y), lessThan(1e-15));
+    });
+  });
+
+  group("stdDev", () {
+    test("is 0 if provided a list of events with same value", () {
+      final value = randomEventValue();
+      final events =
+          List.generate(randomGenerator.nextInt(50), (_) => Event("title", value: value, start: randomDate()));
+      expect(stdDev(events), lessThan(1e-15));
+    });
+
+    test("respects stdDev(X + c) == stdDev(X)", () {
+      final c = randomEventValue();
+      final x = List.generate(
+          randomGenerator.nextInt(50), (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final xPlusC = x.map((e) => Event(e.title, value: e.value + c, start: e.start)).toList();
+      expect(stdDev(xPlusC) - stdDev(x), lessThan(1e-15));
+    });
+
+    test("respects stdDev(cX) == |c| stdDev(X)", () {
+      final c = randomEventValue();
+      final x = List.generate(
+          randomGenerator.nextInt(50), (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final cx = x.map((e) => Event(e.title, value: c * e.value, start: e.start)).toList();
+      expect(stdDev(cx) - (c.abs() * stdDev(x)), lessThan(1e-15));
+    });
+  });
+
+  test("covariance of X with itself is the variance of X", () {
+    final x = List.generate(
+        randomGenerator.nextInt(50), (_) => Event("title", value: randomEventValue(), start: randomDate()));
+    expect(covariance(x, x) - (stdDev(x) * stdDev(x)), lessThan(1e-15));
   });
 }

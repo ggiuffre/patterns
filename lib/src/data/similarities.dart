@@ -21,7 +21,7 @@ double covariance(List<Event> a, List<Event> b) {
   final n = a.length;
 
   return List.generate(n, (index) => index)
-          .map((i) => a[i].value - average(a) * b[i].value - average(b))
+          .map((i) => (a[i].value - average(a)) * (b[i].value - average(b)))
           .reduce((x, y) => x + y) /
       n;
 }
@@ -34,7 +34,7 @@ double stdDev(List<Event> events) {
   final n = events.length;
 
   return sqrt(List.generate(n, (index) => index)
-          .map((i) => events[i].value - average(events) * events[i].value - average(events))
+          .map((i) => (events[i].value - average(events)) * (events[i].value - average(events)))
           .reduce((x, y) => x + y) /
       n);
 }
