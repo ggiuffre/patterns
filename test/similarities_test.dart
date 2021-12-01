@@ -114,7 +114,7 @@ void main() {
       final y = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
       final ax = x.map((e) => Event(e.title, value: a * e.value, start: e.start)).toList();
       final by = y.map((e) => Event(e.title, value: b * e.value, start: e.start)).toList();
-      expect(covariance(ax, by) - (a * b * covariance(x, y)), lessThan(1e-15));
+      expect((covariance(ax, by) - (a * b * covariance(x, y))).abs(), lessThan(1e-15));
     });
 
     test("respects cov(X + a, Y + b) == cov(X, Y)", () {
@@ -125,7 +125,7 @@ void main() {
       final y = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
       final xPlusA = x.map((e) => Event(e.title, value: e.value + a, start: e.start)).toList();
       final yPlusB = y.map((e) => Event(e.title, value: e.value + b, start: e.start)).toList();
-      expect(covariance(xPlusA, yPlusB) - covariance(x, y), lessThan(1e-15));
+      expect((covariance(xPlusA, yPlusB) - covariance(x, y)).abs(), lessThan(1e-15));
     });
   });
 
@@ -134,7 +134,7 @@ void main() {
       final value = randomEventValue();
       final events =
           List.generate(randomGenerator.nextInt(50), (_) => Event("title", value: value, start: randomDate()));
-      expect(stdDev(events), lessThan(1e-15));
+      expect(stdDev(events).abs(), lessThan(1e-15));
     });
 
     test("respects stdDev(X + c) == stdDev(X)", () {
@@ -142,7 +142,7 @@ void main() {
       final x = List.generate(
           randomGenerator.nextInt(50), (_) => Event("title", value: randomEventValue(), start: randomDate()));
       final xPlusC = x.map((e) => Event(e.title, value: e.value + c, start: e.start)).toList();
-      expect(stdDev(xPlusC) - stdDev(x), lessThan(1e-15));
+      expect((stdDev(xPlusC) - stdDev(x)).abs(), lessThan(1e-15));
     });
 
     test("respects stdDev(cX) == |c| stdDev(X)", () {
@@ -150,7 +150,7 @@ void main() {
       final x = List.generate(
           randomGenerator.nextInt(50), (_) => Event("title", value: randomEventValue(), start: randomDate()));
       final cx = x.map((e) => Event(e.title, value: c * e.value, start: e.start)).toList();
-      expect(stdDev(cx) - (c.abs() * stdDev(x)), lessThan(1e-15));
+      expect((stdDev(cx) - (c.abs() * stdDev(x))).abs(), lessThan(1e-15));
     });
   });
 
@@ -158,5 +158,34 @@ void main() {
     final x = List.generate(
         randomGenerator.nextInt(50), (_) => Event("title", value: randomEventValue(), start: randomDate()));
     expect(covariance(x, x) - (stdDev(x) * stdDev(x)), lessThan(1e-15));
+  });
+
+  group("correlation", () {
+    test("is at least -1", () {
+      final nEvents = randomGenerator.nextInt(50);
+      final series1 = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final series2 = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      expect(correlation(series1, series2), greaterThanOrEqualTo(-1));
+    });
+
+    test("is at most 1", () {
+      final nEvents = randomGenerator.nextInt(50);
+      final series1 = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final series2 = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      expect(correlation(series1, series2), lessThanOrEqualTo(1));
+    });
+
+    test("is commutative in its arguments", () {
+      final nEvents = randomGenerator.nextInt(50);
+      final series1 = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      final series2 = List.generate(nEvents, (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      expect(correlation(series1, series2), equals(correlation(series2, series1)));
+    });
+
+    test("of X with itself is 1", () {
+      final x = List.generate(
+          randomGenerator.nextInt(50), (_) => Event("title", value: randomEventValue(), start: randomDate()));
+      expect((correlation(x, x) - 1).abs(), lessThan(1e-15));
+    });
   });
 }

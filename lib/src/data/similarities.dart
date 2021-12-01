@@ -9,6 +9,8 @@ class Similarity {
   const Similarity(this.labels, this.coefficient);
 }
 
+double correlation(List<Event> a, List<Event> b) => (covariance(a, b) / (stdDev(a) * stdDev(b))).abs();
+
 double covariance(List<Event> a, List<Event> b) {
   if (a.length != b.length) {
     throw "Cannot compute the covariance between lists of different length: ${a.length} != ${b.length}";
