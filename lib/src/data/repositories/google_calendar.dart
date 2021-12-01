@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:googleapis/calendar/v3.dart' as g;
 import 'package:http/http.dart' as http;
 
@@ -42,14 +44,14 @@ class GoogleCalendarEventsRepository implements EventRepository {
   Stream<Iterable<Event>> get list {
     final api = _calendarApi;
     if (api != null) {
-      print("Retrieving Google calendar events...");
+      developer.log("Retrieving Google calendar events...");
       return _calendarIds
           .map(_eventsFromCalendarId)
           .fold(Future.value(const Iterable<Event>.empty()), _chainEventComputations)
           .then((eventsList) => eventsList.toSet())
           .asStream();
     } else {
-      print("No auth headers to retrieve Google Calendar events.");
+      developer.log("No auth headers to retrieve Google Calendar events.");
       return Stream.value({});
     }
   }

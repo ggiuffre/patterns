@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -27,7 +29,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
       final localStorage = await SharedPreferences.getInstance();
       await localStorage.setBool("darkMode", darkMode);
     } catch (error) {
-      print("Couldn't persist setting 'darkMode' to disk. $error");
+      developer.log("Couldn't persist setting 'darkMode' to disk. $error");
     }
   }
 
@@ -76,11 +78,10 @@ class AppSettingsController extends StateNotifier<AppSettings> {
         final localStorage = await SharedPreferences.getInstance();
         await localStorage.setBool("googleDataEnabled", true);
       } catch (error) {
-        print("Couldn't persist setting 'googleDataEnabled' to disk. $error");
+        developer.log("Couldn't persist setting 'googleDataEnabled' to disk. $error");
       }
     }
 
-    print(googleAccount);
     return googleAccount;
   }
 
@@ -89,7 +90,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
       final localStorage = await SharedPreferences.getInstance();
       await localStorage.setBool("googleDataEnabled", false);
     } catch (error) {
-      print("Couldn't persist setting 'googleDataEnabled' to disk. $error");
+      developer.log("Couldn't persist setting 'googleDataEnabled' to disk. $error");
     }
 
     final googleAccount = await _googleApiAuth.signOut();
@@ -106,7 +107,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
               .then((sharedPrefs) =>
                   sharedPrefs.setStringList("enabledGoogleCalendars", state.google.enabledCalendarIds.toList()))
               .catchError((error) {
-            print("Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
+            developer.log("Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
             return true; // ignore error
           })) ??
       Future.value(const {});

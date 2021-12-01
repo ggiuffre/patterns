@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -118,11 +120,11 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
       setState(() => _authState = _AuthState.signedIn);
     } on FirebaseAuthException catch (e) {
       if ({'user-not-found', 'wrong-password'}.contains(e.code)) {
-        print('Wrong username or password.');
+        developer.log('Wrong username or password.');
       }
       setState(() => _authState = _AuthState.error);
     } catch (e) {
-      print(e);
+      developer.log("Login threw the following exception: $e");
       setState(() => _authState = _AuthState.error);
     }
   }

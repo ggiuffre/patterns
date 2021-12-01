@@ -123,17 +123,17 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
       );
 
   @override
-  Future<void> setNewRoutePath(EventRoutePath path) async {
-    if (path.isUnknown) {
+  Future<void> setNewRoutePath(EventRoutePath configuration) async {
+    if (configuration.isUnknown) {
       _selectedEvent = null;
       _newEventNeeded = false;
       _show404 = true;
       return;
     }
 
-    if (path.isDetailsPage) {
-      if (path.id?.startsWith("/events/") ?? false) {
-        final eventId = path.id?.replaceFirst("/events/", "");
+    if (configuration.isDetailsPage) {
+      if (configuration.id?.startsWith("/events/") ?? false) {
+        final eventId = configuration.id?.replaceFirst("/events/", "");
         final container = ProviderContainer();
         final events = await container.read(eventProvider).list.last;
         _selectedEvent = events.firstWhere((element) => element.id == eventId);
@@ -141,13 +141,13 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
         _show404 = true;
         return;
       }
-    } else if (path.isNewEventPage) {
+    } else if (configuration.isNewEventPage) {
       _selectedEvent = null;
       _newEventNeeded = true;
     } else {
-      if (path.isPatternsPage) {
+      if (configuration.isPatternsPage) {
         _homePageNavigationItem = 0;
-      } else if (path.isSettingsPage) {
+      } else if (configuration.isSettingsPage) {
         _homePageNavigationItem = 2;
       } else {
         _homePageNavigationItem = 1;
@@ -212,19 +212,19 @@ class EventRouteInformationParser extends RouteInformationParser<EventRoutePath>
   }
 
   @override
-  RouteInformation? restoreRouteInformation(EventRoutePath path) {
-    if (path.isUnknown) {
+  RouteInformation? restoreRouteInformation(EventRoutePath configuration) {
+    if (configuration.isUnknown) {
       return const RouteInformation(location: '/404');
-    } else if (path.isHomePage) {
+    } else if (configuration.isHomePage) {
       return const RouteInformation(location: '/');
-    } else if (path.isPatternsPage) {
+    } else if (configuration.isPatternsPage) {
       return const RouteInformation(location: '/patterns');
-    } else if (path.isNewEventPage) {
+    } else if (configuration.isNewEventPage) {
       return const RouteInformation(location: '/new-event');
-    } else if (path.isSettingsPage) {
+    } else if (configuration.isSettingsPage) {
       return const RouteInformation(location: '/settings');
-    } else if (path.isDetailsPage) {
-      return RouteInformation(location: path.id);
+    } else if (configuration.isDetailsPage) {
+      return RouteInformation(location: configuration.id);
     }
     return null;
   }

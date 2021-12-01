@@ -65,7 +65,7 @@ main() {
 
     testWidgets("executes a callback upon form submission", (WidgetTester tester) async {
       bool formSubmitted = false;
-      final onSubmit = () => formSubmitted = true;
+      void onSubmit() => formSubmitted = true;
       await tester.pumpWidget(ProviderScope(
         overrides: [eventProvider.overrideWithProvider(Provider((_) => const DummyEventRepository()))],
         child: MaterialApp(home: NewEventForm(onSubmit: onSubmit)),

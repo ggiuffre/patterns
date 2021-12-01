@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,7 +34,7 @@ class PatternsIndex extends ConsumerWidget {
                     separatorBuilder: (BuildContext context, int index) => const Divider(),
                     itemBuilder: (BuildContext context, int index) => ListTile(
                       title: Text("${coefficients[index].labels.first} && ${coefficients[index].labels.last}"),
-                      onTap: () => print("tapped ${coefficients[index]}"),
+                      onTap: () => developer.log("tapped ${coefficients[index]}"),
                       trailing: Text(coefficients[index].coefficient.toString()),
                     ),
                   );

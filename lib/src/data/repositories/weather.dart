@@ -1,4 +1,5 @@
 import 'dart:convert' show json;
+import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
@@ -59,7 +60,6 @@ class _MeteostatApi {
     );
 
     final httpResponse = await http.get(url, headers: {"x-api-key": apiKey});
-    print(httpResponse.statusCode);
 
     if (httpResponse.statusCode != 200) {
       throw "Could not retrieve data from the Meteostat historical weather API: HTTP ${httpResponse.statusCode}.";
@@ -152,7 +152,7 @@ Map<String, Object?>? mapOrNull({required Map<String, Object?> data, required St
     try {
       return data[key] as Map<String, Object?>;
     } catch (error) {
-      print("mapOrNull: $error");
+      developer.log("mapOrNull: $error");
       return null;
     }
   } else {
@@ -164,7 +164,7 @@ T? parsed<T>(T Function() callback) {
   try {
     return callback();
   } catch (error) {
-    print("parsed: $error");
+    developer.log("parsed: $error");
     return null;
   }
 }

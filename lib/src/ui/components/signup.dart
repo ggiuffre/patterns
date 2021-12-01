@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
@@ -121,12 +123,12 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
       );
     } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        print('The password provided is too weak.');
+        developer.log('The password provided is too weak.');
       } else if (e.code == 'email-already-in-use') {
-        print('An account already exists for this email.');
+        developer.log('An account already exists for this email.');
       }
     } catch (e) {
-      print(e);
+      developer.log("Account registration threw the following exception: $e");
     }
 
     final user = userCredential?.user;
