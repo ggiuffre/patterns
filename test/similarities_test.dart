@@ -96,6 +96,12 @@ void main() {
       final range = events.last.start.difference(events.first.start).inDays;
       expect(result.length, equals(range + 1));
     });
+
+    test("adds events with value 0, if isBinary argument is true", () {
+      final events = List.generate(randomGenerator.nextInt(50),
+          (_) => Event("title", value: randomEventValue(), start: randomDate(sinceYear: DateTime.now().year - 1)));
+      expect(interpolated(events, isBinary: true).where((e) => !events.contains(e)).every((e) => e.value == 0), isTrue);
+    });
   });
 
   group("covariance", () {

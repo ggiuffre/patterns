@@ -43,7 +43,7 @@ double stdDev(List<Event> events) {
 
 double average(List<Event> events) => events.map((e) => e.value).reduce((a, b) => a + b) / events.length;
 
-List<Event> interpolated(List<Event> events) {
+List<Event> interpolated(List<Event> events, {bool isBinary = false}) {
   events.sort();
 
   if (events.length < 2) {
@@ -63,7 +63,7 @@ List<Event> interpolated(List<Event> events) {
           distanceFromPreviousEvent - 1,
           (index) => Event(
             title,
-            value: previousEvent.value + ((event.value - previousEvent.value) / (index + 1)),
+            value: isBinary ? 0 : previousEvent.value + ((event.value - previousEvent.value) / (index + 1)),
             start: previousDate.add(Duration(days: index + 1)),
           ),
         ),
