@@ -40,7 +40,7 @@ List<Event> randomEvents(
   int toYear = 2020,
 }) =>
     Iterable.generate(
-      10,
+      nEvents,
       (_) => Event(
         title ?? randomEventTitle(),
         value: value ?? randomDouble(max: maxRandomValue),
