@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:patterns/src/ui/components/categories_index.dart';
 
 import '../../data/event.dart';
 import '../components/custom_app_bar.dart';
@@ -9,6 +10,7 @@ import '../components/settings.dart';
 class HomePage extends StatelessWidget {
   final int selectedNavigationItem;
   final void Function(int) onNavigationItemTapped;
+  final void Function(String) onCategoryTapped;
   final void Function(Event) onEventTapped;
   final VoidCallback onNewEvent;
 
@@ -16,57 +18,72 @@ class HomePage extends StatelessWidget {
     Key? key,
     required this.selectedNavigationItem,
     required this.onNavigationItemTapped,
+    required this.onCategoryTapped,
     required this.onEventTapped,
     required this.onNewEvent,
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-        appBar: CustomAppBar(
-          title: const Text("Home Page"),
-          withLogoutAction: true,
+  Widget build(BuildContext context) {
+    final pageToShow = {
+      0: EventsIndex(onEventTapped: onEventTapped),
+      1: const PatternsIndex(),
+      2: const SettingsPage(),
+      3: CategoriesIndex(onCategoryTapped: onCategoryTapped),
+    };
+
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: const Text("Home Page"),
+        withLogoutAction: true,
+      ),
+      body: pageToShow.containsKey(selectedNavigationItem) ? pageToShow[selectedNavigationItem] : pageToShow[0],
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Theme.of(context).secondaryHeaderColor,
+              ),
+              child: const Text('Menu'),
+            ),
+            ListTile(
+              title: const Text('Events'),
+              onTap: () {
+                onNavigationItemTapped(0);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Patterns'),
+              onTap: () {
+                onNavigationItemTapped(1);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Settings'),
+              onTap: () {
+                onNavigationItemTapped(2);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Categories'),
+              onTap: () {
+                onNavigationItemTapped(3);
+                Navigator.pop(context);
+              },
+            ),
+          ],
         ),
-        body: selectedNavigationItem == 0
-            ? EventsIndex(onEventTapped: onEventTapped)
-            : (selectedNavigationItem == 1 ? const PatternsIndex() : const SettingsPage()),
-        drawer: Drawer(
-          child: ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              DrawerHeader(
-                decoration: BoxDecoration(
-                  color: Theme.of(context).secondaryHeaderColor,
-                ),
-                child: const Text('Menu'),
-              ),
-              ListTile(
-                title: const Text('Events'),
-                onTap: () {
-                  onNavigationItemTapped(0);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('Patterns'),
-                onTap: () {
-                  onNavigationItemTapped(1);
-                  Navigator.pop(context);
-                },
-              ),
-              ListTile(
-                title: const Text('Settings'),
-                onTap: () {
-                  onNavigationItemTapped(2);
-                  Navigator.pop(context);
-                },
-              ),
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: onNewEvent,
-          tooltip: 'New event',
-          child: const Icon(Icons.add),
-        ),
-      );
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: onNewEvent,
+        tooltip: 'New event',
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
 }
