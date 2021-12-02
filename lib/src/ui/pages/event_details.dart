@@ -25,6 +25,12 @@ class EventDetailsPage extends ConsumerWidget {
               ),
             ),
             ConstrainedCard(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text("value: ${event.value}"),
+              ),
+            ),
+            ConstrainedCard(
               child: ExpansionTile(
                 leading: const Icon(Icons.warning),
                 expandedCrossAxisAlignment: CrossAxisAlignment.start,

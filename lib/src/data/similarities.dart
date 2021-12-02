@@ -81,6 +81,12 @@ double similarity(Iterable<Event> originalA, Iterable<Event> originalB, {bool bi
     throw "Cannot compute similarity if one of the series is empty";
   }
 
+  // series of non-adjacent 'unary' events is likely to be a series of binary events where
+  // value 0 is encoded by the absence of an event, and value 1 by the presence of it:
+  if (originalA.map((e) => e.value).toSet().length < 2) {
+    binary = true;
+  }
+
   a.sort();
   b.sort();
 

@@ -94,11 +94,12 @@ class FirestoreEventRepository implements EventRepository {
   @override
   Future<String> add(Event event) {
     if (_userId != null) {
-      return FirebaseFirestore.instance
-          .collection("users")
-          .doc(_userId)
-          .collection("events")
-          .add({"title": event.title, "start": event.start, "end": event.end}).then((doc) => doc.id);
+      return FirebaseFirestore.instance.collection("users").doc(_userId).collection("events").add({
+        "title": event.title,
+        "value": event.value.toString(),
+        "start": event.start,
+        "end": event.end,
+      }).then((doc) => doc.id);
     }
     throw Future.error("Couldn't persist event to Cloud Firestore.");
   }
