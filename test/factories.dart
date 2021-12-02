@@ -4,7 +4,7 @@ import 'package:patterns/src/data/event.dart';
 
 final _randomGenerator = Random();
 
-String randomEventTitle() => ["a", "b", "c"][_randomGenerator.nextInt(3)];
+String randomEventTitle() => String.fromCharCode(_randomGenerator.nextInt(26) + 97);
 
 int randomInt({int max = 1000}) => _randomGenerator.nextInt(max);
 

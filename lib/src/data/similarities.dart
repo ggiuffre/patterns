@@ -9,12 +9,17 @@ class Similarity {
   const Similarity(this.labels, this.coefficient);
 }
 
+class CorrelationException implements Exception {
+  String cause;
+  CorrelationException(this.cause);
+}
+
 double correlation(Iterable<double> x, Iterable<double> y) {
   final n = x.length;
   final m = y.length;
 
   if (n != m) {
-    throw "Cannot compute the covariance between lists of different length: $n != $m";
+    throw CorrelationException("Cannot compute the covariance between lists of different length: $n != $m");
   }
 
   if (n < 1) {
@@ -102,11 +107,17 @@ double similarity(Iterable<Event> originalA, Iterable<Event> originalB, {bool bi
     a.add(Event(a.last.title, value: 0, start: b.last.start));
   }
 
-  return correlation(
-      interpolated(a, binary: binary).map((e) => e.value), interpolated(b, binary: binary).map((e) => e.value));
+  try {
+    return correlation(
+      interpolated(a, binary: binary).map((e) => e.value),
+      interpolated(b, binary: binary).map((e) => e.value),
+    );
+  } on CorrelationException {
+    return 0; // TODO figure out why some errors pop up
+  }
 }
 
-List<Similarity> similarities(Iterable<Event> events, Set<String>? categories) {
+List<Similarity> similarities(Iterable<Event> events, {Set<String>? categories}) {
   categories ??= events.map((e) => e.title).toSet();
 
   Set couples = {};

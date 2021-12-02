@@ -5,6 +5,15 @@ import 'package:test/test.dart';
 import 'factories.dart';
 
 void main() {
+  group("similarities", () {
+    test("returns as (n * (n - 1)) / 2 elements where n is the number of 'categories' it computes on", () {
+      final events = randomEvents(20, fromYear: 2005, toYear: 2007);
+      final categories = events.map((e) => e.title).toSet();
+      final result = similarities(events);
+      expect(result.length, equals((categories.length * (categories.length - 1) / 2)));
+    });
+  });
+
   group("similarity", () {
     test("is at least -1", () {
       final series1 = randomEvents(10, title: "title", fromYear: 2005, toYear: 2007);

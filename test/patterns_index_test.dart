@@ -10,17 +10,21 @@ import 'factories.dart';
 main() {
   testWidgets("shows patterns as a list of tiles", (WidgetTester tester) async {
     final eventRepository = InMemoryEventRepository();
-    eventRepository.events = randomEvents(randomInt(max: 20) + 20);
+    eventRepository.events = randomEvents(randomInt(max: 20) + 10);
     final events = await eventRepository.list.last;
     final categories = events.map((e) => e.title).toSet();
-    final coefficients = similarities(events, categories).reversed.toList();
-    final nPatterns = coefficients.length;
+    final coefficients = similarities(events, categories: categories).reversed.toList();
     await tester.pumpWidget(ProviderScope(
       overrides: [eventProvider.overrideWithProvider(Provider((_) => eventRepository))],
       child: const MaterialApp(home: Scaffold(body: PatternsIndex())),
     ));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ListTile), findsNWidgets(nPatterns));
+    for (var similarity in coefficients) {
+      final label = "${similarity.labels.first} && ${similarity.labels.last}";
+      final widgetFinder = find.widgetWithText(ListTile, label);
+      await tester.scrollUntilVisible(widgetFinder, 100);
+      expect(widgetFinder, findsOneWidget);
+    }
   });
 }
