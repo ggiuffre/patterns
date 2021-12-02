@@ -12,15 +12,14 @@ main() {
     final eventRepository = InMemoryEventRepository();
     eventRepository.events = randomEvents(randomInt(max: 20) + 10);
     final events = await eventRepository.list.last;
-    final categories = events.map((e) => e.title).toSet();
-    final coefficients = similarities(events, categories: categories).reversed.toList();
+    final coefficients = similarities(events).reversed;
     await tester.pumpWidget(ProviderScope(
       overrides: [eventProvider.overrideWithProvider(Provider((_) => eventRepository))],
       child: const MaterialApp(home: Scaffold(body: PatternsIndex())),
     ));
     await tester.pumpAndSettle();
 
-    for (var similarity in coefficients) {
+    for (final similarity in coefficients) {
       final label = "${similarity.labels.first} && ${similarity.labels.last}";
       final widgetFinder = find.widgetWithText(ListTile, label);
       await tester.scrollUntilVisible(widgetFinder, 100);

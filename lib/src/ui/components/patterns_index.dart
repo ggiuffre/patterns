@@ -21,8 +21,7 @@ class PatternsIndex extends ConsumerWidget {
 
           if (snapshot.hasData) {
             final events = snapshot.data?.toList() ?? [];
-            final categories = events.map((e) => e.title).toSet();
-            final coefficients = similarities(events, categories: categories).reversed.toList();
+            final coefficients = similarities(events).reversed.toList();
             return coefficients.isEmpty
                 ? const Padding(
                     padding: EdgeInsets.all(8.0),

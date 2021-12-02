@@ -32,7 +32,7 @@ double correlation(Iterable<double> x, Iterable<double> y) {
   double stdDevFractionX = 0;
   double stdDevFractionY = 0;
 
-  for (final i in List.generate(n, (index) => index, growable: false)) {
+  for (var i = 0; i < n; i++) {
     sumX += x.elementAt(i);
     sumY += y.elementAt(i);
     sumXY += x.elementAt(i) * y.elementAt(i);
@@ -117,8 +117,32 @@ double similarity(Iterable<Event> originalA, Iterable<Event> originalB, {bool bi
   }
 }
 
-List<Similarity> similarities(Iterable<Event> events, {Set<String>? categories}) {
-  categories ??= events.map((e) => e.title).toSet();
+class CategoryCouple {
+  final String first;
+  final String second;
+
+  const CategoryCouple(this.first, this.second);
+}
+
+Set<CategoryCouple> couples(Iterable<Event> events) {
+  final categories = events.map((e) => e.title).toSet();
+  var couples = <CategoryCouple>{};
+  var visitedCategories = <String>{};
+
+  for (final a in categories) {
+    for (final b in categories.difference({a})) {
+      if (!visitedCategories.contains(b)) {
+        couples.add(CategoryCouple(a, b));
+      }
+    }
+    visitedCategories.add(a);
+  }
+
+  return couples;
+}
+
+List<Similarity> similarities(Iterable<Event> events) {
+  final categories = events.map((e) => e.title).toSet();
 
   Set couples = {};
   Set visitedCategories = {};
