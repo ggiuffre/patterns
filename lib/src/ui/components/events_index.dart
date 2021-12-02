@@ -8,8 +8,9 @@ import 'error_card.dart';
 
 class EventsIndex extends ConsumerWidget {
   final void Function(Event) onEventTapped;
+  final String? withTitle;
 
-  const EventsIndex({Key? key, required this.onEventTapped}) : super(key: key);
+  const EventsIndex({Key? key, required this.onEventTapped, this.withTitle}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => StreamBuilder<Iterable<Event>>(
@@ -20,7 +21,8 @@ class EventsIndex extends ConsumerWidget {
           }
 
           if (snapshot.hasData) {
-            final events = snapshot.data?.toList() ?? [];
+            final events =
+                (withTitle == null ? snapshot.data : snapshot.data?.where((e) => e.title == withTitle))?.toList() ?? [];
             return events.isEmpty
                 ? const Padding(
                     padding: EdgeInsets.all(8.0),
