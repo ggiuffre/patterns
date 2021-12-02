@@ -29,28 +29,44 @@ class HomePage extends StatelessWidget {
         body: selectedNavigationItem == 0
             ? EventsIndex(onEventTapped: onEventTapped)
             : (selectedNavigationItem == 1 ? const PatternsIndex() : const SettingsPage()),
+        drawer: Drawer(
+          child: ListView(
+            padding: EdgeInsets.zero,
+            children: [
+              DrawerHeader(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
+                child: const Text('Menu'),
+              ),
+              ListTile(
+                title: const Text('Events'),
+                onTap: () {
+                  onNavigationItemTapped(0);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Patterns'),
+                onTap: () {
+                  onNavigationItemTapped(1);
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                title: const Text('Settings'),
+                onTap: () {
+                  onNavigationItemTapped(2);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        ),
         floatingActionButton: FloatingActionButton(
           onPressed: onNewEvent,
           tooltip: 'New event',
           child: const Icon(Icons.add),
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: selectedNavigationItem,
-          onTap: onNavigationItemTapped,
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.list),
-              label: "Events",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.bar_chart),
-              label: "Patterns",
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: "Settings",
-            ),
-          ],
         ),
       );
 }
