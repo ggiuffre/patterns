@@ -9,41 +9,37 @@ class Similarity {
   const Similarity(this.labels, this.coefficient);
 }
 
-double correlation(List<Event> a, List<Event> b) => (covariance(a, b) / (stdDev(a) * stdDev(b))).abs();
+double correlation(Iterable<double> x, Iterable<double> y) {
+  final n = x.length;
+  final m = y.length;
 
-double covariance(List<Event> a, List<Event> b) {
-  if (a.length != b.length) {
-    throw "Cannot compute the covariance between lists of different length: ${a.length} != ${b.length}";
+  if (n != m) {
+    throw "Cannot compute the covariance between lists of different length: $n != $m";
   }
 
-  if (a.isEmpty) {
+  if (n < 1) {
     return 1;
   }
 
-  final n = a.length;
+  double sumX = 0;
+  double sumY = 0;
+  double sumXY = 0;
+  double stdDevFractionX = 0;
+  double stdDevFractionY = 0;
 
-  return List.generate(n, (index) => index)
-          .map((i) => (a[i].value - average(a)) * (b[i].value - average(b)))
-          .reduce((x, y) => x + y) /
-      n;
-}
-
-double stdDev(List<Event> events) {
-  if (events.isEmpty) {
-    return 1;
+  for (final i in List.generate(n, (index) => index, growable: false)) {
+    sumX += x.elementAt(i);
+    sumY += y.elementAt(i);
+    sumXY += x.elementAt(i) * y.elementAt(i);
+    stdDevFractionX += pow(x.elementAt(i), 2);
+    stdDevFractionY += pow(y.elementAt(i), 2);
   }
 
-  final n = events.length;
-
-  return sqrt(List.generate(n, (index) => index)
-          .map((i) => (events[i].value - average(events)) * (events[i].value - average(events)))
-          .reduce((x, y) => x + y) /
-      n);
+  return (n * sumXY - sumX * sumY) /
+      (sqrt(n * stdDevFractionX - pow(sumX, 2)) * sqrt(n * stdDevFractionY - pow(sumY, 2)));
 }
 
-double average(List<Event> events) => events.map((e) => e.value).reduce((a, b) => a + b) / events.length;
-
-List<Event> interpolated(List<Event> events, {bool isBinary = false}) {
+List<Event> interpolated(List<Event> events, {bool binary = false}) {
   events.sort();
 
   if (events.length < 2) {
@@ -63,7 +59,7 @@ List<Event> interpolated(List<Event> events, {bool isBinary = false}) {
           distanceFromPreviousEvent - 1,
           (index) => Event(
             title,
-            value: isBinary ? 0 : previousEvent.value + ((event.value - previousEvent.value) / (index + 1)),
+            value: binary ? 0 : previousEvent.value + ((event.value - previousEvent.value) / (index + 1)),
             start: previousDate.add(Duration(days: index + 1)),
           ),
         ),
@@ -77,38 +73,31 @@ List<Event> interpolated(List<Event> events, {bool isBinary = false}) {
   return events;
 }
 
-double similarity(List<Event> a, List<Event> b) {
-  double accumulator = 0.0;
-  int samplesVisited = 0;
-  int aIndex = 0;
-  int bIndex = 0;
+double similarity(Iterable<Event> originalA, Iterable<Event> originalB, {bool binary = false}) {
+  final a = [...originalA];
+  final b = [...originalB];
 
-  while (aIndex < a.length && bIndex < b.length) {
-    if (a[aIndex].start == b[bIndex].start) {
-      accumulator += 1.0;
-      aIndex++;
-      bIndex++;
-    } else if (a[aIndex].start.isBefore(b[bIndex].start)) {
-      accumulator -= 1.0;
-      aIndex++;
-    } else {
-      accumulator -= 1.0;
-      bIndex++;
-    }
-    samplesVisited++;
+  if (a.isEmpty || b.isEmpty) {
+    throw "Cannot compute similarity if one of the series is empty";
   }
 
-  if (aIndex < a.length) {
-    final remaining = a.length - aIndex;
-    accumulator -= remaining;
-    samplesVisited += remaining;
-  } else if (bIndex < b.length) {
-    final remaining = b.length - bIndex;
-    accumulator -= remaining;
-    samplesVisited += remaining;
+  a.sort();
+  b.sort();
+
+  if (a.first.start.isBefore(b.first.start)) {
+    b.insert(0, Event(b.first.title, value: 0, start: a.first.start));
+  } else if (b.first.start.isBefore(a.first.start)) {
+    a.insert(0, Event(a.first.title, value: 0, start: b.first.start));
   }
 
-  return accumulator / samplesVisited;
+  if (a.last.start.isAfter(b.last.start)) {
+    b.add(Event(b.last.title, value: 0, start: a.last.start));
+  } else if (b.last.start.isAfter(a.last.start)) {
+    a.add(Event(a.last.title, value: 0, start: b.last.start));
+  }
+
+  return correlation(
+      interpolated(a, binary: binary).map((e) => e.value), interpolated(b, binary: binary).map((e) => e.value));
 }
 
 List<Similarity> similarities(Iterable<Event> events, Set<String>? categories) {

@@ -4,18 +4,46 @@ import 'package:patterns/src/data/event.dart';
 
 final _randomGenerator = Random();
 
-DateTime randomDate({int sinceYear = 1850}) => DateTime.utc(
-      DateTime.now().year == sinceYear
-          ? sinceYear
-          : _randomGenerator.nextInt(DateTime.now().year - sinceYear) + sinceYear,
+String randomEventTitle() => ["a", "b", "c"][_randomGenerator.nextInt(3)];
+
+int randomInt({int max = 1000}) => _randomGenerator.nextInt(max);
+
+double randomDouble({double max = 1}) => _randomGenerator.nextDouble() * max;
+
+DateTime randomDate({int fromYear = 1990, int toYear = 2020}) => DateTime.utc(
+      _randomGenerator.nextInt(toYear - fromYear) + fromYear,
       _randomGenerator.nextInt(12) + 1,
       _randomGenerator.nextInt(31) + 1,
     );
 
-String randomEventTitle() => ["a", "b", "c"][_randomGenerator.nextInt(3)];
+Event randomEvent({
+  String? title,
+  double? value,
+  DateTime? start,
+  double maxRandomValue = 1,
+  int fromYear = 1990,
+  int toYear = 2020,
+}) =>
+    Event(
+      title ?? randomEventTitle(),
+      value: value ?? randomDouble(max: maxRandomValue),
+      start: start ?? randomDate(fromYear: fromYear, toYear: toYear),
+    );
 
-double randomEventValue({double? max}) =>
-    max == null ? _randomGenerator.nextDouble() : _randomGenerator.nextDouble() * max;
-
-Event randomEvent({double? maxValue}) =>
-    Event(randomEventTitle(), value: randomEventValue(max: maxValue), start: randomDate());
+List<Event> randomEvents(
+  int nEvents, {
+  String? title,
+  double? value,
+  DateTime? start,
+  double maxRandomValue = 1,
+  int fromYear = 1990,
+  int toYear = 2020,
+}) =>
+    Iterable.generate(
+      10,
+      (_) => Event(
+        title ?? randomEventTitle(),
+        value: value ?? randomDouble(max: maxRandomValue),
+        start: start ?? randomDate(fromYear: fromYear, toYear: toYear),
+      ),
+    ).toSet().toList();
