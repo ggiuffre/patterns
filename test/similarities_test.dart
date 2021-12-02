@@ -145,7 +145,7 @@ void main() {
       final x = Iterable.generate(randomInt(max: 50) + 2, (_) => randomDouble(max: 100)).toSet();
       final a = randomDouble() * randomInt(max: 100);
       final aX = x.map((v) => a * v);
-      expect((correlation(x, aX) - 1).abs(), lessThan(1e-15));
+      expect((correlation(x, aX) - 1).abs(), lessThan(1e-14));
     });
   });
 }
