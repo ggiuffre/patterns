@@ -4,25 +4,25 @@
 
 
 
-This is the source code for _Patterns_, a mobile and web app that tracks
-patterns between habits/events in your day-to-day life. In other words,
-_Patterns_ tells you how your day-to-day habits and events correlate with
-each other, so that you can improve yourself and find what are possible causes
-of a problem.
+_Patterns_ is a cross-platform app that tracks patterns between habits/events in
+your day-to-day life. The app tells you how your day-to-day habits and events
+correlate with each other, so that you can better understand yourself.
+
+Keep in mind that correlation does not imply causation!
 
 As an example you could track the times when you work out, the quality
-of your sleep, the food you eat, and events in your social life. With enough
-data _Patterns_ might show that there is a correlation between workouts and you
-sleeping well.
+of your sleep, the food you eat, and events in your social life; with enough
+data, the app might show that there is a correlation between workouts and you
+sleeping well, or between two other event categories.
 
 
 
 ## Roadmap
 
 I'm open-sourcing this project at an early stage: this app is probably **not
-mature enough** to give you valuable insights yet. Only boolean time series can
-be tracked, and the similarity measure that is used to compare them is a bit
-naive.
+mature enough** to give you valuable insights yet. The similarity measure that
+is used to compare series of events is not numerically stable, and might have
+bugs.
 
 Here's what the roadmap for this project looks like at the moment:
 
@@ -39,9 +39,9 @@ Here's what the roadmap for this project looks like at the moment:
 * Add more ways to authenticate (with authentication providers, for example).
 * Add end-to-end tests, as soon as Flutter's testing framework will be more
   stable.
-* Provide the user with "ready-made" events about the local weather, holidays,
-  political events, or in general whatever might be correlated with user
-  events.
+* Provide the user with "ready-made" events about local weather, holidays,
+  political events, or in general whatever might be potentially correlated
+  with user events.
 * Improve the look-and-feel of the app.
 
 
