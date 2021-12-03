@@ -49,7 +49,10 @@ class EventRoutePath {
 
   bool get isCategoriesPage => id == "/categories";
 
-  bool get isCategoryDetailsPage => id?.startsWith("/categories/") ?? false;
+  bool get isCategoryDetailsPage {
+    final pathSegments = Uri.parse(id ?? "").pathSegments;
+    return pathSegments.first == "categories" && pathSegments.length == 2 && pathSegments[1] != "";
+  }
 
   bool get isPatternsPage => id == "/patterns";
 
@@ -57,7 +60,10 @@ class EventRoutePath {
 
   bool get isSettingsPage => id == "/settings";
 
-  bool get isEventDetailsPage => id?.startsWith("/events/") ?? false;
+  bool get isEventDetailsPage {
+    final pathSegments = Uri.parse(id ?? "").pathSegments;
+    return pathSegments.first == "events" && pathSegments.length == 2 && pathSegments[1] != "";
+  }
 }
 
 class EventRouterDelegate extends RouterDelegate<EventRoutePath>
