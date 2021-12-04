@@ -6,8 +6,8 @@ import 'theme.dart';
 import 'ui/pages/routing.dart';
 
 class PatternsApp extends ConsumerWidget {
-  final EventRouterDelegate _routerDelegate = EventRouterDelegate();
-  final EventRouteInformationParser _routeInformationParser = EventRouteInformationParser();
+  final _routerDelegate = AppRouterDelegate();
+  final _routeInformationParser = AppRouteInformationParser();
 
   PatternsApp({Key? key}) : super(key: key);
 

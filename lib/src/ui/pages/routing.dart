@@ -9,39 +9,39 @@ import 'event_details.dart';
 import 'home.dart';
 import 'new_event.dart';
 
-class EventRoutePath {
+class AppRoutePath {
   final String? id;
   final bool isUnknown;
 
-  const EventRoutePath.home()
+  const AppRoutePath.home()
       : id = "/",
         isUnknown = false;
 
-  const EventRoutePath.categories()
+  const AppRoutePath.categories()
       : id = "/categories",
         isUnknown = false;
 
-  const EventRoutePath.patterns()
+  const AppRoutePath.patterns()
       : id = "/patterns",
         isUnknown = false;
 
-  const EventRoutePath.categoryDetails(title)
+  const AppRoutePath.categoryDetails(title)
       : id = "/categories/$title",
         isUnknown = false;
 
-  const EventRoutePath.eventDetails(eventId)
+  const AppRoutePath.eventDetails(eventId)
       : id = "/events/$eventId",
         isUnknown = false;
 
-  const EventRoutePath.newEvent()
+  const AppRoutePath.newEvent()
       : id = "/new-event",
         isUnknown = false;
 
-  const EventRoutePath.settings()
+  const AppRoutePath.settings()
       : id = "/settings",
         isUnknown = false;
 
-  const EventRoutePath.unknown()
+  const AppRoutePath.unknown()
       : id = null,
         isUnknown = true;
 
@@ -66,8 +66,8 @@ class EventRoutePath {
   }
 }
 
-class EventRouterDelegate extends RouterDelegate<EventRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<EventRoutePath> {
+class AppRouterDelegate extends RouterDelegate<AppRoutePath>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<AppRoutePath> {
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
@@ -77,7 +77,7 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
   bool _newEventNeeded = false;
   bool _show404 = false;
 
-  EventRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
+  AppRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
 
   @override
   Widget build(BuildContext context) => Navigator(
@@ -155,7 +155,7 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
       );
 
   @override
-  Future<void> setNewRoutePath(EventRoutePath configuration) async {
+  Future<void> setNewRoutePath(AppRoutePath configuration) async {
     if (configuration.isUnknown) {
       _selectedCategory = null;
       _selectedEvent = null;
@@ -205,47 +205,47 @@ class EventRouterDelegate extends RouterDelegate<EventRoutePath>
   }
 
   @override
-  EventRoutePath get currentConfiguration {
+  AppRoutePath get currentConfiguration {
     if (_show404) {
-      return const EventRoutePath.unknown();
+      return const AppRoutePath.unknown();
     }
 
     if (_newEventNeeded) {
-      return const EventRoutePath.newEvent();
+      return const AppRoutePath.newEvent();
     }
 
     if (_selectedCategory != null) {
-      return EventRoutePath.categoryDetails(_selectedCategory);
+      return AppRoutePath.categoryDetails(_selectedCategory);
     }
 
-    return _selectedEvent == null ? const EventRoutePath.home() : EventRoutePath.eventDetails(_selectedEvent?.id);
+    return _selectedEvent == null ? const AppRoutePath.home() : AppRoutePath.eventDetails(_selectedEvent?.id);
   }
 }
 
-class EventRouteInformationParser extends RouteInformationParser<EventRoutePath> {
+class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
   @override
-  Future<EventRoutePath> parseRouteInformation(RouteInformation? routeInformation) async {
+  Future<AppRoutePath> parseRouteInformation(RouteInformation? routeInformation) async {
     final uri = Uri.parse(routeInformation?.location ?? "/");
 
     // Handle '/'
     if (uri.pathSegments.isEmpty) {
-      return const EventRoutePath.home();
+      return const AppRoutePath.home();
     }
 
     // Handle '/patterns', '/new-event' '/events', '/settings', and '/categories'
     if (uri.pathSegments.length == 1) {
       if (uri.pathSegments[0] == 'patterns') {
-        return const EventRoutePath.patterns();
+        return const AppRoutePath.patterns();
       } else if (uri.pathSegments[0] == 'new-event') {
-        return const EventRoutePath.newEvent();
+        return const AppRoutePath.newEvent();
       } else if (uri.pathSegments[0] == 'events') {
-        return const EventRoutePath.home();
+        return const AppRoutePath.home();
       } else if (uri.pathSegments[0] == 'settings') {
-        return const EventRoutePath.settings();
+        return const AppRoutePath.settings();
       } else if (uri.pathSegments[0] == 'categories') {
-        return const EventRoutePath.categories();
+        return const AppRoutePath.categories();
       } else {
-        return const EventRoutePath.unknown();
+        return const AppRoutePath.unknown();
       }
     }
 
@@ -255,22 +255,22 @@ class EventRouteInformationParser extends RouteInformationParser<EventRoutePath>
         final remaining = uri.pathSegments[1];
         final id = remaining;
         // if (id == null) return EventRoutePath.unknown();
-        return EventRoutePath.eventDetails(id);
+        return AppRoutePath.eventDetails(id);
       } else if (uri.pathSegments[0] == 'categories') {
         final remaining = uri.pathSegments[1];
         final id = remaining;
         // if (id == null) return EventRoutePath.unknown();
-        return EventRoutePath.categoryDetails(id);
+        return AppRoutePath.categoryDetails(id);
       }
-      return const EventRoutePath.unknown();
+      return const AppRoutePath.unknown();
     }
 
     // Handle unknown routes
-    return const EventRoutePath.unknown();
+    return const AppRoutePath.unknown();
   }
 
   @override
-  RouteInformation? restoreRouteInformation(EventRoutePath configuration) {
+  RouteInformation? restoreRouteInformation(AppRoutePath configuration) {
     if (configuration.isUnknown) {
       return const RouteInformation(location: '/404');
     } else if (configuration.isHomePage) {
