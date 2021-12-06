@@ -122,14 +122,14 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
             )
           else if (_selectedCategory != null)
             MaterialPage(
-              key: ValueKey('/events/${_selectedCategory ?? ""}'),
+              key: ValueKey('/category/$_selectedCategory'),
               child: CategoryDetailsPage(
                 category: _selectedCategory!,
               ),
             )
           else if (_selectedEvent != null)
             MaterialPage(
-              key: ValueKey('/events/${_selectedEvent?.id ?? ""}'),
+              key: ValueKey('/events/$_selectedEvent'),
               child: EventDetailsPage(
                 event: _selectedEvent!,
                 onDeleteEvent: () {
