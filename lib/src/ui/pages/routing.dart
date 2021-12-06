@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/src/ui/components/custom_app_bar.dart';
-import 'package:patterns/src/ui/components/events_index.dart';
 
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
+import '../components/custom_app_bar.dart';
+import '../components/events_index.dart';
 import 'category_details.dart';
 import 'error.dart';
 import 'event_details.dart';

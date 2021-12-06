@@ -16,6 +16,7 @@ class PatternsIndex extends ConsumerWidget {
         stream: ref.read(eventProvider).sorted(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
+            developer.log(snapshot.error.toString());
             return const ErrorCard(text: "Couldn't retrieve events needed to extract patterns.");
           }
 
@@ -34,7 +35,7 @@ class PatternsIndex extends ConsumerWidget {
                     itemBuilder: (BuildContext context, int index) => ListTile(
                       title: Text("${coefficients[index].labels.first} && ${coefficients[index].labels.last}"),
                       onTap: () => developer.log("tapped ${coefficients[index]}"),
-                      trailing: Text(coefficients[index].coefficient.toString()),
+                      trailing: Text(coefficients[index].coefficient.toStringAsPrecision(3)),
                     ),
                   );
           }

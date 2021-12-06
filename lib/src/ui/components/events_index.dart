@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -17,6 +19,7 @@ class EventsIndex extends ConsumerWidget {
         stream: ref.read(eventProvider).sorted(descending: true),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
+            developer.log(snapshot.error.toString());
             return const ErrorCard(text: "Couldn't retrieve events.");
           }
 
