@@ -49,6 +49,7 @@ class HomePage extends StatelessWidget {
               child: const Text('Menu'),
             ),
             ListTile(
+              selected: selectedNavigationItem == 0,
               title: const Text('All events'),
               leading: const Icon(Icons.notes_rounded),
               onTap: () {
@@ -57,6 +58,7 @@ class HomePage extends StatelessWidget {
               },
             ),
             ListTile(
+              selected: selectedNavigationItem == 3,
               title: const Text('Categories'),
               leading: const Icon(Icons.notes_rounded),
               onTap: () {
@@ -65,14 +67,16 @@ class HomePage extends StatelessWidget {
               },
             ),
             ListTile(
+              selected: selectedNavigationItem == 1,
               title: const Text('Patterns'),
-              leading: const Icon(Icons.insert_chart),
+              leading: const Icon(Icons.bar_chart),
               onTap: () {
                 onNavigationItemTapped(1);
                 Navigator.pop(context);
               },
             ),
             ListTile(
+              selected: selectedNavigationItem == 2,
               title: const Text('Settings'),
               leading: const Icon(Icons.settings),
               onTap: () {
