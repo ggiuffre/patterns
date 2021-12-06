@@ -20,7 +20,9 @@ class GoogleCalendarEventsRepository implements EventRepository {
 
   GoogleCalendarEventsRepository([GoogleData? google])
       : _calendarIds = google?.enabledCalendarIds ?? const {},
-        _calendarApi = google?.authHeaders != null ? g.CalendarApi(_GoogleAuthClient(google!.authHeaders!)) : null;
+        _calendarApi = (google != null && google.authHeaders != null)
+            ? g.CalendarApi(_GoogleAuthClient(google.authHeaders!))
+            : null;
 
   @override
   Future<String> add(Event event) {
