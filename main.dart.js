@@ -75532,7 +75532,7 @@ G.KI.prototype={
 H(a,b){return M.tH(M.ra(C.Rj,!0),new T.zt(this.c,null),null,null)}}
 T.eS.prototype={
 gSg(){var s=this.a,r=P.lw(s==null?"":s).gd9()
-return J.f(C.c.gI(r),"categories")&&r.length===2&&!J.f(r[1],"")},
+return r.length===2&&J.f(C.c.gI(r),"categories")&&!J.f(r[1],"")},
 gSh(){var s=this.a,r=P.lw(s==null?"":s).gd9()
 return J.f(C.c.gI(r),"categories")&&r.length===3&&!J.f(r[1],"")&&J.f(r[2],"events")},
 gSj(){var s=this.a,r=P.lw(s==null?"":s).gd9()
