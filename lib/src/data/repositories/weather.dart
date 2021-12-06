@@ -33,7 +33,7 @@ class TemperatureEventRepository implements EventRepository {
 
   @override
   Stream<Iterable<Event>> get list => weatherApi
-      .history(start: DateTime(2021).toUtc(), end: DateTime(2021, 1, 15).toUtc())
+      .history(start: DateTime(2021).toUtc(), end: DateTime(2021, 12, 5).toUtc())
       .then((weatherEvents) => weatherEvents.map((e) => Event("rain", value: e.rainVolume, start: e.time.toLocal())))
       .asStream();
 
@@ -54,12 +54,15 @@ class _MeteostatApi {
     final endDay = end.toIso8601String().substring(0, 10);
     final url = Uri(
       scheme: "https",
-      host: "api.meteostat.net",
-      path: "/v2/stations/daily",
+      host: "meteostat.p.rapidapi.com",
+      path: "/stations/daily",
       queryParameters: {"station": cityId, "start": startDay, "end": endDay},
     );
 
-    final httpResponse = await http.get(url, headers: {"x-api-key": apiKey});
+    final httpResponse = await http.get(url, headers: {
+      "x-rapidapi-host": "meteostat.p.rapidapi.com",
+      "x-rapidapi-key": apiKey,
+    });
 
     if (httpResponse.statusCode != 200) {
       throw "Could not retrieve data from the Meteostat historical weather API: HTTP ${httpResponse.statusCode}.";
