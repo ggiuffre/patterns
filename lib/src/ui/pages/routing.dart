@@ -57,7 +57,7 @@ class AppRoutePath {
 
   bool get isCategoryDetailsPage {
     final pathSegments = Uri.parse(id ?? "").pathSegments;
-    return pathSegments.first == "categories" && pathSegments.length == 2 && pathSegments[1] != "";
+    return pathSegments.length == 2 && pathSegments.first == "categories" && pathSegments[1] != "";
   }
 
   bool get isCategoryEventsPage {
