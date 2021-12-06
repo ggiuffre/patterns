@@ -77,7 +77,8 @@ class GoogleCalendarEventsRepository implements EventRepository {
     final endDateTime = event.end?.dateTime;
     final eventRecurrence = event.recurrence;
 
-    const recurrenceProperties = Event.defaultRecurrence;
+    // TODO using Event.defaultRecurrence makes recurrenceProperties immutable, so what follows is a temp. patch:
+    final recurrenceProperties = <String, String?>{"rRule": null, "exRule": null, "rDate": null, "exDate": null};
     if (eventRecurrence != null) {
       recurrenceProperties["rRule"] =
           eventRecurrence.singleWhere((rule) => rule.startsWith("RRULE:"), orElse: () => "").replaceFirst("RRULE:", "");
