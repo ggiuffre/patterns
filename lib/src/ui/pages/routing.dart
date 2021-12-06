@@ -62,8 +62,8 @@ class AppRoutePath {
 
   bool get isCategoryEventsPage {
     final pathSegments = Uri.parse(id ?? "").pathSegments;
-    return pathSegments.first == "categories" &&
-        pathSegments.length == 3 &&
+    return pathSegments.length == 3 &&
+        pathSegments.first == "categories" &&
         pathSegments[1] != "" &&
         pathSegments[2] == "events";
   }
