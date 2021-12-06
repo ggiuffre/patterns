@@ -49,14 +49,24 @@ class HomePage extends StatelessWidget {
               child: const Text('Menu'),
             ),
             ListTile(
-              title: const Text('Events'),
+              title: const Text('All events'),
+              leading: const Icon(Icons.notes_rounded),
               onTap: () {
                 onNavigationItemTapped(0);
                 Navigator.pop(context);
               },
             ),
             ListTile(
+              title: const Text('Categories'),
+              leading: const Icon(Icons.notes_rounded),
+              onTap: () {
+                onNavigationItemTapped(3);
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
               title: const Text('Patterns'),
+              leading: const Icon(Icons.insert_chart),
               onTap: () {
                 onNavigationItemTapped(1);
                 Navigator.pop(context);
@@ -64,15 +74,9 @@ class HomePage extends StatelessWidget {
             ),
             ListTile(
               title: const Text('Settings'),
+              leading: const Icon(Icons.settings),
               onTap: () {
                 onNavigationItemTapped(2);
-                Navigator.pop(context);
-              },
-            ),
-            ListTile(
-              title: const Text('Categories'),
-              onTap: () {
-                onNavigationItemTapped(3);
                 Navigator.pop(context);
               },
             ),

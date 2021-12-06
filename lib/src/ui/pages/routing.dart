@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/src/ui/components/custom_app_bar.dart';
+import 'package:patterns/src/ui/components/events_index.dart';
 
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
@@ -29,6 +31,10 @@ class AppRoutePath {
       : id = "/categories/$title",
         isUnknown = false;
 
+  const AppRoutePath.categoryEvents(title)
+      : id = "/categories/$title/events",
+        isUnknown = false;
+
   const AppRoutePath.eventDetails(eventId)
       : id = "/events/$eventId",
         isUnknown = false;
@@ -54,6 +60,14 @@ class AppRoutePath {
     return pathSegments.first == "categories" && pathSegments.length == 2 && pathSegments[1] != "";
   }
 
+  bool get isCategoryEventsPage {
+    final pathSegments = Uri.parse(id ?? "").pathSegments;
+    return pathSegments.first == "categories" &&
+        pathSegments.length == 3 &&
+        pathSegments[1] != "" &&
+        pathSegments[2] == "events";
+  }
+
   bool get isPatternsPage => id == "/patterns";
 
   bool get isNewEventPage => id == "/new-event";
@@ -76,6 +90,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
   int _homePageNavigationItem = 0;
   bool _newEventNeeded = false;
   bool _show404 = false;
+  bool _showCategoryEvents = false;
 
   AppRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
 
@@ -120,11 +135,31 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
                 },
               ),
             )
+          else if (_selectedCategory != null && _showCategoryEvents)
+            MaterialPage(
+              key: ValueKey('/category/$_selectedCategory/events'),
+              child: Scaffold(
+                appBar: CustomAppBar(
+                  title: Text("Events for category '$_selectedCategory'"),
+                  withLogoutAction: true,
+                ),
+                body: EventsIndex(
+                    onEventTapped: (event) {
+                      _selectedEvent = event;
+                      notifyListeners();
+                    },
+                    withTitle: _selectedCategory),
+              ),
+            )
           else if (_selectedCategory != null)
             MaterialPage(
               key: ValueKey('/category/$_selectedCategory'),
               child: CategoryDetailsPage(
                 category: _selectedCategory!,
+                onCategoryEventsTapped: () {
+                  _showCategoryEvents = true;
+                  notifyListeners();
+                },
               ),
             )
           else if (_selectedEvent != null)
@@ -148,6 +183,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
           _selectedCategory = null;
           _newEventNeeded = false;
           _show404 = false;
+          _showCategoryEvents = false;
           notifyListeners();
 
           return true;
@@ -161,6 +197,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
       _selectedEvent = null;
       _newEventNeeded = false;
       _show404 = true;
+      _showCategoryEvents = false;
       return;
     }
 
@@ -182,10 +219,20 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
         _show404 = true;
         return;
       }
+    } else if (configuration.isCategoryEventsPage) {
+      if (configuration.id?.startsWith("/categories/") ?? false) {
+        final category = configuration.id?.replaceFirst("/categories/", "").replaceFirst("/events", "");
+        _selectedCategory = category;
+        _showCategoryEvents = true;
+      } else {
+        _show404 = true;
+        return;
+      }
     } else if (configuration.isNewEventPage) {
       _selectedCategory = null;
       _selectedEvent = null;
       _newEventNeeded = true;
+      _showCategoryEvents = false;
     } else {
       if (configuration.isPatternsPage) {
         _homePageNavigationItem = 0;
@@ -199,6 +246,7 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
       _selectedCategory = null;
       _selectedEvent = null;
       _newEventNeeded = false;
+      _showCategoryEvents = false;
     }
 
     _show404 = false;
@@ -215,6 +263,10 @@ class AppRouterDelegate extends RouterDelegate<AppRoutePath>
     }
 
     if (_selectedCategory != null) {
+      if (_showCategoryEvents) {
+        return AppRoutePath.categoryEvents(_selectedCategory);
+      }
+
       return AppRoutePath.categoryDetails(_selectedCategory);
     }
 
@@ -244,28 +296,34 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
         return const AppRoutePath.settings();
       } else if (uri.pathSegments[0] == 'categories') {
         return const AppRoutePath.categories();
-      } else {
-        return const AppRoutePath.unknown();
       }
     }
 
     // Handle '/events/:id' and '/categories/:id'
     if (uri.pathSegments.length == 2) {
       if (uri.pathSegments[0] == 'events') {
-        final remaining = uri.pathSegments[1];
-        final id = remaining;
+        final id = uri.pathSegments[1];
         // if (id == null) return EventRoutePath.unknown();
         return AppRoutePath.eventDetails(id);
       } else if (uri.pathSegments[0] == 'categories') {
-        final remaining = uri.pathSegments[1];
-        final id = remaining;
+        final id = uri.pathSegments[1];
         // if (id == null) return EventRoutePath.unknown();
         return AppRoutePath.categoryDetails(id);
       }
-      return const AppRoutePath.unknown();
     }
 
-    // Handle unknown routes
+    // Handle '/categories/:id/events'
+    if (uri.pathSegments.length == 3) {
+      if (uri.pathSegments[0] == 'categories') {
+        final id = uri.pathSegments[1];
+        // if (id == null) return EventRoutePath.unknown();
+        if (uri.pathSegments[2] == 'events') {
+          return AppRoutePath.categoryEvents(id);
+        }
+      }
+    }
+
+    // Handle remaining (unknown) routes
     return const AppRoutePath.unknown();
   }
 
@@ -284,9 +342,11 @@ class AppRouteInformationParser extends RouteInformationParser<AppRoutePath> {
     } else if (configuration.isCategoriesPage) {
       return const RouteInformation(location: '/categories');
     } else if (configuration.isCategoryDetailsPage) {
-      return RouteInformation(location: configuration.id);
+      return RouteInformation(location: '/categories/${configuration.id}');
+    } else if (configuration.isCategoryEventsPage) {
+      return RouteInformation(location: '/categories/${configuration.id}/events');
     } else if (configuration.isEventDetailsPage) {
-      return RouteInformation(location: configuration.id);
+      return RouteInformation(location: '/events/${configuration.id}');
     }
     return null;
   }

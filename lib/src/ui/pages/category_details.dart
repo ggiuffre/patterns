@@ -6,8 +6,9 @@ import '../components/custom_app_bar.dart';
 
 class CategoryDetailsPage extends ConsumerWidget {
   final String category;
+  final VoidCallback onCategoryEventsTapped;
 
-  const CategoryDetailsPage({Key? key, required this.category}) : super(key: key);
+  const CategoryDetailsPage({Key? key, required this.category, required this.onCategoryEventsTapped}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
@@ -25,9 +26,7 @@ class CategoryDetailsPage extends ConsumerWidget {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: TextButton.icon(
-                  onPressed: () async {
-                    // navigate to (filtered) events index...
-                  },
+                  onPressed: onCategoryEventsTapped,
                   icon: const Icon(Icons.list),
                   label: const Text("See events"),
                 ),
