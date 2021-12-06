@@ -32,6 +32,14 @@ class CategoryDetailsPage extends ConsumerWidget {
               final categoryEvents = events.where((e) => e.title == category);
               final otherEvents = events.where((e) => e.title != category);
               final otherCategories = otherEvents.map((e) => e.title).toSet();
+              final coefficients = otherCategories
+                  .map((c) => similarity(
+                        categoryEvents,
+                        otherEvents.where((e) => e.title == c),
+                        binary: true,
+                      ))
+                  .toList()
+                ..sort();
 
               return otherCategories.isEmpty
                   ? const Padding(
@@ -44,11 +52,7 @@ class CategoryDetailsPage extends ConsumerWidget {
                       itemCount: otherCategories.length,
                       separatorBuilder: (BuildContext context, int index) => const Divider(),
                       itemBuilder: (BuildContext context, int index) {
-                        final coefficient = similarity(
-                          categoryEvents,
-                          otherEvents.where((e) => e.title == otherCategories.elementAt(index)),
-                          binary: true,
-                        );
+                        final coefficient = coefficients[otherCategories.length - 1 - index];
                         final colorLabel = HSLColor.fromColor(
                           Color.lerp(Colors.red, Colors.green, (coefficient + 1) / 2) ?? Colors.white,
                         ).withLightness(0.75).toColor();
