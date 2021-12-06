@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:patterns/src/ui/components/categories_index.dart';
 
 import '../../data/event.dart';
+import '../components/categories_index.dart';
 import '../components/custom_app_bar.dart';
 import '../components/events_index.dart';
 import '../components/patterns_index.dart';
