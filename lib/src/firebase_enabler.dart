@@ -1,14 +1,19 @@
+import 'dart:io';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../firebase_options.dart';
 import 'data/app_settings_provider.dart';
 import 'theme.dart';
 import 'ui/components/error_card.dart';
 
 /// Wrapper that allows any required Firebase service (like authentication or Cloud Firestore) to run.
 class FirebaseEnabler extends ConsumerWidget {
-  final Future<FirebaseApp> _firebaseInitialization = Firebase.initializeApp();
+  final Future<FirebaseApp> _firebaseInitialization = Firebase.initializeApp(
+    options: Platform.isLinux ? null : DefaultFirebaseOptions.currentPlatform,
+  );
   final Widget child;
 
   FirebaseEnabler({Key? key, required this.child}) : super(key: key);
