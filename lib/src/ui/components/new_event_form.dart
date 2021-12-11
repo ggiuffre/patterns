@@ -20,6 +20,7 @@ class NewEventForm extends ConsumerStatefulWidget {
 class _NewEventFormState extends ConsumerState<NewEventForm> {
   final _formKey = GlobalKey<FormState>();
 
+  String _eventType = "custom";
   String _eventTitle = "";
   DateTime _eventStartTime = DateTime.now();
   DateTime _eventEndTime = DateTime.now();
@@ -34,6 +35,45 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         child: ListView(
           padding: const EdgeInsets.all(8.0),
           children: [
+            if (false)
+              ConstrainedCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Type", style: Theme.of(context).textTheme.headline5),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 120),
+                          child: _EventTypeSelector(
+                            groupValue: _eventType,
+                            onChipSelected: (value) => setState(() => _eventType = value),
+                            values: const {
+                              "custom",
+                              "meal",
+                              "workout",
+                              "social event",
+                              "lorem ipsum",
+                              "abcdeefgh",
+                              "something",
+                              "something else",
+                              "whatever",
+                              "lorem ipsum again",
+                              "bla",
+                              "blabla"
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ConstrainedCard(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -141,6 +181,49 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
       }
     }
   }
+}
+
+class _EventTypeSelector extends StatefulWidget {
+  final String groupValue;
+  final Iterable<String> values;
+  final void Function(String) onChipSelected;
+
+  const _EventTypeSelector({
+    Key? key,
+    required this.groupValue,
+    required this.values,
+    required this.onChipSelected,
+  }) : super(key: key);
+
+  @override
+  State<_EventTypeSelector> createState() => _EventTypeSelectorState();
+}
+
+class _EventTypeSelectorState extends State<_EventTypeSelector> {
+  @override
+  Widget build(BuildContext context) => ConstrainedBox(
+        constraints: const BoxConstraints(maxHeight: 120),
+        child: SingleChildScrollView(
+          child: Wrap(
+            children: widget.values
+                .map(
+                  (eventType) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                    child: ChoiceChip(
+                      label: Text(eventType),
+                      selected: eventType == widget.groupValue,
+                      onSelected: (selected) {
+                        if (selected) {
+                          widget.onChipSelected(eventType);
+                        }
+                      },
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      );
 }
 
 class _EventTitleTextField extends ConsumerWidget {
