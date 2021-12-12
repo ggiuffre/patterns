@@ -48,26 +48,25 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxHeight: 120),
-                          child: _EventTypeSelector(
-                            groupValue: _eventType,
-                            onChipSelected: (value) => setState(() => _eventType = value),
-                            values: const {
-                              "custom",
-                              "meal",
-                              "workout",
-                              "social event",
-                              "lorem ipsum",
-                              "abcdeefgh",
-                              "something",
-                              "something else",
-                              "whatever",
-                              "lorem ipsum again",
-                              "bla",
-                              "blabla"
-                            },
-                          ),
+                        child: _EventTypeSelector(
+                          groupValue: _eventType,
+                          onChipSelected: (value) => setState(() => _eventType = value),
+                          values: const {
+                            "custom",
+                            "meal",
+                            "workout",
+                            "social event",
+                            "lorem ipsum",
+                            "abcdeefgh",
+                            "something",
+                            "something else",
+                            "whatever",
+                            "lorem ipsum again",
+                            "bla",
+                            "blabla",
+                            "123456789",
+                            "test test test"
+                          },
                         ),
                       ),
                     ],
@@ -200,27 +199,42 @@ class _EventTypeSelector extends StatefulWidget {
 }
 
 class _EventTypeSelectorState extends State<_EventTypeSelector> {
+  bool minimized = true;
+
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-        constraints: const BoxConstraints(maxHeight: 120),
+  Widget build(BuildContext context) => AnimatedContainer(
+        duration: const Duration(milliseconds: 750),
+        curve: Curves.fastOutSlowIn,
+        constraints: minimized ? const BoxConstraints(maxHeight: 120) : const BoxConstraints(maxHeight: 600),
         child: SingleChildScrollView(
-          child: Wrap(
-            children: widget.values
-                .map(
-                  (eventType) => Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
-                    child: ChoiceChip(
-                      label: Text(eventType),
-                      selected: eventType == widget.groupValue,
-                      onSelected: (selected) {
-                        if (selected) {
-                          widget.onChipSelected(eventType);
-                        }
-                      },
-                    ),
-                  ),
-                )
-                .toList(),
+          child: Column(
+            children: [
+              Wrap(
+                children: widget.values
+                    .map(
+                      (eventType) => Padding(
+                        padding: const EdgeInsets.all(2.0),
+                        child: ChoiceChip(
+                          label: Text(eventType),
+                          selected: eventType == widget.groupValue,
+                          onSelected: (selected) {
+                            setState(() => minimized = false);
+                            if (selected) {
+                              widget.onChipSelected(eventType);
+                            }
+                          },
+                        ),
+                      ),
+                    )
+                    .toList(),
+              ),
+              if (!minimized)
+                TextButton.icon(
+                  icon: const Icon(Icons.arrow_drop_up),
+                  onPressed: () => setState(() => minimized = true),
+                  label: const Text("Collapse"),
+                ),
+            ],
           ),
         ),
       );
