@@ -22,6 +22,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
 
   EventType _eventType = EventType.customEvent;
   String _eventTitle = "";
+  double _eventValue = 1;
   DateTime _eventStartTime = DateTime.now();
   DateTime _eventEndTime = DateTime.now();
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
@@ -58,28 +59,54 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                   ),
                 ),
               ),
-            ConstrainedCard(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text("Event title", style: Theme.of(context).textTheme.headline5),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: _EventTitleTextField(
-                        onHintSelected: (selection) => setState(() => _eventTitle = selection),
-                        onFieldChanged: (newTitle) => setState(() => _eventTitle = newTitle),
-                        autoValidate: _autoValidate,
+            if (_eventType == EventType.customEvent)
+              ConstrainedCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Event title", style: Theme.of(context).textTheme.headline5),
                       ),
-                    ),
-                  ],
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: _EventTitleTextField(
+                          onHintSelected: (selection) => setState(() => _eventTitle = selection),
+                          onFieldChanged: (newTitle) => setState(() => _eventTitle = newTitle),
+                          autoValidate: _autoValidate,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_eventType == EventType.caloriesIntakeMeasurement)
+              ConstrainedCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Food", style: Theme.of(context).textTheme.headline5),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: _FoodRadioInput(
+                          values: FoodType.values,
+                          onChipSelected: (food) => setState(() {
+                            _eventTitle = "Calories intake";
+                            _eventValue = food.calories;
+                          }),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
             ConstrainedCard(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -149,7 +176,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         if (_eventFrequency != Frequency.once) {
           final events = recurringEvents(
             title: _eventTitle,
-            value: 1, // TODO allow user to set event value != 1
+            value: _eventValue,
             range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
             frequency: _eventFrequency,
             interval: _eventInterval,
@@ -158,8 +185,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
             ref.read(eventProvider).add(event);
           }
         } else {
-          // TODO allow user to set event value != 1
-          await ref.read(eventProvider).add(Event(_eventTitle, value: 1, start: _eventStartTime));
+          await ref.read(eventProvider).add(Event(_eventTitle, value: _eventValue, start: _eventStartTime));
         }
         widget.onSubmit();
       }
@@ -167,9 +193,16 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
   }
 }
 
-/// Type of new [Event] that a user can create, for example meal, social event,
-/// sports event...
-enum EventType { customEvent, meal, sportsTraining, socialEvent, measurement }
+/// Type of new [Event] that a user can create, for example social event,
+/// sports event, different-than-usual calories intake...
+enum EventType {
+  customEvent,
+  sportsEvent,
+  caloriesIntakeMeasurement,
+  caloriesBurningMeasurement,
+  socialEvent,
+  measurement,
+}
 
 class _EventTypeSelector extends StatefulWidget {
   final EventType groupValue;
@@ -192,8 +225,9 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
 
   static const eventTypeLabels = {
     EventType.customEvent: "custom event",
-    EventType.meal: "meal",
-    EventType.sportsTraining: "sports training event",
+    EventType.sportsEvent: "sports training event",
+    EventType.caloriesIntakeMeasurement: "calories intake measurement",
+    EventType.caloriesBurningMeasurement: "calories burning measurement",
     EventType.socialEvent: "social event",
     EventType.measurement: "measurement",
   };
@@ -309,6 +343,92 @@ class _EventTitleTextField extends ConsumerWidget {
             ),
           );
         },
+      );
+}
+
+enum FoodType {
+  muesli,
+  lentils,
+  fruit,
+  pasta,
+  rice,
+  salad,
+  sandwich,
+  other,
+}
+
+class _FoodInfo {
+  final String label;
+  final double calories;
+  final double? iron;
+
+  const _FoodInfo({required this.label, required this.calories, this.iron});
+}
+
+class _FoodRadioInput extends StatefulWidget {
+  final Iterable<FoodType> values;
+  final void Function(_FoodInfo) onChipSelected;
+
+  const _FoodRadioInput({
+    Key? key,
+    required this.values,
+    required this.onChipSelected,
+  }) : super(key: key);
+
+  @override
+  State<_FoodRadioInput> createState() => _FoodRadioInputState();
+}
+
+class _FoodRadioInputState extends State<_FoodRadioInput> {
+  FoodType _groupValue = FoodType.muesli;
+
+  static const foodInfo = {
+    FoodType.muesli: _FoodInfo(label: "müesli", calories: 200),
+    FoodType.lentils: _FoodInfo(label: "lentils", calories: 200),
+    FoodType.fruit: _FoodInfo(label: "fruit", calories: 200),
+    FoodType.pasta: _FoodInfo(label: "pasta", calories: 200),
+    FoodType.rice: _FoodInfo(label: "rice", calories: 200),
+    FoodType.salad: _FoodInfo(label: "salad", calories: 200),
+    FoodType.sandwich: _FoodInfo(label: "sandwich", calories: 200),
+    FoodType.other: _FoodInfo(label: "other", calories: 200),
+  };
+
+  @override
+  Widget build(BuildContext context) => Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: Wrap(
+              children: widget.values
+                  .where((food) => foodInfo.containsKey(food))
+                  .map(
+                    (food) => Padding(
+                      padding: const EdgeInsets.all(2.0),
+                      child: ChoiceChip(
+                        label: Text(foodInfo[food]?.label ?? ""),
+                        selected: food == _groupValue,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() => _groupValue = food);
+                            widget.onChipSelected(foodInfo[food]!);
+                          }
+                        },
+                      ),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+          if (_groupValue == FoodType.other)
+            TextFormField(
+                keyboardType: TextInputType.number,
+                onChanged: (_) {},
+                decoration: const InputDecoration(
+                  icon: Icon(Icons.local_fire_department),
+                  border: OutlineInputBorder(),
+                  labelText: 'Calories',
+                )),
+        ],
       );
 }
 

@@ -92,8 +92,25 @@ class FirestoreEventRepository implements EventRepository {
   }
 
   @override
-  Future<String> add(Event event) {
+  Future<String> add(Event event) async {
     if (_userId != null) {
+      final matchingEvents = await list.first.then((events) => events.where((e) =>
+          e.title == event.title &&
+          e.start.day == event.start.day &&
+          e.start.month == event.start.month &&
+          e.start.year == event.start.year)); // TODO allow finer-grained events?
+
+      if (matchingEvents.isNotEmpty) {
+        final existingEvent = matchingEvents.first;
+        final eventId = existingEvent.id;
+        return FirebaseFirestore.instance.collection("users").doc(_userId).collection("events").doc(eventId).update({
+          "title": event.title,
+          "value": (existingEvent.value + event.value).toString(),
+          "start": event.start,
+          "end": event.end,
+        }).then((_) => eventId);
+      }
+
       return FirebaseFirestore.instance.collection("users").doc(_userId).collection("events").add({
         "title": event.title,
         "value": event.value.toString(),
