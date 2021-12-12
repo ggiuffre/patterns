@@ -20,7 +20,7 @@ class NewEventForm extends ConsumerStatefulWidget {
 class _NewEventFormState extends ConsumerState<NewEventForm> {
   final _formKey = GlobalKey<FormState>();
 
-  String _eventType = "custom";
+  EventType _eventType = EventType.customEvent;
   String _eventTitle = "";
   DateTime _eventStartTime = DateTime.now();
   DateTime _eventEndTime = DateTime.now();
@@ -51,22 +51,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                         child: _EventTypeSelector(
                           groupValue: _eventType,
                           onChipSelected: (value) => setState(() => _eventType = value),
-                          values: const {
-                            "custom",
-                            "meal",
-                            "workout",
-                            "social event",
-                            "lorem ipsum",
-                            "abcdeefgh",
-                            "something",
-                            "something else",
-                            "whatever",
-                            "lorem ipsum again",
-                            "bla",
-                            "blabla",
-                            "123456789",
-                            "test test test"
-                          },
+                          values: EventType.values,
                         ),
                       ),
                     ],
@@ -182,10 +167,14 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
   }
 }
 
+/// Type of new [Event] that a user can create, for example meal, social event,
+/// sports event...
+enum EventType { customEvent, meal, sportsTraining, socialEvent, measurement }
+
 class _EventTypeSelector extends StatefulWidget {
-  final String groupValue;
-  final Iterable<String> values;
-  final void Function(String) onChipSelected;
+  final EventType groupValue;
+  final Iterable<EventType> values;
+  final void Function(EventType) onChipSelected;
 
   const _EventTypeSelector({
     Key? key,
@@ -201,21 +190,30 @@ class _EventTypeSelector extends StatefulWidget {
 class _EventTypeSelectorState extends State<_EventTypeSelector> {
   bool minimized = true;
 
+  static const eventTypeLabels = {
+    EventType.customEvent: "custom event",
+    EventType.meal: "meal",
+    EventType.sportsTraining: "sports training event",
+    EventType.socialEvent: "social event",
+    EventType.measurement: "measurement",
+  };
+
   @override
   Widget build(BuildContext context) => AnimatedContainer(
         duration: const Duration(milliseconds: 750),
         curve: Curves.fastOutSlowIn,
-        constraints: minimized ? const BoxConstraints(maxHeight: 120) : const BoxConstraints(maxHeight: 600),
+        constraints: minimized ? const BoxConstraints(maxHeight: 50) : const BoxConstraints(maxHeight: 600),
         child: SingleChildScrollView(
           child: Column(
             children: [
               Wrap(
                 children: widget.values
+                    .where((eventType) => eventTypeLabels.containsKey(eventType))
                     .map(
                       (eventType) => Padding(
                         padding: const EdgeInsets.all(2.0),
                         child: ChoiceChip(
-                          label: Text(eventType),
+                          label: Text(eventTypeLabels[eventType] ?? ""),
                           selected: eventType == widget.groupValue,
                           onSelected: (selected) {
                             setState(() => minimized = false);
