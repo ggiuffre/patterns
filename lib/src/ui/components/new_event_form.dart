@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/src/ui/components/error_card.dart';
 
 import '../../data/date_formatting.dart';
 import '../../data/event.dart';
@@ -36,29 +37,31 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         child: ListView(
           padding: const EdgeInsets.all(8.0),
           children: [
-            if (false)
-              ConstrainedCard(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text("Type", style: Theme.of(context).textTheme.headline5),
+            // if (false)
+            ConstrainedCard(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text("Event type", style: Theme.of(context).textTheme.headline5),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: _EventTypeSelector(
+                        groupValue: _eventType,
+                        onChipSelected: (value) => setState(() => _eventType = value),
+                        values: EventType.values,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: _EventTypeSelector(
-                          groupValue: _eventType,
-                          onChipSelected: (value) => setState(() => _eventType = value),
-                          values: EventType.values,
-                        ),
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
+            ),
+            if (_eventType != EventType.customEvent && _eventType != EventType.caloriesIntakeMeasurement)
+              const ConstrainedCard(child: ErrorCard(text: "Not implemented yet. Work in progress...")),
             if (_eventType == EventType.customEvent)
               ConstrainedCard(
                 child: Padding(
@@ -91,17 +94,15 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("Food", style: Theme.of(context).textTheme.headline5),
+                        child: Text("Food properties", style: Theme.of(context).textTheme.headline5),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: _FoodRadioInput(
-                          values: FoodType.values,
-                          onChipSelected: (food) => setState(() {
-                            _eventTitle = "Calories intake";
-                            _eventValue = food.calories;
-                          }),
-                        ),
+                      _FoodRadioInput(
+                        values: FoodType.values,
+                        onChipSelected: (food) => setState(() {
+                          _eventTitle = "Calories intake";
+                          _eventValue = food.calories;
+                        }),
+                        autoValidate: _autoValidate,
                       ),
                     ],
                   ),
@@ -146,6 +147,44 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                 ),
               ),
             ),
+            if (_eventType == EventType.customEvent)
+              ConstrainedCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Event value", style: Theme.of(context).textTheme.headline5),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          initialValue: _eventValue.toString(),
+                          onChanged: (value) => setState(() => _eventValue = double.tryParse(value) ?? _eventValue),
+                          decoration: const InputDecoration(
+                            icon: Icon(Icons.tune),
+                            border: OutlineInputBorder(),
+                            labelText: 'Numeric value',
+                          ),
+                          autovalidateMode:
+                              _autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) {
+                              return 'Please enter a value for this event';
+                            } else if (double.tryParse(value ?? "") == null) {
+                              return 'Please enter a valid numeric value for this event';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 680.0),
@@ -241,21 +280,20 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
           child: Column(
             children: [
               Wrap(
+                spacing: 4.0,
+                runSpacing: 4.0,
                 children: widget.values
                     .where((eventType) => eventTypeLabels.containsKey(eventType))
                     .map(
-                      (eventType) => Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: ChoiceChip(
-                          label: Text(eventTypeLabels[eventType] ?? ""),
-                          selected: eventType == widget.groupValue,
-                          onSelected: (selected) {
-                            setState(() => minimized = false);
-                            if (selected) {
-                              widget.onChipSelected(eventType);
-                            }
-                          },
-                        ),
+                      (eventType) => ChoiceChip(
+                        label: Text(eventTypeLabels[eventType] ?? ""),
+                        selected: eventType == widget.groupValue,
+                        onSelected: (selected) {
+                          setState(() => minimized = false);
+                          if (selected) {
+                            widget.onChipSelected(eventType);
+                          }
+                        },
                       ),
                     )
                     .toList(),
@@ -368,11 +406,13 @@ class _FoodInfo {
 class _FoodRadioInput extends StatefulWidget {
   final Iterable<FoodType> values;
   final void Function(_FoodInfo) onChipSelected;
+  final bool autoValidate;
 
   const _FoodRadioInput({
     Key? key,
     required this.values,
     required this.onChipSelected,
+    this.autoValidate = false,
   }) : super(key: key);
 
   @override
@@ -380,7 +420,7 @@ class _FoodRadioInput extends StatefulWidget {
 }
 
 class _FoodRadioInputState extends State<_FoodRadioInput> {
-  FoodType _groupValue = FoodType.muesli;
+  _FoodInfo _groupValue = const _FoodInfo(label: "müesli", calories: 200);
 
   static const foodInfo = {
     FoodType.muesli: _FoodInfo(label: "müesli", calories: 200),
@@ -397,37 +437,65 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
   Widget build(BuildContext context) => Column(
         children: [
           Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
             child: Wrap(
+              spacing: 4.0,
+              runSpacing: 4.0,
               children: widget.values
                   .where((food) => foodInfo.containsKey(food))
+                  .map((food) => foodInfo[food])
                   .map(
-                    (food) => Padding(
-                      padding: const EdgeInsets.all(2.0),
-                      child: ChoiceChip(
-                        label: Text(foodInfo[food]?.label ?? ""),
-                        selected: food == _groupValue,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() => _groupValue = food);
-                            widget.onChipSelected(foodInfo[food]!);
-                          }
-                        },
-                      ),
+                    (food) => ChoiceChip(
+                      label: Text(food?.label ?? ""),
+                      selected: food == _groupValue,
+                      onSelected: (selected) {
+                        if (selected) {
+                          setState(() => _groupValue = food!);
+                          widget.onChipSelected(food!);
+                        }
+                      },
                     ),
                   )
                   .toList(),
             ),
           ),
-          if (_groupValue == FoodType.other)
-            TextFormField(
-                keyboardType: TextInputType.number,
-                onChanged: (_) {},
-                decoration: const InputDecoration(
-                  icon: Icon(Icons.local_fire_department),
-                  border: OutlineInputBorder(),
-                  labelText: 'Calories',
-                )),
+          ExpansionTile(
+            leading: const Icon(Icons.tune),
+            expandedCrossAxisAlignment: CrossAxisAlignment.start,
+            title: Text("${_groupValue.calories} calories"),
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  initialValue: _groupValue.calories.toString(),
+                  onChanged: (value) {
+                    final calories = double.tryParse(value);
+                    if (calories != null) {
+                      final newValue = _FoodInfo(label: _groupValue.label, calories: calories);
+                      setState(() => _groupValue = newValue);
+                      widget.onChipSelected(newValue);
+                    }
+                  },
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.local_fire_department),
+                    border: OutlineInputBorder(),
+                    labelText: 'Calories',
+                  ),
+                  autovalidateMode:
+                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  validator: (value) {
+                    if (value?.isEmpty ?? true) {
+                      return 'Please enter the amount of calories for this food';
+                    } else if (double.tryParse(value ?? "") == null) {
+                      return 'Please enter a valid amount of calories for this food';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+            ],
+          ),
         ],
       );
 }
