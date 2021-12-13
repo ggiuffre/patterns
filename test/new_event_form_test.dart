@@ -50,7 +50,7 @@ main() {
 
       final scrollable = find.byWidgetPredicate((w) => w is Scrollable);
       final scrollableForm = find.descendant(of: find.byType(Form), matching: scrollable).first;
-      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit", skipOffstage: false);
+      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit");
       await tester.scrollUntilVisible(submitButtonFinder, 100, scrollable: scrollableForm);
       expect(submitButtonFinder, findsOneWidget);
     });
@@ -64,11 +64,12 @@ main() {
       await tester.enterText(find.widgetWithText(TextFormField, "Event title"), "title");
       final scrollable = find.byWidgetPredicate((w) => w is Scrollable);
       final scrollableForm = find.descendant(of: find.byType(Form), matching: scrollable).first;
-      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit", skipOffstage: false);
+      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit");
       await tester.scrollUntilVisible(submitButtonFinder, 100, scrollable: scrollableForm);
+      await tester.tap(submitButtonFinder);
       await tester.pump();
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    }, skip: true);
+    });
 
     testWidgets("executes a callback upon form submission", (WidgetTester tester) async {
       bool formSubmitted = false;
@@ -81,11 +82,12 @@ main() {
       await tester.enterText(find.widgetWithText(TextFormField, "Event title"), "title");
       final scrollable = find.byWidgetPredicate((w) => w is Scrollable);
       final scrollableForm = find.descendant(of: find.byType(Form), matching: scrollable).first;
-      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit", skipOffstage: false);
+      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit");
       await tester.scrollUntilVisible(submitButtonFinder, 100, scrollable: scrollableForm);
+      await tester.tap(submitButtonFinder);
       await tester.pump();
       expect(formSubmitted, true);
-    }, skip: true);
+    });
 
     testWidgets("shows an error if the event title is empty upon submission", (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
@@ -95,11 +97,12 @@ main() {
 
       final scrollable = find.byWidgetPredicate((w) => w is Scrollable);
       final scrollableForm = find.descendant(of: find.byType(Form), matching: scrollable).first;
-      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit", skipOffstage: false);
+      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit");
       await tester.scrollUntilVisible(submitButtonFinder, 100, scrollable: scrollableForm);
+      await tester.tap(submitButtonFinder);
       await tester.pump();
       expect(find.text("Please enter a title for this event", skipOffstage: false), findsOneWidget);
-    }, skip: true);
+    });
 
     testWidgets("persists a new event to the event repository upon submission", (WidgetTester tester) async {
       final eventRepository = InMemoryEventRepository();
@@ -112,11 +115,12 @@ main() {
       await tester.enterText(find.widgetWithText(TextFormField, "Event title"), eventTitle);
       final scrollable = find.byWidgetPredicate((w) => w is Scrollable);
       final scrollableForm = find.descendant(of: find.byType(Form), matching: scrollable).first;
-      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit", skipOffstage: false);
+      final submitButtonFinder = find.widgetWithText(ElevatedButton, "Submit");
       await tester.scrollUntilVisible(submitButtonFinder, 100, scrollable: scrollableForm);
+      await tester.tap(submitButtonFinder);
       await tester.pump();
       final events = await eventRepository.list.last;
       expect(events.first.title, equals(eventTitle));
-    }, skip: true);
+    });
   });
 }
