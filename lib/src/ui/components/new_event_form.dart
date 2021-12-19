@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/src/data/repositories/mood.dart';
 
 import '../../data/date_formatting.dart';
 import '../../data/event.dart';
@@ -26,6 +27,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
   String _eventTitle = "";
   double _eventValue = 1;
   FoodInfo _foodInfo = foodInfo.values.first;
+  Mood _mood = const Mood();
   DateTime _eventStartTime = DateTime.now();
   DateTime _eventEndTime = DateTime.now();
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
@@ -62,7 +64,9 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                 ),
               ),
             ),
-            if (_eventType != EventType.customEvent && _eventType != EventType.meal)
+            if (_eventType != EventType.customEvent &&
+                _eventType != EventType.meal &&
+                _eventType != EventType.moodMeasurement)
               const ConstrainedCard(child: ErrorCard(text: "Not implemented yet. Work in progress...")),
             if (_eventType == EventType.customEvent)
               ConstrainedCard(
@@ -102,6 +106,75 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                         values: FoodType.values,
                         onChipSelected: (food) => setState(() => _foodInfo = food),
                         autoValidate: _autoValidate,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else if (_eventType == EventType.moodMeasurement)
+              ConstrainedCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Your mood", style: Theme.of(context).textTheme.headline5),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Flexible(flex: 100, child: Text("Happiness:")),
+                            Flexible(
+                              flex: 162,
+                              child: Slider.adaptive(
+                                value: _mood.happiness,
+                                min: -1,
+                                max: 1,
+                                onChanged: (newValue) => setState(() => _mood = _mood.copyWith(happiness: newValue)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Flexible(flex: 100, child: Text("Stress:")),
+                            Flexible(
+                              flex: 162,
+                              child: Slider.adaptive(
+                                value: _mood.stress,
+                                min: -1,
+                                max: 1,
+                                onChanged: (newValue) => setState(() => _mood = _mood.copyWith(stress: newValue)),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Flexible(flex: 100, child: Text("Energy:")),
+                            Flexible(
+                              flex: 162,
+                              child: Slider.adaptive(
+                                value: _mood.energy,
+                                min: -1,
+                                max: 1,
+                                onChanged: (newValue) => setState(() => _mood = _mood.copyWith(energy: newValue)),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -235,6 +308,30 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
               await ref.read(eventProvider).add(nutrientEvent);
             }
           }
+        } else if (_eventType == EventType.moodMeasurement) {
+          if (_eventFrequency != Frequency.once) {
+            final moodEvents = _eventsFromMoodParams(_mood, time: _eventStartTime);
+            final events = moodEvents
+                .map(
+                  (nutrientEvent) => recurringEvents(
+                    title: nutrientEvent.title,
+                    value: nutrientEvent.value,
+                    range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+                    frequency: _eventFrequency,
+                    interval: _eventInterval,
+                  ),
+                )
+                .expand((e) => e)
+                .toList();
+            for (final event in events) {
+              ref.read(eventProvider).add(event);
+            }
+          } else {
+            final moodEvents = _eventsFromMoodParams(_mood, time: _eventStartTime);
+            for (final nutrientEvent in moodEvents) {
+              await ref.read(eventProvider).add(nutrientEvent);
+            }
+          }
         } else if (_eventType == EventType.customEvent) {
           if (_eventFrequency != Frequency.once) {
             final events = recurringEvents(
@@ -263,6 +360,12 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         if (food.fiber != null && food.fiber != 0) Event("fiber intake", value: food.fiber!, start: time),
         if (food.protein != null && food.protein != 0) Event("protein intake", value: food.protein!, start: time),
         if (food.iron != null && food.iron != 0) Event("iron intake", value: food.iron!, start: time),
+      };
+
+  Set<Event> _eventsFromMoodParams(Mood mood, {required DateTime time}) => {
+        if (mood.happiness != 0) Event("happiness", value: mood.happiness, start: time),
+        if (mood.stress != 0) Event("stress", value: mood.stress, start: time),
+        if (mood.energy != 0) Event("perceived energy", value: mood.energy, start: time),
       };
 }
 
@@ -302,7 +405,7 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
     EventType.meal: "meal",
     EventType.socialEvent: "social event",
     EventType.musicListening: "listening to music",
-    EventType.moodMeasurement: "your mood today",
+    EventType.moodMeasurement: "write down your mood",
   };
 
   @override
