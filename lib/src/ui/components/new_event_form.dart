@@ -2,12 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/src/data/repositories/mood.dart';
+import 'package:patterns/src/data/social_event.dart';
 
 import '../../data/date_formatting.dart';
 import '../../data/event.dart';
+import '../../data/food_info.dart';
+import '../../data/mood.dart';
 import '../../data/repositories/events.dart';
-import '../../data/repositories/food.dart';
 import 'constrained_card.dart';
 import 'error_card.dart';
 
@@ -28,6 +29,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
   double _eventValue = 1;
   FoodInfo _foodInfo = foodInfo.values.first;
   Mood _mood = const Mood();
+  SocialEvent _socialEventInfo = const SocialEvent(type: "");
   DateTime _eventStartTime = DateTime.now();
   DateTime _eventEndTime = DateTime.now();
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
@@ -66,7 +68,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
             ),
             if (_eventType != EventType.customEvent &&
                 _eventType != EventType.meal &&
-                _eventType != EventType.moodMeasurement)
+                _eventType != EventType.moodMeasurement &&
+                _eventType != EventType.socialEvent)
               const ConstrainedCard(child: ErrorCard(text: "Not implemented yet. Work in progress...")),
             if (_eventType == EventType.customEvent)
               ConstrainedCard(
@@ -179,6 +182,127 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     ],
                   ),
                 ),
+              )
+            else if (_eventType == EventType.socialEvent)
+              ConstrainedCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Social event", style: Theme.of(context).textTheme.headline5),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Wrap(
+                          spacing: 4.0,
+                          runSpacing: 4.0,
+                          children:
+                              {"dinner", "party", "lunch", "brunch", "cinema", "aperitif", "date", "visit", "other"}
+                                  .map(
+                                    (eventType) => ChoiceChip(
+                                      label: Text(eventType),
+                                      selected: eventType == _socialEventInfo.type,
+                                      onSelected: (selected) {
+                                        if (selected) {
+                                          setState(() => _socialEventInfo = _socialEventInfo.copyWith(type: eventType));
+                                        }
+                                      },
+                                    ),
+                                  )
+                                  .toList(),
+                        ),
+                      ),
+                      if (_socialEventInfo.type == "other")
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            decoration: const InputDecoration(
+                              icon: Icon(Icons.info),
+                              labelText: 'Type of social event',
+                            ),
+                            autovalidateMode:
+                                _autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return 'Please give a label to this event';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Icon(Icons.people),
+                            ),
+                            const Flexible(
+                                child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text("Number of people (including you)"),
+                            )),
+                            Flexible(
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TextFormField(
+                                  key: Key("numberOfPeople${_socialEventInfo.numberOfPeople}"),
+                                  initialValue: _socialEventInfo.numberOfPeople?.toString() ?? "",
+                                  onChanged: (value) {
+                                    final intValue = int.tryParse(value);
+                                    if (intValue != null) {
+                                      setState(
+                                          () => _socialEventInfo = _socialEventInfo.copyWith(numberOfPeople: intValue));
+                                    }
+                                  },
+                                  textAlign: TextAlign.center,
+                                  decoration: InputDecoration(
+                                    prefixIcon: IconButton(
+                                      onPressed: () {
+                                        final currentValue = _socialEventInfo.numberOfPeople;
+                                        if (currentValue != null) {
+                                          if (currentValue > 2) {
+                                            setState(() => _socialEventInfo =
+                                                _socialEventInfo.copyWith(numberOfPeople: currentValue - 1));
+                                          } else {
+                                            // reset number of people to null (copyWith can't do it):
+                                            setState(() => _socialEventInfo = SocialEvent(type: _socialEventInfo.type));
+                                          }
+                                        }
+                                      },
+                                      icon: const Icon(Icons.remove),
+                                    ),
+                                    suffixIcon: IconButton(
+                                      onPressed: () {
+                                        setState(() => _socialEventInfo = _socialEventInfo.copyWith(
+                                            numberOfPeople: (_socialEventInfo.numberOfPeople ?? 1) + 1));
+                                      },
+                                      icon: const Icon(Icons.add),
+                                    ),
+                                  ),
+                                  keyboardType: const TextInputType.numberWithOptions(),
+                                  validator: (value) {
+                                    final intValue = int.tryParse(value ?? "");
+                                    if (intValue != null && intValue < 2) {
+                                      return 'This must be at least 2';
+                                    }
+                                    return null;
+                                  },
+                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                ),
               ),
             ConstrainedCard(
               child: Padding(
@@ -238,7 +362,6 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                           onChanged: (value) => setState(() => _eventValue = double.tryParse(value) ?? _eventValue),
                           decoration: const InputDecoration(
                             icon: Icon(Icons.tune),
-                            border: OutlineInputBorder(),
                             labelText: 'Numeric value',
                           ),
                           autovalidateMode:
@@ -368,7 +491,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
 }
 
 /// Type of new [Event] that a user can create, for example social event,
-/// sports event, different-than-usual calories intake...
+/// sports event, food consumption, perceived mood...
 enum EventType {
   customEvent,
   sportsEvent,
@@ -475,7 +598,6 @@ class _EventTitleTextField extends ConsumerWidget {
               onChanged: onFieldChanged,
               decoration: const InputDecoration(
                 icon: Icon(Icons.info),
-                border: OutlineInputBorder(),
                 labelText: 'Event title',
               ),
               autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
@@ -695,7 +817,6 @@ class _NutrientTextField extends StatelessWidget {
         },
         decoration: InputDecoration(
           icon: const Icon(Icons.local_fire_department),
-          border: const OutlineInputBorder(),
           labelText: "${nutrientName[0].toUpperCase()}${nutrientName.substring(1)}",
           suffixText: "$measurementUnit / 100g",
         ),
