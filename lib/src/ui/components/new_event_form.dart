@@ -571,187 +571,132 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  initialValue: _groupValue.fat == null ? "" : _groupValue.fat.toString(),
-                  onChanged: (value) {
-                    final fat = double.tryParse(value);
-                    if (fat != null) {
-                      final newValue = _groupValue.copyWith(fat: fat);
-                      setState(() => _groupValue = newValue);
-                      widget.onChipSelected(newValue);
-                    }
+                child: _NutrientTextField(
+                  nutrientName: "fat",
+                  initialValue: _groupValue.fat,
+                  onChanged: (newValue) {
+                    final newFoodValue = _groupValue.copyWith(fat: newValue);
+                    setState(() => _groupValue = newFoodValue);
+                    widget.onChipSelected(newFoodValue);
                   },
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.local_fire_department),
-                    border: OutlineInputBorder(),
-                    labelText: 'Fat',
-                  ),
                   autovalidateMode:
                       widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Please enter the amount of fat in this food';
-                    } else if (double.tryParse(value ?? "") == null) {
-                      return 'Please enter a valid amount of fat for this food';
-                    }
-                    return null;
-                  },
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  initialValue: _groupValue.carbs == null ? "" : _groupValue.carbs.toString(),
-                  onChanged: (value) {
-                    final carbs = double.tryParse(value);
-                    if (carbs != null) {
-                      final newValue = _groupValue.copyWith(carbs: carbs);
-                      setState(() => _groupValue = newValue);
-                      widget.onChipSelected(newValue);
-                    }
+                child: _NutrientTextField(
+                  nutrientName: "carbs",
+                  initialValue: _groupValue.carbs,
+                  onChanged: (newValue) {
+                    final newFoodValue = _groupValue.copyWith(carbs: newValue);
+                    setState(() => _groupValue = newFoodValue);
+                    widget.onChipSelected(newFoodValue);
                   },
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.local_fire_department),
-                    border: OutlineInputBorder(),
-                    labelText: 'Carbs',
-                  ),
                   autovalidateMode:
                       widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Please enter the amount of carbs in this food';
-                    } else if (double.tryParse(value ?? "") == null) {
-                      return 'Please enter a valid amount of carbs for this food';
-                    }
-                    return null;
-                  },
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  initialValue: _groupValue.fiber == null ? "" : _groupValue.fiber.toString(),
-                  onChanged: (value) {
-                    final fiber = double.tryParse(value);
-                    if (fiber != null) {
-                      final newValue = _groupValue.copyWith(fiber: fiber);
-                      setState(() => _groupValue = newValue);
-                      widget.onChipSelected(newValue);
-                    }
+                child: _NutrientTextField(
+                  nutrientName: "fiber",
+                  initialValue: _groupValue.fiber,
+                  onChanged: (newValue) {
+                    final newFoodValue = _groupValue.copyWith(fiber: newValue);
+                    setState(() => _groupValue = newFoodValue);
+                    widget.onChipSelected(newFoodValue);
                   },
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.local_fire_department),
-                    border: OutlineInputBorder(),
-                    labelText: 'Fiber',
-                  ),
                   autovalidateMode:
                       widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Please enter the amount of fiber in this food';
-                    } else if (double.tryParse(value ?? "") == null) {
-                      return 'Please enter a valid amount of fiber for this food';
-                    }
-                    return null;
-                  },
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  initialValue: _groupValue.protein == null ? "" : _groupValue.protein.toString(),
-                  onChanged: (value) {
-                    final protein = double.tryParse(value);
-                    if (protein != null) {
-                      final newValue = _groupValue.copyWith(protein: protein);
-                      setState(() => _groupValue = newValue);
-                      widget.onChipSelected(newValue);
-                    }
+                child: _NutrientTextField(
+                  nutrientName: "protein",
+                  initialValue: _groupValue.protein,
+                  onChanged: (newValue) {
+                    final newFoodValue = _groupValue.copyWith(protein: newValue);
+                    setState(() => _groupValue = newFoodValue);
+                    widget.onChipSelected(newFoodValue);
                   },
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.local_fire_department),
-                    border: OutlineInputBorder(),
-                    labelText: 'Protein',
-                  ),
                   autovalidateMode:
                       widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Please enter the amount of protein in this food';
-                    } else if (double.tryParse(value ?? "") == null) {
-                      return 'Please enter a valid amount of protein for this food';
-                    }
-                    return null;
-                  },
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  initialValue: _groupValue.salt == null ? "" : _groupValue.salt.toString(),
-                  onChanged: (value) {
-                    final salt = double.tryParse(value);
-                    if (salt != null) {
-                      final newValue = _groupValue.copyWith(salt: salt);
-                      setState(() => _groupValue = newValue);
-                      widget.onChipSelected(newValue);
-                    }
+                child: _NutrientTextField(
+                  nutrientName: "salt",
+                  initialValue: _groupValue.salt,
+                  onChanged: (newValue) {
+                    final newFoodValue = _groupValue.copyWith(salt: newValue);
+                    setState(() => _groupValue = newFoodValue);
+                    widget.onChipSelected(newFoodValue);
                   },
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.local_fire_department),
-                    border: OutlineInputBorder(),
-                    labelText: 'Salt',
-                  ),
                   autovalidateMode:
                       widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Please enter the amount of salt in this food';
-                    } else if (double.tryParse(value ?? "") == null) {
-                      return 'Please enter a valid amount of salt for this food';
-                    }
-                    return null;
-                  },
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  initialValue: _groupValue.iron == null ? "" : _groupValue.iron.toString(),
-                  onChanged: (value) {
-                    final iron = double.tryParse(value);
-                    if (iron != null) {
-                      final newValue = _groupValue.copyWith(iron: iron);
-                      setState(() => _groupValue = newValue);
-                      widget.onChipSelected(newValue);
-                    }
+                child: _NutrientTextField(
+                  nutrientName: "iron",
+                  initialValue: _groupValue.iron,
+                  onChanged: (newValue) {
+                    final newFoodValue = _groupValue.copyWith(iron: newValue);
+                    setState(() => _groupValue = newFoodValue);
+                    widget.onChipSelected(newFoodValue);
                   },
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.local_fire_department),
-                    border: OutlineInputBorder(),
-                    labelText: 'Iron',
-                  ),
                   autovalidateMode:
                       widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Please enter the amount of iron in this food';
-                    } else if (double.tryParse(value ?? "") == null) {
-                      return 'Please enter a valid amount of iron for this food';
-                    }
-                    return null;
-                  },
                 ),
               ),
             ],
           ),
         ],
+      );
+}
+
+class _NutrientTextField extends StatelessWidget {
+  final String nutrientName;
+  final void Function(double?) onChanged;
+  final double? initialValue;
+  final AutovalidateMode? autovalidateMode;
+
+  const _NutrientTextField({
+    Key? key,
+    required this.nutrientName,
+    required this.onChanged,
+    this.initialValue,
+    this.autovalidateMode,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => TextFormField(
+        keyboardType: TextInputType.number,
+        initialValue: initialValue == null ? "" : initialValue.toString(),
+        onChanged: (newStringValue) {
+          final newValue = double.tryParse(newStringValue);
+          if (newValue != null) {
+            onChanged(newValue);
+          }
+        },
+        decoration: InputDecoration(
+          icon: const Icon(Icons.local_fire_department),
+          border: const OutlineInputBorder(),
+          labelText: "${nutrientName[0].toUpperCase()}${nutrientName.substring(1)}",
+        ),
+        autovalidateMode: autovalidateMode,
+        validator: (value) {
+          if (value?.isEmpty ?? true) {
+            return 'Please enter the amount of $nutrientName that this food contains';
+          } else if (double.tryParse(value ?? "") == null) {
+            return 'Please enter a valid number';
+          }
+          return null;
+        },
       );
 }
 
