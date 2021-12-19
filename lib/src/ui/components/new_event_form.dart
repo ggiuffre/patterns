@@ -285,8 +285,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
       if (formState.validate()) {
         setState(() => _addingEvent = true);
         if (_eventType == EventType.meal) {
+          final nutrientEvents = _eventsFromFoodInfo(_foodInfo, time: _eventStartTime);
           if (_eventFrequency != Frequency.once) {
-            final nutrientEvents = _eventsFromFoodInfo(_foodInfo, time: _eventStartTime);
             final events = nutrientEvents
                 .map(
                   (nutrientEvent) => recurringEvents(
@@ -303,14 +303,13 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
               ref.read(eventProvider).add(event);
             }
           } else {
-            final nutrientEvents = _eventsFromFoodInfo(_foodInfo, time: _eventStartTime);
             for (final nutrientEvent in nutrientEvents) {
               await ref.read(eventProvider).add(nutrientEvent);
             }
           }
         } else if (_eventType == EventType.moodMeasurement) {
+          final moodEvents = _eventsFromMoodParams(_mood, time: _eventStartTime);
           if (_eventFrequency != Frequency.once) {
-            final moodEvents = _eventsFromMoodParams(_mood, time: _eventStartTime);
             final events = moodEvents
                 .map(
                   (nutrientEvent) => recurringEvents(
@@ -327,7 +326,6 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
               ref.read(eventProvider).add(event);
             }
           } else {
-            final moodEvents = _eventsFromMoodParams(_mood, time: _eventStartTime);
             for (final nutrientEvent in moodEvents) {
               await ref.read(eventProvider).add(nutrientEvent);
             }
