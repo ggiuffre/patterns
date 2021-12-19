@@ -40,6 +40,8 @@ class CategoryDetailsPage extends ConsumerWidget {
                   .toList()
                 ..sort();
 
+              final defaultTextColor =
+                  Theme.of(context).colorScheme.brightness == Brightness.dark ? Colors.white : Colors.black;
               return otherCategories.isEmpty
                   ? const Padding(
                       padding: EdgeInsets.all(8.0),
@@ -52,9 +54,11 @@ class CategoryDetailsPage extends ConsumerWidget {
                       separatorBuilder: (BuildContext context, int index) => const Divider(),
                       itemBuilder: (BuildContext context, int index) {
                         final coefficient = coefficients[otherCategories.length - 1 - index];
-                        final colorLabel = HSLColor.fromColor(
-                          Color.lerp(Colors.red, Colors.green, (coefficient + 1) / 2) ?? Colors.white,
-                        ).withLightness(0.75).toColor();
+                        final colorLabel = coefficient.isNaN
+                            ? defaultTextColor
+                            : HSLColor.fromColor(
+                                Color.lerp(Colors.red, Colors.green, (coefficient + 1) / 2) ?? Colors.white,
+                              ).withLightness(0.75).toColor();
                         return ListTile(
                           title: Text(otherCategories.elementAt(index)),
                           trailing: ColorFiltered(
@@ -71,9 +75,7 @@ class CategoryDetailsPage extends ConsumerWidget {
                                 coefficient.toStringAsPrecision(3),
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
-                                  color: Theme.of(context).colorScheme.brightness == Brightness.dark
-                                      ? Colors.white
-                                      : Colors.black,
+                                  color: defaultTextColor,
                                 ),
                               ),
                             ),
