@@ -24,6 +24,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
   EventType _eventType = EventType.customEvent;
   String _eventTitle = "";
   double _eventValue = 1;
+  _FoodInfo? _foodInfo;
   DateTime _eventStartTime = DateTime.now();
   DateTime _eventEndTime = DateTime.now();
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
@@ -60,7 +61,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                 ),
               ),
             ),
-            if (_eventType != EventType.customEvent && _eventType != EventType.caloriesIntakeMeasurement)
+            if (_eventType != EventType.customEvent && _eventType != EventType.meal)
               const ConstrainedCard(child: ErrorCard(text: "Not implemented yet. Work in progress...")),
             if (_eventType == EventType.customEvent)
               ConstrainedCard(
@@ -85,7 +86,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                   ),
                 ),
               )
-            else if (_eventType == EventType.caloriesIntakeMeasurement)
+            else if (_eventType == EventType.meal)
               ConstrainedCard(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -99,8 +100,9 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       _FoodRadioInput(
                         values: FoodType.values,
                         onChipSelected: (food) => setState(() {
-                          _eventTitle = "Calories intake";
+                          _eventTitle = "Meal";
                           _eventValue = food.calories;
+                          _foodInfo = food;
                         }),
                         autoValidate: _autoValidate,
                       ),
@@ -212,24 +214,60 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
       setState(() => _autoValidate = true);
       if (formState.validate()) {
         setState(() => _addingEvent = true);
-        if (_eventFrequency != Frequency.once) {
-          final events = recurringEvents(
-            title: _eventTitle,
-            value: _eventValue,
-            range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
-            frequency: _eventFrequency,
-            interval: _eventInterval,
-          );
-          for (final event in events) {
-            ref.read(eventProvider).add(event);
+        if (_eventType == EventType.meal && _foodInfo != null) {
+          if (_eventFrequency != Frequency.once) {
+            final nutrientEvents = _eventsFromFoodInfo(_foodInfo!, time: _eventStartTime);
+            final events = nutrientEvents
+                .map(
+                  (nutrientEvent) => recurringEvents(
+                    title: nutrientEvent.title,
+                    value: nutrientEvent.value,
+                    range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+                    frequency: _eventFrequency,
+                    interval: _eventInterval,
+                  ),
+                )
+                .expand((e) => e)
+                .toList();
+            for (final event in events) {
+              ref.read(eventProvider).add(event);
+            }
+          } else {
+            final nutrientEvents = _eventsFromFoodInfo(_foodInfo!, time: _eventStartTime);
+            for (final nutrientEvent in nutrientEvents) {
+              await ref.read(eventProvider).add(nutrientEvent);
+            }
           }
-        } else {
-          await ref.read(eventProvider).add(Event(_eventTitle, value: _eventValue, start: _eventStartTime));
+        } else if (_eventType == EventType.customEvent) {
+          if (_eventFrequency != Frequency.once) {
+            final events = recurringEvents(
+              title: _eventTitle,
+              value: _eventValue,
+              range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+              frequency: _eventFrequency,
+              interval: _eventInterval,
+            );
+            for (final event in events) {
+              ref.read(eventProvider).add(event);
+            }
+          } else {
+            await ref.read(eventProvider).add(Event(_eventTitle, value: _eventValue, start: _eventStartTime));
+          }
         }
         widget.onSubmit();
       }
     }
   }
+
+  Set<Event> _eventsFromFoodInfo(_FoodInfo food, {required DateTime time}) => {
+        Event("calories intake", value: food.calories, start: time),
+        if (food.fat != null && food.fat != 0) Event("fat intake", value: food.fat!, start: time),
+        if (food.carbs != null && food.carbs != 0) Event("carbs intake", value: food.carbs!, start: time),
+        if (food.fibers != null && food.fibers != 0) Event("fibers intake", value: food.fibers!, start: time),
+        if (food.proteins != null && food.proteins != 0) Event("proteins intake", value: food.proteins!, start: time),
+        if (food.salt != null && food.salt != 0) Event("salt intake", value: food.salt!, start: time),
+        if (food.iron != null && food.iron != 0) Event("iron intake", value: food.iron!, start: time),
+      };
 }
 
 /// Type of new [Event] that a user can create, for example social event,
@@ -237,7 +275,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
 enum EventType {
   customEvent,
   sportsEvent,
-  caloriesIntakeMeasurement,
+  meal,
   caloriesBurningMeasurement,
   socialEvent,
   measurement,
@@ -265,7 +303,7 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
   static const eventTypeLabels = {
     EventType.customEvent: "custom event",
     EventType.sportsEvent: "sports training event",
-    EventType.caloriesIntakeMeasurement: "calories intake measurement",
+    EventType.meal: "calories intake measurement",
     EventType.caloriesBurningMeasurement: "calories burning measurement",
     EventType.socialEvent: "social event",
     EventType.measurement: "measurement",
@@ -392,15 +430,30 @@ enum FoodType {
   rice,
   salad,
   sandwich,
+  pizza,
   other,
 }
 
 class _FoodInfo {
   final String label;
   final double calories;
+  final double? fat;
+  final double? carbs;
+  final double? fibers;
+  final double? proteins;
+  final double? salt;
   final double? iron;
 
-  const _FoodInfo({required this.label, required this.calories, this.iron});
+  const _FoodInfo({
+    required this.label,
+    required this.calories,
+    this.fat,
+    this.carbs,
+    this.fibers,
+    this.proteins,
+    this.salt,
+    this.iron,
+  });
 }
 
 class _FoodRadioInput extends StatefulWidget {
@@ -430,6 +483,7 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
     FoodType.rice: _FoodInfo(label: "rice", calories: 200),
     FoodType.salad: _FoodInfo(label: "salad", calories: 200),
     FoodType.sandwich: _FoodInfo(label: "sandwich", calories: 200),
+    FoodType.pizza: _FoodInfo(label: "pizza", calories: 180, fat: 5, carbs: 20, proteins: 10, fibers: 0),
     FoodType.other: _FoodInfo(label: "other", calories: 200),
   };
 
