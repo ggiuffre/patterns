@@ -2,12 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/src/ui/components/error_card.dart';
 
 import '../../data/date_formatting.dart';
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
+import '../../data/repositories/food.dart';
 import 'constrained_card.dart';
+import 'error_card.dart';
 
 class NewEventForm extends ConsumerStatefulWidget {
   final void Function() onSubmit;
@@ -24,7 +25,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
   EventType _eventType = EventType.customEvent;
   String _eventTitle = "";
   double _eventValue = 1;
-  _FoodInfo? _foodInfo;
+  FoodInfo _foodInfo = foodInfo.values.first;
   DateTime _eventStartTime = DateTime.now();
   DateTime _eventEndTime = DateTime.now();
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
@@ -99,11 +100,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       ),
                       _FoodRadioInput(
                         values: FoodType.values,
-                        onChipSelected: (food) => setState(() {
-                          _eventTitle = "Meal";
-                          _eventValue = food.calories;
-                          _foodInfo = food;
-                        }),
+                        onChipSelected: (food) => setState(() => _foodInfo = food),
                         autoValidate: _autoValidate,
                       ),
                     ],
@@ -214,9 +211,9 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
       setState(() => _autoValidate = true);
       if (formState.validate()) {
         setState(() => _addingEvent = true);
-        if (_eventType == EventType.meal && _foodInfo != null) {
+        if (_eventType == EventType.meal) {
           if (_eventFrequency != Frequency.once) {
-            final nutrientEvents = _eventsFromFoodInfo(_foodInfo!, time: _eventStartTime);
+            final nutrientEvents = _eventsFromFoodInfo(_foodInfo, time: _eventStartTime);
             final events = nutrientEvents
                 .map(
                   (nutrientEvent) => recurringEvents(
@@ -233,7 +230,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
               ref.read(eventProvider).add(event);
             }
           } else {
-            final nutrientEvents = _eventsFromFoodInfo(_foodInfo!, time: _eventStartTime);
+            final nutrientEvents = _eventsFromFoodInfo(_foodInfo, time: _eventStartTime);
             for (final nutrientEvent in nutrientEvents) {
               await ref.read(eventProvider).add(nutrientEvent);
             }
@@ -259,13 +256,12 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
     }
   }
 
-  Set<Event> _eventsFromFoodInfo(_FoodInfo food, {required DateTime time}) => {
+  Set<Event> _eventsFromFoodInfo(FoodInfo food, {required DateTime time}) => {
         Event("calories intake", value: food.calories, start: time),
         if (food.fat != null && food.fat != 0) Event("fat intake", value: food.fat!, start: time),
         if (food.carbs != null && food.carbs != 0) Event("carbs intake", value: food.carbs!, start: time),
         if (food.fiber != null && food.fiber != 0) Event("fiber intake", value: food.fiber!, start: time),
         if (food.protein != null && food.protein != 0) Event("protein intake", value: food.protein!, start: time),
-        if (food.salt != null && food.salt != 0) Event("salt intake", value: food.salt!, start: time),
         if (food.iron != null && food.iron != 0) Event("iron intake", value: food.iron!, start: time),
       };
 }
@@ -422,64 +418,9 @@ class _EventTitleTextField extends ConsumerWidget {
       );
 }
 
-enum FoodType {
-  muesli,
-  lentils,
-  fruit,
-  pasta,
-  rice,
-  salad,
-  sandwich,
-  pizza,
-  other,
-}
-
-class _FoodInfo {
-  final String label;
-  final double calories;
-  final double? fat;
-  final double? carbs;
-  final double? fiber;
-  final double? protein;
-  final double? salt;
-  final double? iron;
-
-  const _FoodInfo({
-    required this.label,
-    required this.calories,
-    this.fat,
-    this.carbs,
-    this.fiber,
-    this.protein,
-    this.salt,
-    this.iron,
-  });
-
-  _FoodInfo copyWith({
-    String? label,
-    double? calories,
-    double? fat,
-    double? carbs,
-    double? fiber,
-    double? protein,
-    double? salt,
-    double? iron,
-  }) =>
-      _FoodInfo(
-        label: label ?? this.label,
-        calories: calories ?? this.calories,
-        fat: fat ?? this.fat,
-        carbs: carbs ?? this.carbs,
-        fiber: fiber ?? this.fiber,
-        protein: protein ?? this.protein,
-        salt: salt ?? this.salt,
-        iron: iron ?? this.iron,
-      );
-}
-
 class _FoodRadioInput extends StatefulWidget {
   final Iterable<FoodType> values;
-  final void Function(_FoodInfo) onChipSelected;
+  final void Function(FoodInfo) onChipSelected;
   final bool autoValidate;
 
   const _FoodRadioInput({
@@ -494,19 +435,7 @@ class _FoodRadioInput extends StatefulWidget {
 }
 
 class _FoodRadioInputState extends State<_FoodRadioInput> {
-  _FoodInfo _groupValue = const _FoodInfo(label: "müesli", calories: 200);
-
-  static const foodInfo = {
-    FoodType.muesli: _FoodInfo(label: "müesli", calories: 200),
-    FoodType.lentils: _FoodInfo(label: "lentils", calories: 200),
-    FoodType.fruit: _FoodInfo(label: "fruit", calories: 200),
-    FoodType.pasta: _FoodInfo(label: "pasta", calories: 200),
-    FoodType.rice: _FoodInfo(label: "rice", calories: 200),
-    FoodType.salad: _FoodInfo(label: "salad", calories: 200),
-    FoodType.sandwich: _FoodInfo(label: "sandwich", calories: 200),
-    FoodType.pizza: _FoodInfo(label: "pizza", calories: 180, fat: 5, carbs: 20, protein: 10, fiber: 0),
-    FoodType.other: _FoodInfo(label: "other", calories: 200),
-  };
+  FoodInfo _groupValue = foodInfo.values.first;
 
   @override
   Widget build(BuildContext context) => Column(
@@ -541,37 +470,24 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: TextFormField(
-                  keyboardType: TextInputType.number,
-                  initialValue: _groupValue.calories.toString(),
-                  onChanged: (value) {
-                    final calories = double.tryParse(value);
-                    if (calories != null) {
-                      final newValue = _groupValue.copyWith(calories: calories);
-                      setState(() => _groupValue = newValue);
-                      widget.onChipSelected(newValue);
-                    }
+                child: _NutrientTextField(
+                  key: Key("${_groupValue.label}_calories"),
+                  nutrientName: "calories",
+                  measurementUnit: "kcal",
+                  initialValue: _groupValue.calories,
+                  onChanged: (newValue) {
+                    final newFoodValue = _groupValue.copyWith(calories: newValue);
+                    setState(() => _groupValue = newFoodValue);
+                    widget.onChipSelected(newFoodValue);
                   },
-                  decoration: const InputDecoration(
-                    icon: Icon(Icons.local_fire_department),
-                    border: OutlineInputBorder(),
-                    labelText: 'Calories',
-                  ),
                   autovalidateMode:
                       widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Please enter the amount of calories in this food';
-                    } else if (double.tryParse(value ?? "") == null) {
-                      return 'Please enter a valid amount of calories for this food';
-                    }
-                    return null;
-                  },
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: _NutrientTextField(
+                  key: Key("${_groupValue.label}_fat"),
                   nutrientName: "fat",
                   initialValue: _groupValue.fat,
                   onChanged: (newValue) {
@@ -586,6 +502,7 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: _NutrientTextField(
+                  key: Key("${_groupValue.label}_carbs"),
                   nutrientName: "carbs",
                   initialValue: _groupValue.carbs,
                   onChanged: (newValue) {
@@ -600,6 +517,7 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: _NutrientTextField(
+                  key: Key("${_groupValue.label}_fiber"),
                   nutrientName: "fiber",
                   initialValue: _groupValue.fiber,
                   onChanged: (newValue) {
@@ -614,6 +532,7 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: _NutrientTextField(
+                  key: Key("${_groupValue.label}_protein"),
                   nutrientName: "protein",
                   initialValue: _groupValue.protein,
                   onChanged: (newValue) {
@@ -628,21 +547,9 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: _NutrientTextField(
-                  nutrientName: "salt",
-                  initialValue: _groupValue.salt,
-                  onChanged: (newValue) {
-                    final newFoodValue = _groupValue.copyWith(salt: newValue);
-                    setState(() => _groupValue = newFoodValue);
-                    widget.onChipSelected(newFoodValue);
-                  },
-                  autovalidateMode:
-                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: _NutrientTextField(
+                  key: Key("${_groupValue.label}_iron"),
                   nutrientName: "iron",
+                  measurementUnit: "mg",
                   initialValue: _groupValue.iron,
                   onChanged: (newValue) {
                     final newFoodValue = _groupValue.copyWith(iron: newValue);
@@ -664,14 +571,16 @@ class _NutrientTextField extends StatelessWidget {
   final void Function(double?) onChanged;
   final double? initialValue;
   final AutovalidateMode? autovalidateMode;
+  final String? measurementUnit;
 
-  const _NutrientTextField({
-    Key? key,
-    required this.nutrientName,
-    required this.onChanged,
-    this.initialValue,
-    this.autovalidateMode,
-  }) : super(key: key);
+  const _NutrientTextField(
+      {Key? key,
+      required this.nutrientName,
+      required this.onChanged,
+      this.initialValue,
+      this.autovalidateMode,
+      this.measurementUnit = "g"})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) => TextFormField(
@@ -687,6 +596,7 @@ class _NutrientTextField extends StatelessWidget {
           icon: const Icon(Icons.local_fire_department),
           border: const OutlineInputBorder(),
           labelText: "${nutrientName[0].toUpperCase()}${nutrientName.substring(1)}",
+          suffixText: "$measurementUnit / 100g",
         ),
         autovalidateMode: autovalidateMode,
         validator: (value) {
