@@ -272,9 +272,9 @@ enum EventType {
   customEvent,
   sportsEvent,
   meal,
-  caloriesBurningMeasurement,
   socialEvent,
-  measurement,
+  musicListening,
+  moodMeasurement,
 }
 
 class _EventTypeSelector extends StatefulWidget {
@@ -298,11 +298,11 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
 
   static const eventTypeLabels = {
     EventType.customEvent: "custom event",
-    EventType.sportsEvent: "sports training event",
-    EventType.meal: "calories intake measurement",
-    EventType.caloriesBurningMeasurement: "calories burning measurement",
+    EventType.sportsEvent: "workout/training",
+    EventType.meal: "meal",
     EventType.socialEvent: "social event",
-    EventType.measurement: "measurement",
+    EventType.musicListening: "listening to music",
+    EventType.moodMeasurement: "your mood today",
   };
 
   @override
