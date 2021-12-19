@@ -263,8 +263,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         Event("calories intake", value: food.calories, start: time),
         if (food.fat != null && food.fat != 0) Event("fat intake", value: food.fat!, start: time),
         if (food.carbs != null && food.carbs != 0) Event("carbs intake", value: food.carbs!, start: time),
-        if (food.fibers != null && food.fibers != 0) Event("fibers intake", value: food.fibers!, start: time),
-        if (food.proteins != null && food.proteins != 0) Event("proteins intake", value: food.proteins!, start: time),
+        if (food.fiber != null && food.fiber != 0) Event("fiber intake", value: food.fiber!, start: time),
+        if (food.protein != null && food.protein != 0) Event("protein intake", value: food.protein!, start: time),
         if (food.salt != null && food.salt != 0) Event("salt intake", value: food.salt!, start: time),
         if (food.iron != null && food.iron != 0) Event("iron intake", value: food.iron!, start: time),
       };
@@ -439,8 +439,8 @@ class _FoodInfo {
   final double calories;
   final double? fat;
   final double? carbs;
-  final double? fibers;
-  final double? proteins;
+  final double? fiber;
+  final double? protein;
   final double? salt;
   final double? iron;
 
@@ -449,11 +449,32 @@ class _FoodInfo {
     required this.calories,
     this.fat,
     this.carbs,
-    this.fibers,
-    this.proteins,
+    this.fiber,
+    this.protein,
     this.salt,
     this.iron,
   });
+
+  _FoodInfo copyWith({
+    String? label,
+    double? calories,
+    double? fat,
+    double? carbs,
+    double? fiber,
+    double? protein,
+    double? salt,
+    double? iron,
+  }) =>
+      _FoodInfo(
+        label: label ?? this.label,
+        calories: calories ?? this.calories,
+        fat: fat ?? this.fat,
+        carbs: carbs ?? this.carbs,
+        fiber: fiber ?? this.fiber,
+        protein: protein ?? this.protein,
+        salt: salt ?? this.salt,
+        iron: iron ?? this.iron,
+      );
 }
 
 class _FoodRadioInput extends StatefulWidget {
@@ -483,7 +504,7 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
     FoodType.rice: _FoodInfo(label: "rice", calories: 200),
     FoodType.salad: _FoodInfo(label: "salad", calories: 200),
     FoodType.sandwich: _FoodInfo(label: "sandwich", calories: 200),
-    FoodType.pizza: _FoodInfo(label: "pizza", calories: 180, fat: 5, carbs: 20, proteins: 10, fibers: 0),
+    FoodType.pizza: _FoodInfo(label: "pizza", calories: 180, fat: 5, carbs: 20, protein: 10, fiber: 0),
     FoodType.other: _FoodInfo(label: "other", calories: 200),
   };
 
@@ -526,7 +547,7 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
                   onChanged: (value) {
                     final calories = double.tryParse(value);
                     if (calories != null) {
-                      final newValue = _FoodInfo(label: _groupValue.label, calories: calories);
+                      final newValue = _groupValue.copyWith(calories: calories);
                       setState(() => _groupValue = newValue);
                       widget.onChipSelected(newValue);
                     }
@@ -540,9 +561,189 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
                       widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
-                      return 'Please enter the amount of calories for this food';
+                      return 'Please enter the amount of calories in this food';
                     } else if (double.tryParse(value ?? "") == null) {
                       return 'Please enter a valid amount of calories for this food';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  initialValue: _groupValue.fat == null ? "" : _groupValue.fat.toString(),
+                  onChanged: (value) {
+                    final fat = double.tryParse(value);
+                    if (fat != null) {
+                      final newValue = _groupValue.copyWith(fat: fat);
+                      setState(() => _groupValue = newValue);
+                      widget.onChipSelected(newValue);
+                    }
+                  },
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.local_fire_department),
+                    border: OutlineInputBorder(),
+                    labelText: 'Fat',
+                  ),
+                  autovalidateMode:
+                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  validator: (value) {
+                    if (value?.isEmpty ?? true) {
+                      return 'Please enter the amount of fat in this food';
+                    } else if (double.tryParse(value ?? "") == null) {
+                      return 'Please enter a valid amount of fat for this food';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  initialValue: _groupValue.carbs == null ? "" : _groupValue.carbs.toString(),
+                  onChanged: (value) {
+                    final carbs = double.tryParse(value);
+                    if (carbs != null) {
+                      final newValue = _groupValue.copyWith(carbs: carbs);
+                      setState(() => _groupValue = newValue);
+                      widget.onChipSelected(newValue);
+                    }
+                  },
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.local_fire_department),
+                    border: OutlineInputBorder(),
+                    labelText: 'Carbs',
+                  ),
+                  autovalidateMode:
+                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  validator: (value) {
+                    if (value?.isEmpty ?? true) {
+                      return 'Please enter the amount of carbs in this food';
+                    } else if (double.tryParse(value ?? "") == null) {
+                      return 'Please enter a valid amount of carbs for this food';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  initialValue: _groupValue.fiber == null ? "" : _groupValue.fiber.toString(),
+                  onChanged: (value) {
+                    final fiber = double.tryParse(value);
+                    if (fiber != null) {
+                      final newValue = _groupValue.copyWith(fiber: fiber);
+                      setState(() => _groupValue = newValue);
+                      widget.onChipSelected(newValue);
+                    }
+                  },
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.local_fire_department),
+                    border: OutlineInputBorder(),
+                    labelText: 'Fiber',
+                  ),
+                  autovalidateMode:
+                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  validator: (value) {
+                    if (value?.isEmpty ?? true) {
+                      return 'Please enter the amount of fiber in this food';
+                    } else if (double.tryParse(value ?? "") == null) {
+                      return 'Please enter a valid amount of fiber for this food';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  initialValue: _groupValue.protein == null ? "" : _groupValue.protein.toString(),
+                  onChanged: (value) {
+                    final protein = double.tryParse(value);
+                    if (protein != null) {
+                      final newValue = _groupValue.copyWith(protein: protein);
+                      setState(() => _groupValue = newValue);
+                      widget.onChipSelected(newValue);
+                    }
+                  },
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.local_fire_department),
+                    border: OutlineInputBorder(),
+                    labelText: 'Protein',
+                  ),
+                  autovalidateMode:
+                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  validator: (value) {
+                    if (value?.isEmpty ?? true) {
+                      return 'Please enter the amount of protein in this food';
+                    } else if (double.tryParse(value ?? "") == null) {
+                      return 'Please enter a valid amount of protein for this food';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  initialValue: _groupValue.salt == null ? "" : _groupValue.salt.toString(),
+                  onChanged: (value) {
+                    final salt = double.tryParse(value);
+                    if (salt != null) {
+                      final newValue = _groupValue.copyWith(salt: salt);
+                      setState(() => _groupValue = newValue);
+                      widget.onChipSelected(newValue);
+                    }
+                  },
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.local_fire_department),
+                    border: OutlineInputBorder(),
+                    labelText: 'Salt',
+                  ),
+                  autovalidateMode:
+                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  validator: (value) {
+                    if (value?.isEmpty ?? true) {
+                      return 'Please enter the amount of salt in this food';
+                    } else if (double.tryParse(value ?? "") == null) {
+                      return 'Please enter a valid amount of salt for this food';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: TextFormField(
+                  keyboardType: TextInputType.number,
+                  initialValue: _groupValue.iron == null ? "" : _groupValue.iron.toString(),
+                  onChanged: (value) {
+                    final iron = double.tryParse(value);
+                    if (iron != null) {
+                      final newValue = _groupValue.copyWith(iron: iron);
+                      setState(() => _groupValue = newValue);
+                      widget.onChipSelected(newValue);
+                    }
+                  },
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.local_fire_department),
+                    border: OutlineInputBorder(),
+                    labelText: 'Iron',
+                  ),
+                  autovalidateMode:
+                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  validator: (value) {
+                    if (value?.isEmpty ?? true) {
+                      return 'Please enter the amount of iron in this food';
+                    } else if (double.tryParse(value ?? "") == null) {
+                      return 'Please enter a valid amount of iron for this food';
                     }
                     return null;
                   },
