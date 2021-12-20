@@ -7,8 +7,10 @@ class ConstrainedCard extends StatelessWidget {
   const ConstrainedCard({Key? key, required this.child}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 680.0),
-        child: Card(child: child),
+  Widget build(BuildContext context) => Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 680.0),
+          child: Card(child: child),
+        ),
       );
 }

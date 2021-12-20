@@ -2,13 +2,13 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/src/data/social_event.dart';
 
 import '../../data/date_formatting.dart';
 import '../../data/event.dart';
 import '../../data/food_info.dart';
 import '../../data/mood.dart';
 import '../../data/repositories/events.dart';
+import '../../data/social_event.dart';
 import 'constrained_card.dart';
 import 'error_card.dart';
 
@@ -43,7 +43,6 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         child: ListView(
           padding: const EdgeInsets.all(8.0),
           children: [
-            // if (false)
             ConstrainedCard(
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -238,15 +237,23 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Icon(Icons.people),
+                            Flexible(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: const [
+                                  Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Icon(Icons.people),
+                                  ),
+                                  Flexible(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(8.0),
+                                      child: Text("Number of people (including you)"),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                            const Flexible(
-                                child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text("Number of people (including you)"),
-                            )),
                             Flexible(
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -534,36 +541,35 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
         duration: const Duration(milliseconds: 750),
         curve: Curves.fastOutSlowIn,
         constraints: minimized ? const BoxConstraints(maxHeight: 50) : const BoxConstraints(maxHeight: 600),
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Wrap(
-                spacing: 4.0,
-                runSpacing: 4.0,
-                children: widget.values
-                    .where((eventType) => eventTypeLabels.containsKey(eventType))
-                    .map(
-                      (eventType) => ChoiceChip(
-                        label: Text(eventTypeLabels[eventType] ?? ""),
-                        selected: eventType == widget.groupValue,
-                        onSelected: (selected) {
-                          setState(() => minimized = false);
-                          if (selected) {
-                            widget.onChipSelected(eventType);
-                          }
-                        },
-                      ),
-                    )
-                    .toList(),
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            Wrap(
+              spacing: 4.0,
+              runSpacing: 4.0,
+              children: widget.values
+                  .where((eventType) => eventTypeLabels.containsKey(eventType))
+                  .map(
+                    (eventType) => ChoiceChip(
+                      label: Text(eventTypeLabels[eventType] ?? ""),
+                      selected: eventType == widget.groupValue,
+                      onSelected: (selected) {
+                        setState(() => minimized = false);
+                        if (selected) {
+                          widget.onChipSelected(eventType);
+                        }
+                      },
+                    ),
+                  )
+                  .toList(),
+            ),
+            if (!minimized)
+              TextButton.icon(
+                icon: const Icon(Icons.arrow_drop_up),
+                onPressed: () => setState(() => minimized = true),
+                label: const Text("Collapse"),
               ),
-              if (!minimized)
-                TextButton.icon(
-                  icon: const Icon(Icons.arrow_drop_up),
-                  onPressed: () => setState(() => minimized = true),
-                  label: const Text("Collapse"),
-                ),
-            ],
-          ),
+          ],
         ),
       );
 }
@@ -661,131 +667,135 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
   FoodInfo _groupValue = foodInfo.values.first;
 
   @override
-  Widget build(BuildContext context) => Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Wrap(
-              spacing: 4.0,
-              runSpacing: 4.0,
-              children: widget.values
-                  .where((food) => foodInfo.containsKey(food))
-                  .map((food) => foodInfo[food])
-                  .map(
-                    (food) => ChoiceChip(
-                      label: Text(food?.label ?? ""),
-                      selected: food == _groupValue,
-                      onSelected: (selected) {
-                        if (selected) {
-                          setState(() => _groupValue = food!);
-                          widget.onChipSelected(food!);
-                        }
-                      },
-                    ),
-                  )
-                  .toList(),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Wrap(
+                spacing: 4.0,
+                runSpacing: 4.0,
+                children: widget.values
+                    .where((food) => foodInfo.containsKey(food))
+                    .map((food) => foodInfo[food])
+                    .map(
+                      (food) => ChoiceChip(
+                        label: Text(food?.label ?? ""),
+                        selected: food == _groupValue,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() => _groupValue = food!);
+                            widget.onChipSelected(food!);
+                          }
+                        },
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          ),
-          ExpansionTile(
-            leading: const Icon(Icons.tune),
-            expandedCrossAxisAlignment: CrossAxisAlignment.start,
-            title: Text("${_groupValue.calories} calories"),
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: _NutrientTextField(
-                  key: Key("${_groupValue.label}_calories"),
-                  nutrientName: "calories",
-                  measurementUnit: "kcal",
-                  initialValue: _groupValue.calories,
-                  onChanged: (newValue) {
-                    final newFoodValue = _groupValue.copyWith(calories: newValue);
-                    setState(() => _groupValue = newFoodValue);
-                    widget.onChipSelected(newFoodValue);
-                  },
-                  autovalidateMode:
-                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+            ExpansionTile(
+              leading: const Icon(Icons.tune),
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
+              title: Text("${_groupValue.calories} calories"),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _NutrientTextField(
+                    key: Key("${_groupValue.label}_calories"),
+                    nutrientName: "calories",
+                    measurementUnit: "kcal",
+                    initialValue: _groupValue.calories,
+                    onChanged: (newValue) {
+                      final newFoodValue = _groupValue.copyWith(calories: newValue);
+                      setState(() => _groupValue = newFoodValue);
+                      widget.onChipSelected(newFoodValue);
+                    },
+                    autovalidateMode:
+                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: _NutrientTextField(
-                  key: Key("${_groupValue.label}_fat"),
-                  nutrientName: "fat",
-                  initialValue: _groupValue.fat,
-                  onChanged: (newValue) {
-                    final newFoodValue = _groupValue.copyWith(fat: newValue);
-                    setState(() => _groupValue = newFoodValue);
-                    widget.onChipSelected(newFoodValue);
-                  },
-                  autovalidateMode:
-                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _NutrientTextField(
+                    key: Key("${_groupValue.label}_fat"),
+                    nutrientName: "fat",
+                    initialValue: _groupValue.fat,
+                    onChanged: (newValue) {
+                      final newFoodValue = _groupValue.copyWith(fat: newValue);
+                      setState(() => _groupValue = newFoodValue);
+                      widget.onChipSelected(newFoodValue);
+                    },
+                    autovalidateMode:
+                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: _NutrientTextField(
-                  key: Key("${_groupValue.label}_carbs"),
-                  nutrientName: "carbs",
-                  initialValue: _groupValue.carbs,
-                  onChanged: (newValue) {
-                    final newFoodValue = _groupValue.copyWith(carbs: newValue);
-                    setState(() => _groupValue = newFoodValue);
-                    widget.onChipSelected(newFoodValue);
-                  },
-                  autovalidateMode:
-                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _NutrientTextField(
+                    key: Key("${_groupValue.label}_carbs"),
+                    nutrientName: "carbs",
+                    initialValue: _groupValue.carbs,
+                    onChanged: (newValue) {
+                      final newFoodValue = _groupValue.copyWith(carbs: newValue);
+                      setState(() => _groupValue = newFoodValue);
+                      widget.onChipSelected(newFoodValue);
+                    },
+                    autovalidateMode:
+                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: _NutrientTextField(
-                  key: Key("${_groupValue.label}_fiber"),
-                  nutrientName: "fiber",
-                  initialValue: _groupValue.fiber,
-                  onChanged: (newValue) {
-                    final newFoodValue = _groupValue.copyWith(fiber: newValue);
-                    setState(() => _groupValue = newFoodValue);
-                    widget.onChipSelected(newFoodValue);
-                  },
-                  autovalidateMode:
-                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _NutrientTextField(
+                    key: Key("${_groupValue.label}_fiber"),
+                    nutrientName: "fiber",
+                    initialValue: _groupValue.fiber,
+                    onChanged: (newValue) {
+                      final newFoodValue = _groupValue.copyWith(fiber: newValue);
+                      setState(() => _groupValue = newFoodValue);
+                      widget.onChipSelected(newFoodValue);
+                    },
+                    autovalidateMode:
+                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: _NutrientTextField(
-                  key: Key("${_groupValue.label}_protein"),
-                  nutrientName: "protein",
-                  initialValue: _groupValue.protein,
-                  onChanged: (newValue) {
-                    final newFoodValue = _groupValue.copyWith(protein: newValue);
-                    setState(() => _groupValue = newFoodValue);
-                    widget.onChipSelected(newFoodValue);
-                  },
-                  autovalidateMode:
-                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _NutrientTextField(
+                    key: Key("${_groupValue.label}_protein"),
+                    nutrientName: "protein",
+                    initialValue: _groupValue.protein,
+                    onChanged: (newValue) {
+                      final newFoodValue = _groupValue.copyWith(protein: newValue);
+                      setState(() => _groupValue = newFoodValue);
+                      widget.onChipSelected(newFoodValue);
+                    },
+                    autovalidateMode:
+                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                child: _NutrientTextField(
-                  key: Key("${_groupValue.label}_iron"),
-                  nutrientName: "iron",
-                  measurementUnit: "mg",
-                  initialValue: _groupValue.iron,
-                  onChanged: (newValue) {
-                    final newFoodValue = _groupValue.copyWith(iron: newValue);
-                    setState(() => _groupValue = newFoodValue);
-                    widget.onChipSelected(newFoodValue);
-                  },
-                  autovalidateMode:
-                      widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _NutrientTextField(
+                    key: Key("${_groupValue.label}_iron"),
+                    nutrientName: "iron",
+                    measurementUnit: "mg",
+                    initialValue: _groupValue.iron,
+                    onChanged: (newValue) {
+                      final newFoodValue = _groupValue.copyWith(iron: newValue);
+                      setState(() => _groupValue = newFoodValue);
+                      widget.onChipSelected(newFoodValue);
+                    },
+                    autovalidateMode:
+                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       );
 }
 
