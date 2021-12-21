@@ -10,7 +10,7 @@ import 'factories.dart';
 main() {
   testWidgets("shows patterns as a list of tiles", (WidgetTester tester) async {
     final eventRepository = InMemoryEventRepository();
-    eventRepository.events = randomEvents(randomInt(max: 20) + 10);
+    eventRepository.events = randomEvents(randomInt(max: 5) + 10);
     final events = await eventRepository.list.last;
     final coefficients = similarities(events).reversed;
     await tester.pumpWidget(ProviderScope(
