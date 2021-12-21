@@ -5,10 +5,22 @@ import 'factories.dart';
 
 main() {
   group("The monthsLater extension method on DateTime", () {
-    test("returns a date in the future compared to the original", () {
+    test("returns a date in the future compared to the original, when adding months", () {
       final original = randomDate();
-      final result = original.monthsLater(months: randomInt(max: 24));
+      final result = original.monthsLater(months: randomInt(max: 24) + 1);
       expect(original.isBefore(result), isTrue);
+    });
+
+    test("returns a date in the past compared to the original, when subtracting months", () {
+      final original = randomDate();
+      final result = original.monthsLater(months: -(randomInt(max: 24) + 1));
+      expect(original.isAfter(result), isTrue);
+    });
+
+    test("returns the same date as the original, when adding 0 months", () {
+      final original = randomDate();
+      final result = original.monthsLater(months: 0);
+      expect(original.isAtSameMomentAs(result), isTrue);
     });
 
     test("returns a date with the same day of the month, if the original day is below 29", () {
@@ -44,6 +56,12 @@ main() {
       }
       expect(result.year == original.year + 1, isTrue);
       expect(result.month == original.month, isTrue);
+    });
+  });
+
+  group("The increaseByInterval extension method on DateTime", () {
+    group("with daily frequency argument", () {
+      test("", () {});
     });
   });
 }

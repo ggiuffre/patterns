@@ -151,27 +151,34 @@ extension IncreasableByInterval on DateTime {
     required Frequency frequency,
   }) {
     if (frequency == Frequency.daily) {
-      return DateTime(year, month, day + interval, hour, minute, second, millisecond, microsecond);
+      return DateTime.utc(year, month, day + interval, hour, minute, second, millisecond, microsecond);
     } else if (frequency == Frequency.weekly) {
-      return DateTime(year, month, day + (7 * interval), hour, minute, second, millisecond, microsecond);
+      return DateTime.utc(year, month, day + (7 * interval), hour, minute, second, millisecond, microsecond);
     } else if (frequency == Frequency.monthly) {
       return monthsLater(months: interval);
     } else if (frequency == Frequency.yearly) {
-      return DateTime(year + interval, month, day, hour, minute, second, millisecond, microsecond);
+      return DateTime.utc(year + interval, month, day, hour, minute, second, millisecond, microsecond);
     } else {
       throw Exception("Invalid frequency '$frequency'");
     }
   }
 
   DateTime monthsLater({required int months}) {
-    DateTime candidate = DateTime(year, month + months, day, hour, minute, second, millisecond, microsecond);
+    DateTime candidate = DateTime.utc(year, month + months, day, hour, minute, second, millisecond, microsecond);
+    int correction = 0;
 
-    if ((candidate.month - month) % 12 > months) {
-      int correction = 1;
-      while (((candidate.month - month) % 12 > months)) {
-        candidate = DateTime(year, month + months, day - correction, hour, minute, second, millisecond, microsecond);
-        correction++;
-      }
+    while (((candidate.month - month) % 12 > months.abs())) {
+      correction++;
+      candidate = DateTime.utc(
+        year,
+        month + months,
+        day - (correction * months.sign),
+        hour,
+        minute,
+        second,
+        millisecond,
+        microsecond,
+      );
     }
 
     return candidate;
