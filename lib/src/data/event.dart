@@ -104,21 +104,11 @@ class Event implements Comparable<Event> {
     final endTime = end;
 
     if (endTime != null && frequency != Frequency.once) {
-      final actions = <Frequency, DateTime Function(DateTime, int)>{
-        Frequency.daily: (DateTime t, int interval) =>
-            DateTime(t.year, t.month, t.day + interval, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-        Frequency.weekly: (DateTime t, int interval) =>
-            DateTime(t.year, t.month, t.day + (7 * interval), t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-        Frequency.monthly: (DateTime t, int interval) => monthsLater(t: t, months: interval),
-        Frequency.yearly: (DateTime t, int interval) =>
-            DateTime(t.year + interval, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-      };
-
       List<Event> result = [];
       DateTime instanceTime = start;
       while (!instanceTime.isAfter(endTime)) {
         result.add(Event(title, value: value, start: instanceTime));
-        instanceTime = actions[frequency]!(instanceTime, interval);
+        instanceTime = instanceTime.increaseByInterval(interval: interval, frequency: frequency);
       }
 
       return result;
@@ -145,38 +135,45 @@ Iterable<Event> recurringEvents({
     return {Event(title, value: value, start: range.start)};
   }
 
-  final actions = <Frequency, DateTime Function(DateTime, int)>{
-    Frequency.daily: (DateTime t, int interval) =>
-        DateTime(t.year, t.month, t.day + interval, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-    Frequency.weekly: (DateTime t, int interval) =>
-        DateTime(t.year, t.month, t.day + (7 * interval), t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-    Frequency.monthly: (DateTime t, int interval) => monthsLater(t: t, months: interval),
-    Frequency.yearly: (DateTime t, int interval) =>
-        DateTime(t.year + interval, t.month, t.day, t.hour, t.minute, t.second, t.millisecond, t.microsecond),
-  };
-
   List<Event> result = [];
   DateTime time = range.start;
   while (!time.isAfter(range.end)) {
     result.add(Event(title, value: value, start: time));
-    time = actions[frequency]!(time, interval);
+    time = time.increaseByInterval(interval: interval, frequency: frequency);
   }
 
   return result;
 }
 
-DateTime monthsLater({required DateTime t, required int months}) {
-  DateTime candidate = DateTime(t.year + (t.month + months >= 12 ? 1 : 0), t.month + months, t.day, t.hour, t.minute,
-      t.second, t.millisecond, t.microsecond);
-
-  if ((candidate.month - t.month) % 12 > months) {
-    int correction = 1;
-    while (((candidate.month - t.month) % 12 > months)) {
-      candidate = DateTime(t.year + (t.month + months >= 12 ? 1 : 0), t.month + months, t.day - correction, t.hour,
-          t.minute, t.second, t.millisecond, t.microsecond);
-      correction++;
+extension IncreasableByInterval on DateTime {
+  DateTime increaseByInterval({
+    required int interval,
+    required Frequency frequency,
+  }) {
+    if (frequency == Frequency.daily) {
+      return DateTime(year, month, day + interval, hour, minute, second, millisecond, microsecond);
+    } else if (frequency == Frequency.weekly) {
+      return DateTime(year, month, day + (7 * interval), hour, minute, second, millisecond, microsecond);
+    } else if (frequency == Frequency.monthly) {
+      return monthsLater(months: interval);
+    } else if (frequency == Frequency.yearly) {
+      return DateTime(year + interval, month, day, hour, minute, second, millisecond, microsecond);
+    } else {
+      throw Exception("Invalid frequency '$frequency'");
     }
   }
 
-  return candidate;
+  DateTime monthsLater({required int months}) {
+    DateTime candidate = DateTime(year, month + months, day, hour, minute, second, millisecond, microsecond);
+
+    if ((candidate.month - month) % 12 > months) {
+      int correction = 1;
+      while (((candidate.month - month) % 12 > months)) {
+        candidate = DateTime(year, month + months, day - correction, hour, minute, second, millisecond, microsecond);
+        correction++;
+      }
+    }
+
+    return candidate;
+  }
 }

@@ -10,10 +10,10 @@ int randomInt({int max = 1000}) => _randomGenerator.nextInt(max);
 
 double randomDouble({double max = 1}) => _randomGenerator.nextDouble() * max;
 
-DateTime randomDate({int fromYear = 1990, int toYear = 2020}) => DateTime.utc(
+DateTime randomDate({int? day, int? month, int fromYear = 1990, int toYear = 2020}) => DateTime.utc(
       _randomGenerator.nextInt(toYear - fromYear) + fromYear,
-      _randomGenerator.nextInt(12) + 1,
-      _randomGenerator.nextInt(31) + 1,
+      month ?? _randomGenerator.nextInt(12) + 1,
+      day ?? _randomGenerator.nextInt(31) + 1,
     );
 
 Event randomEvent({
