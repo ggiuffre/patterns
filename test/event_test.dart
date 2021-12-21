@@ -29,5 +29,21 @@ main() {
       final result = original.monthsLater(months: 1);
       expect(result.year == original.year + 1, isTrue);
     });
+
+    test("returns a date in the same year, if increasing a date in November by 1 month", () {
+      final original = randomDate(month: 1);
+      final result = original.monthsLater(months: 1);
+      expect(result.year == original.year, isTrue);
+    });
+
+    test("called 12 times returns a date in the next year and same month, if increasing the result by 1 month", () {
+      final original = randomDate();
+      DateTime result = original;
+      for (int i = 0; i < 12; i += 1) {
+        result = result.monthsLater(months: 1);
+      }
+      expect(result.year == original.year + 1, isTrue);
+      expect(result.month == original.month, isTrue);
+    });
   });
 }
