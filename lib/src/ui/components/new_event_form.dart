@@ -67,12 +67,6 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                 ),
               ),
             ),
-            if (_eventType != EventType.customEvent &&
-                _eventType != EventType.meal &&
-                _eventType != EventType.moodMeasurement &&
-                _eventType != EventType.sportsEvent &&
-                _eventType != EventType.socialEvent)
-              const ConstrainedCard(child: ErrorCard(text: "Not implemented yet. Work in progress...")),
             if (_eventType == EventType.customEvent)
               ConstrainedCard(
                 child: Padding(
@@ -333,6 +327,10 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     ],
                   ),
                 ),
+              )
+            else
+              const ConstrainedCard(
+                child: ErrorCard(text: "Not implemented yet. Work in progress..."),
               ),
             ConstrainedCard(
               child: Padding(
