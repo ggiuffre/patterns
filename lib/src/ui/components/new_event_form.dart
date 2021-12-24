@@ -9,6 +9,7 @@ import '../../data/food_info.dart';
 import '../../data/mood.dart';
 import '../../data/repositories/events.dart';
 import '../../data/social_event.dart';
+import '../../data/sports_info.dart';
 import 'constrained_card.dart';
 import 'error_card.dart';
 
@@ -30,6 +31,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
   FoodInfo _foodInfo = foodInfo.values.first;
   Mood _mood = const Mood();
   SocialEvent _socialEventInfo = const SocialEvent(type: "");
+  SportsInfo _sportsInfo = sportsInfo.values.first;
   DateTime _eventStartTime = DateTime.now();
   DateTime _eventEndTime = DateTime.now();
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
@@ -68,6 +70,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
             if (_eventType != EventType.customEvent &&
                 _eventType != EventType.meal &&
                 _eventType != EventType.moodMeasurement &&
+                _eventType != EventType.sportsEvent &&
                 _eventType != EventType.socialEvent)
               const ConstrainedCard(child: ErrorCard(text: "Not implemented yet. Work in progress...")),
             if (_eventType == EventType.customEvent)
@@ -310,6 +313,26 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     ],
                   ),
                 ),
+              )
+            else if (_eventType == EventType.sportsEvent)
+              ConstrainedCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Record your performance", style: Theme.of(context).textTheme.headline5),
+                      ),
+                      _SportsRadioInput(
+                        values: Sport.values,
+                        onChipSelected: (sport) => setState(() => _sportsInfo = sport),
+                        autoValidate: _autoValidate,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ConstrainedCard(
               child: Padding(
@@ -460,6 +483,29 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
               await ref.read(eventProvider).add(nutrientEvent);
             }
           }
+        } else if (_eventType == EventType.sportsEvent) {
+          final sportEvents = _eventsFromSportsInfo(_sportsInfo, time: _eventStartTime);
+          if (_eventFrequency != Frequency.once) {
+            final events = sportEvents
+                .map(
+                  (event) => recurringEvents(
+                    title: event.title,
+                    value: event.value,
+                    range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+                    frequency: _eventFrequency,
+                    interval: _eventInterval,
+                  ),
+                )
+                .expand((event) => event)
+                .toList();
+            for (final event in events) {
+              ref.read(eventProvider).add(event);
+            }
+          } else {
+            for (final event in sportEvents) {
+              await ref.read(eventProvider).add(event);
+            }
+          }
         } else if (_eventType == EventType.customEvent) {
           if (_eventFrequency != Frequency.once) {
             final events = recurringEvents(
@@ -494,6 +540,12 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         if (mood.happiness != 0) Event("happiness", value: mood.happiness, start: time),
         if (mood.stress != 0) Event("stress", value: mood.stress, start: time),
         if (mood.energy != 0) Event("perceived energy", value: mood.energy, start: time),
+      };
+
+  Set<Event> _eventsFromSportsInfo(SportsInfo session, {required DateTime time}) => {
+        Event(session.sport, value: 1, start: time),
+        if (session.calories != null && session.calories != 0)
+          Event("calories intake", value: -(session.calories!), start: time),
       };
 }
 
@@ -828,7 +880,7 @@ class _NutrientTextField extends StatelessWidget {
         decoration: InputDecoration(
           icon: const Icon(Icons.local_fire_department),
           labelText: "${nutrientName[0].toUpperCase()}${nutrientName.substring(1)}",
-          suffixText: "$measurementUnit / 100g",
+          suffixText: measurementUnit,
         ),
         autovalidateMode: autovalidateMode,
         validator: (value) {
@@ -839,6 +891,97 @@ class _NutrientTextField extends StatelessWidget {
           }
           return null;
         },
+      );
+}
+
+class _SportsRadioInput extends StatefulWidget {
+  final Iterable<Sport> values;
+  final void Function(SportsInfo) onChipSelected;
+  final bool autoValidate;
+
+  const _SportsRadioInput({
+    Key? key,
+    required this.values,
+    required this.onChipSelected,
+    this.autoValidate = false,
+  }) : super(key: key);
+
+  @override
+  State<_SportsRadioInput> createState() => _SportsRadioInputState();
+}
+
+class _SportsRadioInputState extends State<_SportsRadioInput> {
+  SportsInfo _groupValue = sportsInfo.values.first;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: Wrap(
+                spacing: 4.0,
+                runSpacing: 4.0,
+                children: widget.values
+                    .where((trainingSession) => sportsInfo.containsKey(trainingSession))
+                    .map((trainingSession) => sportsInfo[trainingSession])
+                    .map(
+                      (trainingSession) => ChoiceChip(
+                        label: Text(trainingSession?.sport ?? ""),
+                        selected: trainingSession == _groupValue,
+                        onSelected: (selected) {
+                          if (selected) {
+                            setState(() => _groupValue = trainingSession!);
+                            widget.onChipSelected(trainingSession!);
+                          }
+                        },
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+            ExpansionTile(
+              leading: const Icon(Icons.tune),
+              expandedCrossAxisAlignment: CrossAxisAlignment.start,
+              title: Text("${_groupValue.calories} calories burnt"),
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _NutrientTextField(
+                    key: Key("${_groupValue.sport}_calories"),
+                    nutrientName: "calories",
+                    measurementUnit: "kcal",
+                    initialValue: _groupValue.calories,
+                    onChanged: (newValue) {
+                      final newSportsValue = _groupValue.copyWith(calories: newValue);
+                      setState(() => _groupValue = newSportsValue);
+                      widget.onChipSelected(newSportsValue);
+                    },
+                    autovalidateMode:
+                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: _NutrientTextField(
+                    key: Key("${_groupValue.sport}_duration"),
+                    nutrientName: "duration",
+                    initialValue: _groupValue.duration,
+                    onChanged: (newValue) {
+                      final newSportsValue = _groupValue.copyWith(duration: newValue);
+                      setState(() => _groupValue = newSportsValue);
+                      widget.onChipSelected(newSportsValue);
+                    },
+                    autovalidateMode:
+                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       );
 }
 
