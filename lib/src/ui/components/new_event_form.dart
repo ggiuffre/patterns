@@ -591,6 +591,15 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
     EventType.moodMeasurement: "write down your mood",
   };
 
+  static const eventTypeIcons = {
+    EventType.customEvent: Icon(Icons.dashboard_customize, size: 18),
+    EventType.sportsEvent: Icon(Icons.sports_tennis, size: 18),
+    EventType.meal: Icon(Icons.fastfood, size: 18),
+    EventType.socialEvent: Icon(Icons.people, size: 18),
+    EventType.musicListening: Icon(Icons.music_note, size: 18),
+    EventType.moodMeasurement: Icon(Icons.mood, size: 18),
+  };
+
   @override
   Widget build(BuildContext context) => AnimatedContainer(
         duration: const Duration(milliseconds: 750),
@@ -606,6 +615,7 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
                   .where((eventType) => eventTypeLabels.containsKey(eventType))
                   .map(
                     (eventType) => ChoiceChip(
+                      avatar: eventTypeIcons[eventType],
                       label: Text(eventTypeLabels[eventType] ?? ""),
                       selected: eventType == widget.groupValue,
                       onSelected: (selected) {
