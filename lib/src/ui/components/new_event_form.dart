@@ -32,8 +32,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
   Mood _mood = const Mood();
   SocialEvent _socialEventInfo = const SocialEvent(type: "");
   SportsInfo _sportsInfo = sportsInfo.values.first;
-  DateTime _eventStartTime = DateTime.now();
-  DateTime _eventEndTime = DateTime.now();
+  DateTime _eventStartTime = _today;
+  DateTime _eventEndTime = _today;
   Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
   int _eventInterval = 1; // days/weeks/months/... (depending on the frequency) between each instance of the new event
   bool _addingEvent = false; // whether the new event is in the process of being added
@@ -431,6 +431,11 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         ),
       );
 
+  static DateTime get _today {
+    final _now = DateTime.now();
+    return DateTime(_now.year, _now.month, _now.day);
+  }
+
   Future<void> _submitEvent() async {
     final formState = _formKey.currentState;
     if (formState != null) {
@@ -445,7 +450,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                   (nutrientEvent) => recurringEvents(
                     title: nutrientEvent.title,
                     value: nutrientEvent.value,
-                    range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+                    range: DateTimeRange(start: _eventStartTime.toUtc(), end: _eventEndTime.toUtc()),
                     frequency: _eventFrequency,
                     interval: _eventInterval,
                   ),
@@ -468,7 +473,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                   (nutrientEvent) => recurringEvents(
                     title: nutrientEvent.title,
                     value: nutrientEvent.value,
-                    range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+                    range: DateTimeRange(start: _eventStartTime.toUtc(), end: _eventEndTime.toUtc()),
                     frequency: _eventFrequency,
                     interval: _eventInterval,
                   ),
@@ -491,7 +496,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                   (event) => recurringEvents(
                     title: event.title,
                     value: event.value,
-                    range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+                    range: DateTimeRange(start: _eventStartTime.toUtc(), end: _eventEndTime.toUtc()),
                     frequency: _eventFrequency,
                     interval: _eventInterval,
                   ),
@@ -511,7 +516,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
             final events = recurringEvents(
               title: _eventTitle,
               value: _eventValue,
-              range: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+              range: DateTimeRange(start: _eventStartTime.toUtc(), end: _eventEndTime.toUtc()),
               frequency: _eventFrequency,
               interval: _eventInterval,
             );
