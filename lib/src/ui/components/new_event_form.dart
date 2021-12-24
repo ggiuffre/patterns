@@ -11,7 +11,6 @@ import '../../data/repositories/events.dart';
 import '../../data/social_event.dart';
 import '../../data/sports_info.dart';
 import 'constrained_card.dart';
-import 'error_card.dart';
 
 class NewEventForm extends ConsumerStatefulWidget {
   final void Function() onSubmit;
@@ -329,8 +328,44 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                 ),
               )
             else
-              const ConstrainedCard(
-                child: ErrorCard(text: "Not implemented yet. Work in progress..."),
+              ConstrainedCard(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text("Weight measurement", style: Theme.of(context).textTheme.headline5),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          keyboardType: TextInputType.number,
+                          onChanged: (value) => setState(() {
+                            _eventTitle = "weight measurement";
+                            _eventValue = double.tryParse(value) ?? _eventValue;
+                          }),
+                          decoration: const InputDecoration(
+                            icon: Icon(Icons.tune),
+                            labelText: 'Weight (Kilograms)',
+                            suffixText: "Kg",
+                          ),
+                          autovalidateMode:
+                              _autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) {
+                              return 'Please enter your current weight';
+                            } else if (double.tryParse(value ?? "") == null) {
+                              return 'Please enter a valid numeric value for your weight';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ConstrainedCard(
               child: Padding(
@@ -509,7 +544,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
               await ref.read(eventProvider).add(event);
             }
           }
-        } else if (_eventType == EventType.customEvent) {
+        } else if (_eventType == EventType.customEvent || _eventType == EventType.weightMeasurement) {
           if (_eventFrequency != Frequency.once) {
             final events = recurringEvents(
               title: _eventTitle,
@@ -559,7 +594,7 @@ enum EventType {
   sportsEvent,
   meal,
   socialEvent,
-  musicListening,
+  weightMeasurement,
   moodMeasurement,
 }
 
@@ -587,7 +622,7 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
     EventType.sportsEvent: "workout/training",
     EventType.meal: "meal",
     EventType.socialEvent: "social event",
-    EventType.musicListening: "listening to music",
+    EventType.weightMeasurement: "weight measurement",
     EventType.moodMeasurement: "write down your mood",
   };
 
@@ -596,7 +631,7 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
     EventType.sportsEvent: Icon(Icons.sports_tennis, size: 18),
     EventType.meal: Icon(Icons.fastfood, size: 18),
     EventType.socialEvent: Icon(Icons.people, size: 18),
-    EventType.musicListening: Icon(Icons.music_note, size: 18),
+    EventType.weightMeasurement: Icon(Icons.trending_up, size: 18),
     EventType.moodMeasurement: Icon(Icons.mood, size: 18),
   };
 

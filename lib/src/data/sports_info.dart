@@ -34,6 +34,7 @@ const sportsInfo = {
   Sport.other: SportsInfo(sport: "other"),
 };
 
+// see https://www.nutristrategy.com/caloriesburned.htm
 const caloriesBurntPerKilogramPerHourBySport = {
   Sport.running: 12.5,
   Sport.cycling: 8.0,
