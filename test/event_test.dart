@@ -219,6 +219,30 @@ main() {
       expect(events.length, equals(range.duration.inDays + 1));
     });
 
+    test("returns events that include the last day in the range, if given daily frequency", () {
+      final range = DateTimeRange(start: DateTime.utc(1970, 2, 23), end: DateTime.utc(1971, 7, 16));
+      final events = recurringEvents(
+        title: "title",
+        value: 1,
+        range: range,
+        frequency: Frequency.daily,
+      );
+      expect(events.last.start.day, equals(16));
+      expect(events.last.start.month, equals(7));
+      expect(events.last.start.year, equals(1971));
+    });
+
+    test("returns 2 events, if given daily frequency and a 2-day range", () {
+      final range = DateTimeRange(start: DateTime.utc(1970, 2, 23), end: DateTime.utc(1970, 2, 24));
+      final events = recurringEvents(
+        title: "title",
+        value: 1,
+        range: range,
+        frequency: Frequency.daily,
+      );
+      expect(events.length, equals(2));
+    });
+
     test("returns a singleton if the frequency interval is greater than the range", () {
       final startDate = DateTime.utc(2000, 1, 31);
       final range = DateTimeRange(start: startDate, end: DateTime.utc(2000, 7, 2));
