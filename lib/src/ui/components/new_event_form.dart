@@ -491,7 +491,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                 .expand((e) => e)
                 .toList();
             for (final event in events) {
-              ref.read(eventProvider).add(event);
+              await ref.read(eventProvider).add(event);
             }
           } else {
             for (final nutrientEvent in nutrientEvents) {
@@ -514,7 +514,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                 .expand((e) => e)
                 .toList();
             for (final event in events) {
-              ref.read(eventProvider).add(event);
+              await ref.read(eventProvider).add(event);
             }
           } else {
             for (final nutrientEvent in moodEvents) {
@@ -537,7 +537,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                 .expand((event) => event)
                 .toList();
             for (final event in events) {
-              ref.read(eventProvider).add(event);
+              await ref.read(eventProvider).add(event);
             }
           } else {
             for (final event in sportEvents) {
@@ -554,7 +554,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
               interval: _eventInterval,
             );
             for (final event in events) {
-              ref.read(eventProvider).add(event);
+              await ref.read(eventProvider).add(event);
             }
           } else {
             await ref.read(eventProvider).add(Event(_eventTitle, value: _eventValue, start: _eventStartTime));
