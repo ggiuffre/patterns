@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:googleapis/calendar/v3.dart';
+import 'package:googleapis/calendar/v3.dart' as g;
 
 import '../../data/app_settings_provider.dart';
+import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import 'constrained_card.dart';
 
@@ -16,6 +17,7 @@ class SettingsPage extends StatelessWidget {
           DarkModeSettingsCard(),
           GoogleCalendarSettingsCard(),
           DangerZoneSettingsCard(),
+          BodyWeightSettingsCard(),
         ],
       );
 }
@@ -77,7 +79,7 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                 ],
               ),
               if (ref.watch(appSettingsProvider).google.enabled)
-                FutureBuilder<Iterable<CalendarListEntry>>(
+                FutureBuilder<Iterable<g.CalendarListEntry>>(
                   future: ref.read(appSettingsProvider.notifier).googleCalendars,
                   builder: (context, snapshot) {
                     final errorIndicator = Padding(
@@ -153,7 +155,7 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
         ),
       );
 
-  String _calendarEntryTitle(CalendarListEntry calendar) {
+  String _calendarEntryTitle(g.CalendarListEntry calendar) {
     final isPrimary = calendar.primary ?? false;
     final calendarSummary = calendar.summary;
     if (calendarSummary != null) {
@@ -228,4 +230,111 @@ class _DeleteAllEventsDialog extends StatelessWidget {
           ),
         ],
       );
+}
+
+class BodyWeightSettingsCard extends ConsumerStatefulWidget {
+  const BodyWeightSettingsCard({Key? key}) : super(key: key);
+
+  @override
+  ConsumerState<BodyWeightSettingsCard> createState() => _BodyWeightSettingsCardState();
+}
+
+class _BodyWeightSettingsCardState extends ConsumerState<BodyWeightSettingsCard> {
+  final _formKey = GlobalKey<FormState>();
+  double? _newBodyWeight;
+  bool _addingEvent = false;
+
+  @override
+  Widget build(BuildContext context) => ConstrainedCard(
+        child: FutureBuilder<Iterable<Event>>(
+          future: ref
+              .read(eventProvider)
+              .sorted()
+              .last
+              .then((events) => events.where((e) => e.title == "weight measurement")),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(Icons.warning, color: Theme.of(context).errorColor),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Couldn't retrieve body weight from events"),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            if (snapshot.hasData) {
+              return Form(
+                key: _formKey,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: Text("Body weight"),
+                    ),
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: TextFormField(
+                          initialValue: (snapshot.data?.isEmpty ?? true)
+                              ? null
+                              : snapshot.data?.last.value.toStringAsPrecision(2),
+                          decoration: const InputDecoration(suffixText: "Kg"),
+                          onChanged: (value) => setState(() => _newBodyWeight = double.tryParse(value)),
+                          validator: (value) {
+                            if (value?.isEmpty ?? true) {
+                              return 'Please enter your current weight';
+                            } else if (double.tryParse(value ?? "") == null) {
+                              return 'Please enter a valid numeric value for your weight';
+                            }
+                            return null;
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: _addingEvent
+                          ? const Center(child: CircularProgressIndicator.adaptive())
+                          : ActionChip(label: const Text("Update"), onPressed: _onSubmit),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            return const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Center(child: CircularProgressIndicator.adaptive()),
+            );
+          },
+        ),
+      );
+
+  Future<void> _onSubmit() async {
+    final formState = _formKey.currentState;
+    if (formState != null) {
+      if (formState.validate()) {
+        setState(() => _addingEvent = true);
+        final newBodyWeight = _newBodyWeight;
+        if (newBodyWeight != null) {
+          final _now = DateTime.now();
+          final _today = DateTime(_now.year, _now.month, _now.day);
+          final event = Event("weight measurement", value: newBodyWeight, start: _today);
+          await ref.read(eventProvider).add(event);
+          setState(() => _addingEvent = false);
+        }
+      }
+    }
+  }
 }

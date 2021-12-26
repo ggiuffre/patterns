@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:googleapis/calendar/v3.dart';
+import 'package:googleapis/calendar/v3.dart' as g;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,13 +13,13 @@ final appSettingsProvider = StateNotifierProvider<AppSettingsController, AppSett
 class AppSettingsController extends StateNotifier<AppSettings> {
   AppSettingsController({AppSettings appSettings = const AppSettings()}) : super(appSettings);
 
-  CalendarApi? _calendarApi;
+  g.CalendarApi? _calendarApi;
 
   static final _googleApiAuth = GoogleSignIn(
     scopes: const [
       'email',
-      CalendarApi.calendarReadonlyScope,
-      CalendarApi.calendarEventsReadonlyScope,
+      g.CalendarApi.calendarReadonlyScope,
+      g.CalendarApi.calendarEventsReadonlyScope,
     ],
   );
 
@@ -50,7 +50,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
         if (googleAccount != null) {
           final headers = await googleAccount.authHeaders;
           if (headers.isNotEmpty) {
-            _calendarApi = CalendarApi(_GoogleAuthClient(headers));
+            _calendarApi = g.CalendarApi(_GoogleAuthClient(headers));
             state = state.copyWith(
               google: state.google.copyWith(
                 enabled: true,
@@ -71,7 +71,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
 
     if (googleAccount != null) {
       final headers = await googleAccount.authHeaders;
-      _calendarApi = CalendarApi(_GoogleAuthClient(headers));
+      _calendarApi = g.CalendarApi(_GoogleAuthClient(headers));
       state =
           state.copyWith(google: state.google.copyWith(enabled: true, account: googleAccount, authHeaders: headers));
       try {
@@ -101,18 +101,18 @@ class AppSettingsController extends StateNotifier<AppSettings> {
   }
 
   /// Retrieve a list of calendars and assign default settings to any new calendar.
-  Future<Iterable<CalendarListEntry>> get googleCalendars =>
-      _calendarApi?.calendarList.list().then((calendars) => calendars.items ?? <CalendarListEntry>[]).whenComplete(() =>
-          SharedPreferences.getInstance()
-              .then((sharedPrefs) =>
-                  sharedPrefs.setStringList("enabledGoogleCalendars", state.google.enabledCalendarIds.toList()))
-              .catchError((error) {
-            developer.log("Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
-            return true; // ignore error
-          })) ??
+  Future<Iterable<g.CalendarListEntry>> get googleCalendars =>
+      _calendarApi?.calendarList.list().then((calendars) => calendars.items ?? <g.CalendarListEntry>[]).whenComplete(
+          () => SharedPreferences.getInstance()
+                  .then((sharedPrefs) =>
+                      sharedPrefs.setStringList("enabledGoogleCalendars", state.google.enabledCalendarIds.toList()))
+                  .catchError((error) {
+                developer.log("Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
+                return true; // ignore error
+              })) ??
       Future.value(const {});
 
-  void setGoogleCalendarImportance(CalendarListEntry calendar, bool isEnabled) {
+  void setGoogleCalendarImportance(g.CalendarListEntry calendar, bool isEnabled) {
     final calendarId = calendar.id;
     final enabledCalendarIds = state.google.enabledCalendarIds;
     if (calendarId != null) {
