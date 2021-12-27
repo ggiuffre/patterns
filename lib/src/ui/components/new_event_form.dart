@@ -102,6 +102,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       ),
                       _FoodRadioInput(
                         values: FoodType.values,
+                        groupValue: _foodInfo,
                         onChipSelected: (food) => setState(() => _foodInfo = food),
                         autoValidate: _autoValidate,
                       ),
@@ -320,6 +321,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       ),
                       _SportsRadioInput(
                         values: Sport.values,
+                        groupValue: _sportsInfo,
                         onChipSelected: (sport) => setState(() => _sportsInfo = sport),
                         autoValidate: _autoValidate,
                       ),
@@ -484,7 +486,13 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         } else if (_eventType == EventType.socialEvent) {
           derivedEvents = _eventsFromSocialEvent(_socialEventInfo, time: _eventStartTime);
         } else if (_eventType == EventType.sportsEvent) {
-          derivedEvents = _eventsFromSportsInfo(_sportsInfo, time: _eventStartTime);
+          final weightMeasurements = await ref
+              .read(eventProvider)
+              .sorted()
+              .first
+              .then((events) => events.where((e) => e.title == "weight measurement").map((e) => e.value));
+          final bodyWeight = weightMeasurements.isEmpty ? 65.0 : weightMeasurements.last; // TODO ask user
+          derivedEvents = _eventsFromSportsInfo(_sportsInfo, time: _eventStartTime, bodyWeight: bodyWeight);
         } else if (_eventType == EventType.customEvent) {
           derivedEvents = {Event(_eventTitle, value: _eventValue, start: _eventStartTime)};
         } else if (_eventType == EventType.weightMeasurement) {
@@ -492,7 +500,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         }
 
         if (_eventFrequency != Frequency.once) {
-          derivedEvents = derivedEvents
+          final derivedRecurringEvents = derivedEvents
               .map((event) => recurringEvents(
                     title: event.title,
                     value: event.value,
@@ -501,6 +509,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     interval: _eventInterval,
                   ))
               .expand((event) => event);
+          derivedEvents = derivedRecurringEvents;
         }
 
         for (final event in derivedEvents) {
@@ -533,10 +542,13 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
           Event("meeting people", value: socialEvent.numberOfPeople!.toDouble(), start: time),
       };
 
-  Set<Event> _eventsFromSportsInfo(SportsInfo session, {required DateTime time}) => {
+  Set<Event> _eventsFromSportsInfo(SportsInfo session, {required DateTime time, required double bodyWeight}) => {
         Event(session.sport, value: 1, start: time),
-        if (session.calories != null && session.calories != 0)
-          Event("calories intake", value: -(session.calories!), start: time),
+        Event(
+          "calories intake",
+          value: -SportsInfo.energyConsumption(sport: session, bodyWeight: bodyWeight),
+          start: time,
+        ),
       };
 }
 
@@ -700,24 +712,19 @@ class _EventTitleTextField extends ConsumerWidget {
       );
 }
 
-class _FoodRadioInput extends StatefulWidget {
+class _FoodRadioInput extends StatelessWidget {
   final Iterable<FoodType> values;
+  final FoodInfo groupValue;
   final void Function(FoodInfo) onChipSelected;
   final bool autoValidate;
 
   const _FoodRadioInput({
     Key? key,
     required this.values,
+    required this.groupValue,
     required this.onChipSelected,
     this.autoValidate = false,
   }) : super(key: key);
-
-  @override
-  State<_FoodRadioInput> createState() => _FoodRadioInputState();
-}
-
-class _FoodRadioInputState extends State<_FoodRadioInput> {
-  FoodInfo _groupValue = foodInfo.values.first;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -730,17 +737,16 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
               child: Wrap(
                 spacing: 4.0,
                 runSpacing: 4.0,
-                children: widget.values
+                children: values
                     .where((food) => foodInfo.containsKey(food))
                     .map((food) => foodInfo[food])
                     .map(
                       (food) => ChoiceChip(
                         label: Text(food?.label ?? ""),
-                        selected: food == _groupValue,
+                        selected: food == groupValue,
                         onSelected: (selected) {
                           if (selected) {
-                            setState(() => _groupValue = food!);
-                            widget.onChipSelected(food!);
+                            onChipSelected(food!);
                           }
                         },
                       ),
@@ -751,98 +757,68 @@ class _FoodRadioInputState extends State<_FoodRadioInput> {
             ExpansionTile(
               leading: const Icon(Icons.tune),
               expandedCrossAxisAlignment: CrossAxisAlignment.start,
-              title: Text("${_groupValue.calories} calories"),
+              title: Text("${groupValue.calories} calories"),
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _NutrientTextField(
-                    key: Key("${_groupValue.label}_calories"),
+                    key: Key("${groupValue.label}_calories"),
                     nutrientName: "calories",
                     measurementUnit: "kcal",
-                    initialValue: _groupValue.calories,
-                    onChanged: (newValue) {
-                      final newFoodValue = _groupValue.copyWith(calories: newValue);
-                      setState(() => _groupValue = newFoodValue);
-                      widget.onChipSelected(newFoodValue);
-                    },
-                    autovalidateMode:
-                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    initialValue: groupValue.calories,
+                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(calories: newValue)),
+                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _NutrientTextField(
-                    key: Key("${_groupValue.label}_fat"),
+                    key: Key("${groupValue.label}_fat"),
                     nutrientName: "fat",
-                    initialValue: _groupValue.fat,
-                    onChanged: (newValue) {
-                      final newFoodValue = _groupValue.copyWith(fat: newValue);
-                      setState(() => _groupValue = newFoodValue);
-                      widget.onChipSelected(newFoodValue);
-                    },
-                    autovalidateMode:
-                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    initialValue: groupValue.fat,
+                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(fat: newValue)),
+                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _NutrientTextField(
-                    key: Key("${_groupValue.label}_carbs"),
+                    key: Key("${groupValue.label}_carbs"),
                     nutrientName: "carbs",
-                    initialValue: _groupValue.carbs,
-                    onChanged: (newValue) {
-                      final newFoodValue = _groupValue.copyWith(carbs: newValue);
-                      setState(() => _groupValue = newFoodValue);
-                      widget.onChipSelected(newFoodValue);
-                    },
-                    autovalidateMode:
-                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    initialValue: groupValue.carbs,
+                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(carbs: newValue)),
+                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _NutrientTextField(
-                    key: Key("${_groupValue.label}_fiber"),
+                    key: Key("${groupValue.label}_fiber"),
                     nutrientName: "fiber",
-                    initialValue: _groupValue.fiber,
-                    onChanged: (newValue) {
-                      final newFoodValue = _groupValue.copyWith(fiber: newValue);
-                      setState(() => _groupValue = newFoodValue);
-                      widget.onChipSelected(newFoodValue);
-                    },
-                    autovalidateMode:
-                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    initialValue: groupValue.fiber,
+                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(fiber: newValue)),
+                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _NutrientTextField(
-                    key: Key("${_groupValue.label}_protein"),
+                    key: Key("${groupValue.label}_protein"),
                     nutrientName: "protein",
-                    initialValue: _groupValue.protein,
-                    onChanged: (newValue) {
-                      final newFoodValue = _groupValue.copyWith(protein: newValue);
-                      setState(() => _groupValue = newFoodValue);
-                      widget.onChipSelected(newFoodValue);
-                    },
-                    autovalidateMode:
-                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    initialValue: groupValue.protein,
+                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(protein: newValue)),
+                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: _NutrientTextField(
-                    key: Key("${_groupValue.label}_iron"),
+                    key: Key("${groupValue.label}_iron"),
                     nutrientName: "iron",
                     measurementUnit: "mg",
-                    initialValue: _groupValue.iron,
-                    onChanged: (newValue) {
-                      final newFoodValue = _groupValue.copyWith(iron: newValue);
-                      setState(() => _groupValue = newFoodValue);
-                      widget.onChipSelected(newFoodValue);
-                    },
-                    autovalidateMode:
-                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    initialValue: groupValue.iron,
+                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(iron: newValue)),
+                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
                   ),
                 ),
               ],
@@ -895,24 +871,19 @@ class _NutrientTextField extends StatelessWidget {
       );
 }
 
-class _SportsRadioInput extends StatefulWidget {
+class _SportsRadioInput extends StatelessWidget {
   final Iterable<Sport> values;
+  final SportsInfo groupValue;
   final void Function(SportsInfo) onChipSelected;
   final bool autoValidate;
 
   const _SportsRadioInput({
     Key? key,
     required this.values,
+    required this.groupValue,
     required this.onChipSelected,
     this.autoValidate = false,
   }) : super(key: key);
-
-  @override
-  State<_SportsRadioInput> createState() => _SportsRadioInputState();
-}
-
-class _SportsRadioInputState extends State<_SportsRadioInput> {
-  SportsInfo _groupValue = sportsInfo.values.first;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -925,17 +896,16 @@ class _SportsRadioInputState extends State<_SportsRadioInput> {
               child: Wrap(
                 spacing: 4.0,
                 runSpacing: 4.0,
-                children: widget.values
+                children: values
                     .where((trainingSession) => sportsInfo.containsKey(trainingSession))
                     .map((trainingSession) => sportsInfo[trainingSession])
                     .map(
                       (trainingSession) => ChoiceChip(
                         label: Text(trainingSession?.sport ?? ""),
-                        selected: trainingSession == _groupValue,
+                        selected: trainingSession == groupValue,
                         onSelected: (selected) {
                           if (selected) {
-                            setState(() => _groupValue = trainingSession!);
-                            widget.onChipSelected(trainingSession!);
+                            onChipSelected(trainingSession!);
                           }
                         },
                       ),
@@ -946,37 +916,60 @@ class _SportsRadioInputState extends State<_SportsRadioInput> {
             ExpansionTile(
               leading: const Icon(Icons.tune),
               expandedCrossAxisAlignment: CrossAxisAlignment.start,
-              title: Text("${_groupValue.calories} calories burnt"),
+              title: Text("${groupValue.energyPerKilogramPerHour} calories per Kg per hour"),
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: _NutrientTextField(
-                    key: Key("${_groupValue.sport}_calories"),
-                    nutrientName: "calories",
-                    measurementUnit: "kcal",
-                    initialValue: _groupValue.calories,
-                    onChanged: (newValue) {
-                      final newSportsValue = _groupValue.copyWith(calories: newValue);
-                      setState(() => _groupValue = newSportsValue);
-                      widget.onChipSelected(newSportsValue);
+                  child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    initialValue: groupValue.energyPerKilogramPerHour.toString(),
+                    onChanged: (newStringValue) {
+                      final newValue = double.tryParse(newStringValue);
+                      if (newValue != null) {
+                        onChipSelected(groupValue.copyWith(energyPerKilogramPerHour: newValue));
+                      }
                     },
-                    autovalidateMode:
-                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.local_fire_department),
+                      labelText: "Energy per Kg per hour",
+                      suffixText: "kcal / (Kg hour)",
+                    ),
+                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    validator: (value) {
+                      if (value?.isEmpty ?? true) {
+                        return "Please enter the energy that is burnt in 1 hour, divided by your weight";
+                      } else if (double.tryParse(value ?? "") == null) {
+                        return "Please enter a valid number";
+                      }
+                      return null;
+                    },
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: _NutrientTextField(
-                    key: Key("${_groupValue.sport}_duration"),
-                    nutrientName: "duration",
-                    initialValue: _groupValue.duration,
-                    onChanged: (newValue) {
-                      final newSportsValue = _groupValue.copyWith(duration: newValue);
-                      setState(() => _groupValue = newSportsValue);
-                      widget.onChipSelected(newSportsValue);
+                  child: TextFormField(
+                    keyboardType: TextInputType.number,
+                    initialValue: groupValue.hours == null ? "" : groupValue.hours.toString(),
+                    onChanged: (newStringValue) {
+                      final newValue = double.tryParse(newStringValue);
+                      if (newValue != null) {
+                        onChipSelected(groupValue.copyWith(hours: newValue));
+                      }
                     },
-                    autovalidateMode:
-                        widget.autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    decoration: const InputDecoration(
+                      icon: Icon(Icons.timer),
+                      labelText: "duration",
+                      suffixText: "hours",
+                    ),
+                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    validator: (value) {
+                      if (value?.isEmpty ?? true) {
+                        return "Please enter the amount of hours (even fractional) that you trained";
+                      } else if (double.tryParse(value ?? "") == null) {
+                        return "Please enter a valid number";
+                      }
+                      return null;
+                    },
                   ),
                 ),
               ],
