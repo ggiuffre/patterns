@@ -475,91 +475,38 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
       setState(() => _autoValidate = true);
       if (formState.validate()) {
         setState(() => _addingEvent = true);
+
+        Iterable<Event> derivedEvents = const Iterable.empty();
         if (_eventType == EventType.meal) {
-          final nutrientEvents = _eventsFromFoodInfo(_foodInfo, time: _eventStartTime);
-          if (_eventFrequency != Frequency.once) {
-            final events = nutrientEvents
-                .map(
-                  (nutrientEvent) => recurringEvents(
-                    title: nutrientEvent.title,
-                    value: nutrientEvent.value,
-                    range: DateTimeRange(start: _eventStartTime.toUtc(), end: _eventEndTime.toUtc()),
-                    frequency: _eventFrequency,
-                    interval: _eventInterval,
-                  ),
-                )
-                .expand((e) => e)
-                .toList();
-            for (final event in events) {
-              await ref.read(eventProvider).add(event);
-            }
-          } else {
-            for (final nutrientEvent in nutrientEvents) {
-              await ref.read(eventProvider).add(nutrientEvent);
-            }
-          }
+          derivedEvents = _eventsFromFoodInfo(_foodInfo, time: _eventStartTime);
         } else if (_eventType == EventType.moodMeasurement) {
-          final moodEvents = _eventsFromMoodParams(_mood, time: _eventStartTime);
-          if (_eventFrequency != Frequency.once) {
-            final events = moodEvents
-                .map(
-                  (nutrientEvent) => recurringEvents(
-                    title: nutrientEvent.title,
-                    value: nutrientEvent.value,
-                    range: DateTimeRange(start: _eventStartTime.toUtc(), end: _eventEndTime.toUtc()),
-                    frequency: _eventFrequency,
-                    interval: _eventInterval,
-                  ),
-                )
-                .expand((e) => e)
-                .toList();
-            for (final event in events) {
-              await ref.read(eventProvider).add(event);
-            }
-          } else {
-            for (final nutrientEvent in moodEvents) {
-              await ref.read(eventProvider).add(nutrientEvent);
-            }
-          }
+          derivedEvents = _eventsFromMoodParams(_mood, time: _eventStartTime);
+        } else if (_eventType == EventType.socialEvent) {
+          derivedEvents = _eventsFromSocialEvent(_socialEventInfo, time: _eventStartTime);
         } else if (_eventType == EventType.sportsEvent) {
-          final sportEvents = _eventsFromSportsInfo(_sportsInfo, time: _eventStartTime);
-          if (_eventFrequency != Frequency.once) {
-            final events = sportEvents
-                .map(
-                  (event) => recurringEvents(
+          derivedEvents = _eventsFromSportsInfo(_sportsInfo, time: _eventStartTime);
+        } else if (_eventType == EventType.customEvent) {
+          derivedEvents = {Event(_eventTitle, value: _eventValue, start: _eventStartTime)};
+        } else if (_eventType == EventType.weightMeasurement) {
+          derivedEvents = {Event(_eventTitle, value: _eventValue, start: _eventStartTime)};
+        }
+
+        if (_eventFrequency != Frequency.once) {
+          derivedEvents = derivedEvents
+              .map((event) => recurringEvents(
                     title: event.title,
                     value: event.value,
                     range: DateTimeRange(start: _eventStartTime.toUtc(), end: _eventEndTime.toUtc()),
                     frequency: _eventFrequency,
                     interval: _eventInterval,
-                  ),
-                )
-                .expand((event) => event)
-                .toList();
-            for (final event in events) {
-              await ref.read(eventProvider).add(event);
-            }
-          } else {
-            for (final event in sportEvents) {
-              await ref.read(eventProvider).add(event);
-            }
-          }
-        } else if (_eventType == EventType.customEvent || _eventType == EventType.weightMeasurement) {
-          if (_eventFrequency != Frequency.once) {
-            final events = recurringEvents(
-              title: _eventTitle,
-              value: _eventValue,
-              range: DateTimeRange(start: _eventStartTime.toUtc(), end: _eventEndTime.toUtc()),
-              frequency: _eventFrequency,
-              interval: _eventInterval,
-            );
-            for (final event in events) {
-              await ref.read(eventProvider).add(event);
-            }
-          } else {
-            await ref.read(eventProvider).add(Event(_eventTitle, value: _eventValue, start: _eventStartTime));
-          }
+                  ))
+              .expand((event) => event);
         }
+
+        for (final event in derivedEvents) {
+          await ref.read(eventProvider).add(event);
+        }
+
         widget.onSubmit();
       }
     }
@@ -578,6 +525,12 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         if (mood.happiness != 0) Event("happiness", value: mood.happiness, start: time),
         if (mood.stress != 0) Event("stress", value: mood.stress, start: time),
         if (mood.energy != 0) Event("perceived energy", value: mood.energy, start: time),
+      };
+
+  Set<Event> _eventsFromSocialEvent(SocialEvent socialEvent, {required DateTime time}) => {
+        Event(socialEvent.type, value: 1, start: time),
+        if (socialEvent.numberOfPeople != null)
+          Event("meeting people", value: socialEvent.numberOfPeople!.toDouble(), start: time),
       };
 
   Set<Event> _eventsFromSportsInfo(SportsInfo session, {required DateTime time}) => {
