@@ -33,9 +33,12 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
   SportsInfo _sportsInfo = sportsInfo.values.first;
   DateTime _eventStartTime = _today;
   DateTime _eventEndTime = _today;
-  Frequency _eventFrequency = Frequency.once; // frequency at which the new event should occur
-  int _eventInterval = 1; // days/weeks/months/... (depending on the frequency) between each instance of the new event
-  bool _addingEvent = false; // whether the new event is in the process of being added
+  Frequency _eventFrequency =
+      Frequency.once; // frequency at which the new event should occur
+  int _eventInterval =
+      1; // days/weeks/months/... (depending on the frequency) between each instance of the new event
+  bool _addingEvent =
+      false; // whether the new event is in the process of being added
   bool _autoValidate = false;
 
   @override
@@ -52,13 +55,15 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text("Event type", style: Theme.of(context).textTheme.headline5),
+                      child: Text("Event type",
+                          style: Theme.of(context).textTheme.headline5),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: _EventTypeSelector(
                         groupValue: _eventType,
-                        onChipSelected: (value) => setState(() => _eventType = value),
+                        onChipSelected: (value) =>
+                            setState(() => _eventType = value),
                         values: EventType.values,
                       ),
                     ),
@@ -75,13 +80,16 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("Event title", style: Theme.of(context).textTheme.headline5),
+                        child: Text("Event title",
+                            style: Theme.of(context).textTheme.headline5),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: _EventTitleTextField(
-                          onHintSelected: (selection) => setState(() => _eventTitle = selection),
-                          onFieldChanged: (newTitle) => setState(() => _eventTitle = newTitle),
+                          onHintSelected: (selection) =>
+                              setState(() => _eventTitle = selection),
+                          onFieldChanged: (newTitle) =>
+                              setState(() => _eventTitle = newTitle),
                           autoValidate: _autoValidate,
                         ),
                       ),
@@ -98,12 +106,14 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("Food properties", style: Theme.of(context).textTheme.headline5),
+                        child: Text("Food properties",
+                            style: Theme.of(context).textTheme.headline5),
                       ),
                       _FoodRadioInput(
                         values: FoodType.values,
                         groupValue: _foodInfo,
-                        onChipSelected: (food) => setState(() => _foodInfo = food),
+                        onChipSelected: (food) =>
+                            setState(() => _foodInfo = food),
                         autoValidate: _autoValidate,
                       ),
                     ],
@@ -119,21 +129,24 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("Your mood", style: Theme.of(context).textTheme.headline5),
+                        child: Text("Your mood",
+                            style: Theme.of(context).textTheme.headline5),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Flexible(flex: 100, child: Text("Happiness:")),
+                            const Flexible(
+                                flex: 100, child: Text("Happiness:")),
                             Flexible(
                               flex: 162,
                               child: Slider.adaptive(
                                 value: _mood.happiness,
                                 min: -1,
                                 max: 1,
-                                onChanged: (newValue) => setState(() => _mood = _mood.copyWith(happiness: newValue)),
+                                onChanged: (newValue) => setState(() => _mood =
+                                    _mood.copyWith(happiness: newValue)),
                               ),
                             ),
                           ],
@@ -151,7 +164,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                                 value: _mood.stress,
                                 min: -1,
                                 max: 1,
-                                onChanged: (newValue) => setState(() => _mood = _mood.copyWith(stress: newValue)),
+                                onChanged: (newValue) => setState(() =>
+                                    _mood = _mood.copyWith(stress: newValue)),
                               ),
                             ),
                           ],
@@ -169,7 +183,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                                 value: _mood.energy,
                                 min: -1,
                                 max: 1,
-                                onChanged: (newValue) => setState(() => _mood = _mood.copyWith(energy: newValue)),
+                                onChanged: (newValue) => setState(() =>
+                                    _mood = _mood.copyWith(energy: newValue)),
                               ),
                             ),
                           ],
@@ -188,27 +203,39 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("Social event", style: Theme.of(context).textTheme.headline5),
+                        child: Text("Social event",
+                            style: Theme.of(context).textTheme.headline5),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Wrap(
                           spacing: 4.0,
                           runSpacing: 4.0,
-                          children:
-                              {"dinner", "party", "lunch", "brunch", "cinema", "aperitif", "date", "visit", "other"}
-                                  .map(
-                                    (eventType) => ChoiceChip(
-                                      label: Text(eventType),
-                                      selected: eventType == _socialEventInfo.type,
-                                      onSelected: (selected) {
-                                        if (selected) {
-                                          setState(() => _socialEventInfo = _socialEventInfo.copyWith(type: eventType));
-                                        }
-                                      },
-                                    ),
-                                  )
-                                  .toList(),
+                          children: {
+                            "dinner",
+                            "party",
+                            "lunch",
+                            "brunch",
+                            "cinema",
+                            "aperitif",
+                            "date",
+                            "visit",
+                            "other"
+                          }
+                              .map(
+                                (eventType) => ChoiceChip(
+                                  label: Text(eventType),
+                                  selected: eventType == _socialEventInfo.type,
+                                  onSelected: (selected) {
+                                    if (selected) {
+                                      setState(() => _socialEventInfo =
+                                          _socialEventInfo.copyWith(
+                                              type: eventType));
+                                    }
+                                  },
+                                ),
+                              )
+                              .toList(),
                         ),
                       ),
                       if (_socialEventInfo.type == "other")
@@ -219,8 +246,9 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                               icon: Icon(Icons.info),
                               labelText: 'Type of social event',
                             ),
-                            autovalidateMode:
-                                _autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                            autovalidateMode: _autoValidate
+                                ? AutovalidateMode.onUserInteraction
+                                : AutovalidateMode.disabled,
                             validator: (value) {
                               if (value?.isEmpty ?? true) {
                                 return 'Please give a label to this event';
@@ -245,7 +273,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                                   Flexible(
                                     child: Padding(
                                       padding: EdgeInsets.all(8.0),
-                                      child: Text("Number of people (including you)"),
+                                      child: Text(
+                                          "Number of people (including you)"),
                                     ),
                                   ),
                                 ],
@@ -255,27 +284,37 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                               child: Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: TextFormField(
-                                  key: Key("numberOfPeople${_socialEventInfo.numberOfPeople}"),
-                                  initialValue: _socialEventInfo.numberOfPeople?.toString() ?? "",
+                                  key: Key(
+                                      "numberOfPeople${_socialEventInfo.numberOfPeople}"),
+                                  initialValue: _socialEventInfo.numberOfPeople
+                                          ?.toString() ??
+                                      "",
                                   onChanged: (value) {
                                     final intValue = int.tryParse(value);
                                     if (intValue != null) {
-                                      setState(
-                                          () => _socialEventInfo = _socialEventInfo.copyWith(numberOfPeople: intValue));
+                                      setState(() => _socialEventInfo =
+                                          _socialEventInfo.copyWith(
+                                              numberOfPeople: intValue));
                                     }
                                   },
                                   textAlign: TextAlign.center,
                                   decoration: InputDecoration(
                                     prefixIcon: IconButton(
                                       onPressed: () {
-                                        final currentValue = _socialEventInfo.numberOfPeople;
+                                        final currentValue =
+                                            _socialEventInfo.numberOfPeople;
                                         if (currentValue != null) {
                                           if (currentValue > 2) {
                                             setState(() => _socialEventInfo =
-                                                _socialEventInfo.copyWith(numberOfPeople: currentValue - 1));
+                                                _socialEventInfo.copyWith(
+                                                    numberOfPeople:
+                                                        currentValue - 1));
                                           } else {
                                             // reset number of people to null (copyWith can't do it):
-                                            setState(() => _socialEventInfo = SocialEvent(type: _socialEventInfo.type));
+                                            setState(() => _socialEventInfo =
+                                                SocialEvent(
+                                                    type:
+                                                        _socialEventInfo.type));
                                           }
                                         }
                                       },
@@ -283,13 +322,18 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                                     ),
                                     suffixIcon: IconButton(
                                       onPressed: () {
-                                        setState(() => _socialEventInfo = _socialEventInfo.copyWith(
-                                            numberOfPeople: (_socialEventInfo.numberOfPeople ?? 1) + 1));
+                                        setState(() => _socialEventInfo =
+                                            _socialEventInfo.copyWith(
+                                                numberOfPeople: (_socialEventInfo
+                                                            .numberOfPeople ??
+                                                        1) +
+                                                    1));
                                       },
                                       icon: const Icon(Icons.add),
                                     ),
                                   ),
-                                  keyboardType: const TextInputType.numberWithOptions(),
+                                  keyboardType:
+                                      const TextInputType.numberWithOptions(),
                                   validator: (value) {
                                     final intValue = int.tryParse(value ?? "");
                                     if (intValue != null && intValue < 2) {
@@ -297,7 +341,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                                     }
                                     return null;
                                   },
-                                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                                  autovalidateMode:
+                                      AutovalidateMode.onUserInteraction,
                                 ),
                               ),
                             ),
@@ -317,12 +362,14 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("Record your performance", style: Theme.of(context).textTheme.headline5),
+                        child: Text("Record your performance",
+                            style: Theme.of(context).textTheme.headline5),
                       ),
                       _SportsRadioInput(
                         values: Sport.values,
                         groupValue: _sportsInfo,
-                        onChipSelected: (sport) => setState(() => _sportsInfo = sport),
+                        onChipSelected: (sport) =>
+                            setState(() => _sportsInfo = sport),
                         autoValidate: _autoValidate,
                       ),
                     ],
@@ -338,7 +385,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("Weight measurement", style: Theme.of(context).textTheme.headline5),
+                        child: Text("Weight measurement",
+                            style: Theme.of(context).textTheme.headline5),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -353,8 +401,9 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                             labelText: 'Weight (Kilograms)',
                             suffixText: "Kg",
                           ),
-                          autovalidateMode:
-                              _autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                          autovalidateMode: _autoValidate
+                              ? AutovalidateMode.onUserInteraction
+                              : AutovalidateMode.disabled,
                           validator: (value) {
                             if (value?.isEmpty ?? true) {
                               return 'Please enter your current weight';
@@ -377,10 +426,12 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Text("Event time", style: Theme.of(context).textTheme.headline5),
+                      child: Text("Event time",
+                          style: Theme.of(context).textTheme.headline5),
                     ),
                     _EventDateRangeInput(
-                      initialValue: DateTimeRange(start: _eventStartTime, end: _eventEndTime),
+                      initialValue: DateTimeRange(
+                          start: _eventStartTime, end: _eventEndTime),
                       onChange: (newRange) => setState(() {
                         _eventStartTime = newRange.start;
                         _eventEndTime = newRange.end;
@@ -401,8 +452,10 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                           _eventEndTime = _eventStartTime;
                         }
                       }),
-                      onIncreaseInterval: () => setState(() => _eventInterval++),
-                      onDecreaseInterval: () => setState(() => _eventInterval = max(1, _eventInterval - 1)),
+                      onIncreaseInterval: () =>
+                          setState(() => _eventInterval++),
+                      onDecreaseInterval: () => setState(
+                          () => _eventInterval = max(1, _eventInterval - 1)),
                     ),
                   ],
                 ),
@@ -417,20 +470,23 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     children: [
                       Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Text("Event value", style: Theme.of(context).textTheme.headline5),
+                        child: Text("Event value",
+                            style: Theme.of(context).textTheme.headline5),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: TextFormField(
                           keyboardType: TextInputType.number,
                           initialValue: _eventValue.toString(),
-                          onChanged: (value) => setState(() => _eventValue = double.tryParse(value) ?? _eventValue),
+                          onChanged: (value) => setState(() => _eventValue =
+                              double.tryParse(value) ?? _eventValue),
                           decoration: const InputDecoration(
                             icon: Icon(Icons.tune),
                             labelText: 'Numeric value',
                           ),
-                          autovalidateMode:
-                              _autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                          autovalidateMode: _autoValidate
+                              ? AutovalidateMode.onUserInteraction
+                              : AutovalidateMode.disabled,
                           validator: (value) {
                             if (value?.isEmpty ?? true) {
                               return 'Please enter a value for this event';
@@ -451,7 +507,9 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
                   child: _addingEvent
-                      ? const Center(child: CircularProgressIndicator.adaptive())
+                      ? const Center(
+                          child: CircularProgressIndicator.adaptive(),
+                        )
                       : SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -467,8 +525,8 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
       );
 
   static DateTime get _today {
-    final _now = DateTime.now();
-    return DateTime(_now.year, _now.month, _now.day);
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day);
   }
 
   Future<void> _submitEvent() async {
@@ -484,19 +542,29 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         } else if (_eventType == EventType.moodMeasurement) {
           derivedEvents = _eventsFromMoodParams(_mood, time: _eventStartTime);
         } else if (_eventType == EventType.socialEvent) {
-          derivedEvents = _eventsFromSocialEvent(_socialEventInfo, time: _eventStartTime);
+          derivedEvents =
+              _eventsFromSocialEvent(_socialEventInfo, time: _eventStartTime);
         } else if (_eventType == EventType.sportsEvent) {
           final weightMeasurements = await ref
               .read(eventProvider)
               .sorted()
               .first
-              .then((events) => events.where((e) => e.title == "weight measurement").map((e) => e.value));
-          final bodyWeight = weightMeasurements.isEmpty ? 65.0 : weightMeasurements.last; // TODO ask user
-          derivedEvents = _eventsFromSportsInfo(_sportsInfo, time: _eventStartTime, bodyWeight: bodyWeight);
+              .then((events) => events
+                  .where((e) => e.title == "weight measurement")
+                  .map((e) => e.value));
+          final bodyWeight = weightMeasurements.isEmpty
+              ? 65.0
+              : weightMeasurements.last; // TODO ask user
+          derivedEvents = _eventsFromSportsInfo(_sportsInfo,
+              time: _eventStartTime, bodyWeight: bodyWeight);
         } else if (_eventType == EventType.customEvent) {
-          derivedEvents = {Event(_eventTitle, value: _eventValue, start: _eventStartTime)};
+          derivedEvents = {
+            Event(_eventTitle, value: _eventValue, start: _eventStartTime)
+          };
         } else if (_eventType == EventType.weightMeasurement) {
-          derivedEvents = {Event(_eventTitle, value: _eventValue, start: _eventStartTime)};
+          derivedEvents = {
+            Event(_eventTitle, value: _eventValue, start: _eventStartTime)
+          };
         }
 
         if (_eventFrequency != Frequency.once) {
@@ -504,7 +572,9 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
               .map((event) => recurringEvents(
                     title: event.title,
                     value: event.value,
-                    range: DateTimeRange(start: _eventStartTime.toUtc(), end: _eventEndTime.toUtc()),
+                    range: DateTimeRange(
+                        start: _eventStartTime.toUtc(),
+                        end: _eventEndTime.toUtc()),
                     frequency: _eventFrequency,
                     interval: _eventInterval,
                   ))
@@ -523,30 +593,43 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
 
   Set<Event> _eventsFromFoodInfo(FoodInfo food, {required DateTime time}) => {
         Event("calories intake", value: food.calories, start: time),
-        if (food.fat != null && food.fat != 0) Event("fat intake", value: food.fat!, start: time),
-        if (food.carbs != null && food.carbs != 0) Event("carbs intake", value: food.carbs!, start: time),
-        if (food.fiber != null && food.fiber != 0) Event("fiber intake", value: food.fiber!, start: time),
-        if (food.protein != null && food.protein != 0) Event("protein intake", value: food.protein!, start: time),
-        if (food.iron != null && food.iron != 0) Event("iron intake", value: food.iron!, start: time),
+        if (food.fat != null && food.fat != 0)
+          Event("fat intake", value: food.fat!, start: time),
+        if (food.carbs != null && food.carbs != 0)
+          Event("carbs intake", value: food.carbs!, start: time),
+        if (food.fiber != null && food.fiber != 0)
+          Event("fiber intake", value: food.fiber!, start: time),
+        if (food.protein != null && food.protein != 0)
+          Event("protein intake", value: food.protein!, start: time),
+        if (food.iron != null && food.iron != 0)
+          Event("iron intake", value: food.iron!, start: time),
       };
 
   Set<Event> _eventsFromMoodParams(Mood mood, {required DateTime time}) => {
-        if (mood.happiness != 0) Event("happiness", value: mood.happiness, start: time),
+        if (mood.happiness != 0)
+          Event("happiness", value: mood.happiness, start: time),
         if (mood.stress != 0) Event("stress", value: mood.stress, start: time),
-        if (mood.energy != 0) Event("perceived energy", value: mood.energy, start: time),
+        if (mood.energy != 0)
+          Event("perceived energy", value: mood.energy, start: time),
       };
 
-  Set<Event> _eventsFromSocialEvent(SocialEvent socialEvent, {required DateTime time}) => {
+  Set<Event> _eventsFromSocialEvent(SocialEvent socialEvent,
+          {required DateTime time}) =>
+      {
         Event(socialEvent.type, value: 1, start: time),
         if (socialEvent.numberOfPeople != null)
-          Event("meeting people", value: socialEvent.numberOfPeople!.toDouble(), start: time),
+          Event("meeting people",
+              value: socialEvent.numberOfPeople!.toDouble(), start: time),
       };
 
-  Set<Event> _eventsFromSportsInfo(SportsInfo session, {required DateTime time, required double bodyWeight}) => {
+  Set<Event> _eventsFromSportsInfo(SportsInfo session,
+          {required DateTime time, required double bodyWeight}) =>
+      {
         Event(session.sport, value: 1, start: time),
         Event(
           "calories intake",
-          value: -SportsInfo.energyConsumption(sport: session, bodyWeight: bodyWeight),
+          value: -SportsInfo.energyConsumption(
+              sport: session, bodyWeight: bodyWeight),
           start: time,
         ),
       };
@@ -604,7 +687,9 @@ class _EventTypeSelectorState extends State<_EventTypeSelector> {
   Widget build(BuildContext context) => AnimatedContainer(
         duration: const Duration(milliseconds: 750),
         curve: Curves.fastOutSlowIn,
-        constraints: minimized ? const BoxConstraints(maxHeight: 50) : const BoxConstraints(maxHeight: 600),
+        constraints: minimized
+            ? const BoxConstraints(maxHeight: 50)
+            : const BoxConstraints(maxHeight: 600),
         child: ListView(
           shrinkWrap: true,
           children: [
@@ -652,8 +737,13 @@ class _EventTitleTextField extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => FutureBuilder<Set<String>>(
-        future: ref.read(eventProvider).list.last.then((events) => events.map((e) => e.title).toSet()),
+  Widget build(BuildContext context, WidgetRef ref) =>
+      FutureBuilder<Set<String>>(
+        future: ref
+            .read(eventProvider)
+            .list
+            .last
+            .then((events) => events.map((e) => e.title).toSet()),
         builder: (context, snapshot) {
           final hints = (snapshot.connectionState == ConnectionState.done)
               ? snapshot.data ?? const Iterable<String>.empty()
@@ -661,9 +751,13 @@ class _EventTitleTextField extends ConsumerWidget {
           return Autocomplete<String>(
             optionsBuilder: (textEditingValue) => textEditingValue.text == ''
                 ? const Iterable<String>.empty()
-                : hints.where((option) => option.toLowerCase().contains(textEditingValue.text.toLowerCase())),
+                : hints.where((option) => option
+                    .toLowerCase()
+                    .contains(textEditingValue.text.toLowerCase())),
             onSelected: onHintSelected,
-            fieldViewBuilder: (context, textEditingController, focusNode, onFieldSubmitted) => TextFormField(
+            fieldViewBuilder:
+                (context, textEditingController, focusNode, onFieldSubmitted) =>
+                    TextFormField(
               controller: textEditingController,
               focusNode: focusNode,
               onChanged: onFieldChanged,
@@ -671,7 +765,9 @@ class _EventTitleTextField extends ConsumerWidget {
                 icon: Icon(Icons.info),
                 labelText: 'Event title',
               ),
-              autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+              autovalidateMode: autoValidate
+                  ? AutovalidateMode.onUserInteraction
+                  : AutovalidateMode.disabled,
               validator: (value) {
                 if (value?.isEmpty ?? true) {
                   return 'Please enter a title for this event';
@@ -680,7 +776,9 @@ class _EventTitleTextField extends ConsumerWidget {
               },
             ),
             optionsViewBuilder: (context, onSelected, options) => Padding(
-              padding: EdgeInsets.only(left: (IconTheme.of(context).size ?? 24.0) + 16.0, right: 56.0),
+              padding: EdgeInsets.only(
+                  left: (IconTheme.of(context).size ?? 24.0) + 16.0,
+                  right: 56.0),
               child: Align(
                 alignment: Alignment.topLeft,
                 child: Material(
@@ -766,8 +864,11 @@ class _FoodRadioInput extends StatelessWidget {
                     nutrientName: "calories",
                     measurementUnit: "kcal",
                     initialValue: groupValue.calories,
-                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(calories: newValue)),
-                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    onChanged: (newValue) =>
+                        onChipSelected(groupValue.copyWith(calories: newValue)),
+                    autovalidateMode: autoValidate
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
@@ -776,8 +877,11 @@ class _FoodRadioInput extends StatelessWidget {
                     key: Key("${groupValue.label}_fat"),
                     nutrientName: "fat",
                     initialValue: groupValue.fat,
-                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(fat: newValue)),
-                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    onChanged: (newValue) =>
+                        onChipSelected(groupValue.copyWith(fat: newValue)),
+                    autovalidateMode: autoValidate
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
@@ -786,8 +890,11 @@ class _FoodRadioInput extends StatelessWidget {
                     key: Key("${groupValue.label}_carbs"),
                     nutrientName: "carbs",
                     initialValue: groupValue.carbs,
-                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(carbs: newValue)),
-                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    onChanged: (newValue) =>
+                        onChipSelected(groupValue.copyWith(carbs: newValue)),
+                    autovalidateMode: autoValidate
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
@@ -796,8 +903,11 @@ class _FoodRadioInput extends StatelessWidget {
                     key: Key("${groupValue.label}_fiber"),
                     nutrientName: "fiber",
                     initialValue: groupValue.fiber,
-                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(fiber: newValue)),
-                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    onChanged: (newValue) =>
+                        onChipSelected(groupValue.copyWith(fiber: newValue)),
+                    autovalidateMode: autoValidate
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
@@ -806,8 +916,11 @@ class _FoodRadioInput extends StatelessWidget {
                     key: Key("${groupValue.label}_protein"),
                     nutrientName: "protein",
                     initialValue: groupValue.protein,
-                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(protein: newValue)),
-                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    onChanged: (newValue) =>
+                        onChipSelected(groupValue.copyWith(protein: newValue)),
+                    autovalidateMode: autoValidate
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                   ),
                 ),
                 Padding(
@@ -817,8 +930,11 @@ class _FoodRadioInput extends StatelessWidget {
                     nutrientName: "iron",
                     measurementUnit: "mg",
                     initialValue: groupValue.iron,
-                    onChanged: (newValue) => onChipSelected(groupValue.copyWith(iron: newValue)),
-                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    onChanged: (newValue) =>
+                        onChipSelected(groupValue.copyWith(iron: newValue)),
+                    autovalidateMode: autoValidate
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                   ),
                 ),
               ],
@@ -856,7 +972,8 @@ class _NutrientTextField extends StatelessWidget {
         },
         decoration: InputDecoration(
           icon: const Icon(Icons.local_fire_department),
-          labelText: "${nutrientName[0].toUpperCase()}${nutrientName.substring(1)}",
+          labelText:
+              "${nutrientName[0].toUpperCase()}${nutrientName.substring(1)}",
           suffixText: measurementUnit,
         ),
         autovalidateMode: autovalidateMode,
@@ -897,7 +1014,8 @@ class _SportsRadioInput extends StatelessWidget {
                 spacing: 4.0,
                 runSpacing: 4.0,
                 children: values
-                    .where((trainingSession) => sportsInfo.containsKey(trainingSession))
+                    .where((trainingSession) =>
+                        sportsInfo.containsKey(trainingSession))
                     .map((trainingSession) => sportsInfo[trainingSession])
                     .map(
                       (trainingSession) => ChoiceChip(
@@ -916,17 +1034,20 @@ class _SportsRadioInput extends StatelessWidget {
             ExpansionTile(
               leading: const Icon(Icons.tune),
               expandedCrossAxisAlignment: CrossAxisAlignment.start,
-              title: Text("${groupValue.energyPerKilogramPerHour} calories per Kg per hour"),
+              title: Text(
+                  "${groupValue.energyPerKilogramPerHour} calories per Kg per hour"),
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextFormField(
                     keyboardType: TextInputType.number,
-                    initialValue: groupValue.energyPerKilogramPerHour.toString(),
+                    initialValue:
+                        groupValue.energyPerKilogramPerHour.toString(),
                     onChanged: (newStringValue) {
                       final newValue = double.tryParse(newStringValue);
                       if (newValue != null) {
-                        onChipSelected(groupValue.copyWith(energyPerKilogramPerHour: newValue));
+                        onChipSelected(groupValue.copyWith(
+                            energyPerKilogramPerHour: newValue));
                       }
                     },
                     decoration: const InputDecoration(
@@ -934,7 +1055,9 @@ class _SportsRadioInput extends StatelessWidget {
                       labelText: "Energy per Kg per hour",
                       suffixText: "kcal / (Kg hour)",
                     ),
-                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    autovalidateMode: autoValidate
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                     validator: (value) {
                       if (value?.isEmpty ?? true) {
                         return "Please enter the energy that is burnt in 1 hour, divided by your weight";
@@ -949,7 +1072,9 @@ class _SportsRadioInput extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
                   child: TextFormField(
                     keyboardType: TextInputType.number,
-                    initialValue: groupValue.hours == null ? "" : groupValue.hours.toString(),
+                    initialValue: groupValue.hours == null
+                        ? ""
+                        : groupValue.hours.toString(),
                     onChanged: (newStringValue) {
                       final newValue = double.tryParse(newStringValue);
                       if (newValue != null) {
@@ -961,7 +1086,9 @@ class _SportsRadioInput extends StatelessWidget {
                       labelText: "duration",
                       suffixText: "hours",
                     ),
-                    autovalidateMode: autoValidate ? AutovalidateMode.onUserInteraction : AutovalidateMode.disabled,
+                    autovalidateMode: autoValidate
+                        ? AutovalidateMode.onUserInteraction
+                        : AutovalidateMode.disabled,
                     validator: (value) {
                       if (value?.isEmpty ?? true) {
                         return "Please enter the amount of hours (even fractional) that you trained";
@@ -983,7 +1110,9 @@ class _EventDateRangeInput extends StatelessWidget {
   final DateTimeRange initialValue;
   final void Function(DateTimeRange) onChange;
 
-  const _EventDateRangeInput({Key? key, required this.initialValue, required this.onChange}) : super(key: key);
+  const _EventDateRangeInput(
+      {Key? key, required this.initialValue, required this.onChange})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) => Column(
@@ -992,14 +1121,19 @@ class _EventDateRangeInput extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: GestureDetector(
               onTap: () async {
-                final newStartTime = await _selectDate(context, initialDate: initialValue.start);
-                final compatibleEndTime = newStartTime.isAfter(initialValue.end) ? newStartTime : initialValue.end;
-                onChange(DateTimeRange(start: newStartTime, end: compatibleEndTime));
+                final newStartTime =
+                    await _selectDate(context, initialDate: initialValue.start);
+                final compatibleEndTime = newStartTime.isAfter(initialValue.end)
+                    ? newStartTime
+                    : initialValue.end;
+                onChange(
+                    DateTimeRange(start: newStartTime, end: compatibleEndTime));
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text("Start")),
+                  const Padding(
+                      padding: EdgeInsets.all(8.0), child: Text("Start")),
                   Text(formattedDate(initialValue.start)),
                 ],
               ),
@@ -1009,14 +1143,20 @@ class _EventDateRangeInput extends StatelessWidget {
             padding: const EdgeInsets.all(8.0),
             child: GestureDetector(
               onTap: () async {
-                final newEndTime = await _selectDate(context, initialDate: initialValue.end);
-                final compatibleStartTime = newEndTime.isBefore(initialValue.start) ? newEndTime : initialValue.start;
-                onChange(DateTimeRange(start: compatibleStartTime, end: newEndTime));
+                final newEndTime =
+                    await _selectDate(context, initialDate: initialValue.end);
+                final compatibleStartTime =
+                    newEndTime.isBefore(initialValue.start)
+                        ? newEndTime
+                        : initialValue.start;
+                onChange(
+                    DateTimeRange(start: compatibleStartTime, end: newEndTime));
               },
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Padding(padding: EdgeInsets.all(8.0), child: Text("End")),
+                  const Padding(
+                      padding: EdgeInsets.all(8.0), child: Text("End")),
                   Text(formattedDate(initialValue.end)),
                 ],
               ),
@@ -1025,7 +1165,8 @@ class _EventDateRangeInput extends StatelessWidget {
         ],
       );
 
-  Future<DateTime> _selectDate(BuildContext context, {required DateTime initialDate}) async {
+  Future<DateTime> _selectDate(BuildContext context,
+      {required DateTime initialDate}) async {
     final newDate = await showDatePicker(
       context: context,
       initialDate: initialDate,
@@ -1065,7 +1206,8 @@ class _EventFrequencyExpansionTile extends StatelessWidget {
         leading: const Icon(Icons.repeat),
         expandedCrossAxisAlignment: CrossAxisAlignment.start,
         title: Text(
-          _recurringEventStringDescription(frequency: eventFrequency, interval: eventInterval),
+          _recurringEventStringDescription(
+              frequency: eventFrequency, interval: eventInterval),
         ),
         children: [
           for (final frequency in Frequency.values)
@@ -1096,12 +1238,15 @@ class _EventFrequencyExpansionTile extends StatelessWidget {
                             onPressed: onDecreaseInterval,
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 16.0),
                             child: Container(
                               constraints: const BoxConstraints(minWidth: 48.0),
                               alignment: Alignment.center,
                               child: Text(
-                                _intervalLabel(frequency: eventFrequency, interval: eventInterval),
+                                _intervalLabel(
+                                    frequency: eventFrequency,
+                                    interval: eventInterval),
                               ),
                             ),
                           ),
@@ -1135,7 +1280,8 @@ class _EventFrequencyExpansionTile extends StatelessWidget {
     }
   }
 
-  String _recurringEventStringDescription({required Frequency frequency, required int interval}) {
+  String _recurringEventStringDescription(
+      {required Frequency frequency, required int interval}) {
     if (frequency == Frequency.once) {
       return "Does not repeat";
     } else if (frequency == Frequency.daily) {

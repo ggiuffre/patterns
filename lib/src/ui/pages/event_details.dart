@@ -24,7 +24,7 @@ class EventDetailsPage extends ConsumerWidget {
                   onDeleteEvent: () => Routemaster.of(context).push('/events'),
                 )
               : const CustomScaffold(
-                  body: Center(child: CircularProgressIndicator()),
+                  body: Center(child: CircularProgressIndicator.adaptive()),
                 ),
         );
 }
