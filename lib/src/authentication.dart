@@ -1,4 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -7,19 +6,6 @@ import 'theme.dart';
 import 'ui/components/custom_app_bar.dart';
 import 'ui/components/login.dart';
 import 'ui/components/signup.dart';
-
-/// Wrapper that only shows its child if a user is authenticated, and otherwise prompts for authentication.
-class AuthenticationGuard extends StatelessWidget {
-  final Widget child;
-
-  const AuthenticationGuard({Key? key, required this.child}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) => StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) => snapshot.data == null ? const SignUpLogInSelector() : child,
-      );
-}
 
 class SignUpLogInSelector extends ConsumerWidget {
   const SignUpLogInSelector({Key? key}) : super(key: key);

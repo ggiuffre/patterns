@@ -11,9 +11,11 @@ import '../components/error_card.dart';
 
 class CategoryDetailsPage extends ConsumerWidget {
   final String category;
-  final VoidCallback onCategoryEventsTapped;
 
-  const CategoryDetailsPage({Key? key, required this.category, required this.onCategoryEventsTapped}) : super(key: key);
+  const CategoryDetailsPage({
+    Key? key,
+    required this.category,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
@@ -41,36 +43,47 @@ class CategoryDetailsPage extends ConsumerWidget {
                 ..sort();
 
               final defaultTextColor =
-                  Theme.of(context).colorScheme.brightness == Brightness.dark ? Colors.white : Colors.black;
+                  Theme.of(context).colorScheme.brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black;
               return otherCategories.isEmpty
                   ? const Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Center(child: Text("No other categories to compare")),
+                      child:
+                          Center(child: Text("No other categories to compare")),
                     )
                   : ListView.separated(
                       shrinkWrap: true,
                       padding: const EdgeInsets.all(8.0),
                       itemCount: otherCategories.length,
-                      separatorBuilder: (BuildContext context, int index) => const Divider(),
+                      separatorBuilder: (BuildContext context, int index) =>
+                          const Divider(),
                       itemBuilder: (BuildContext context, int index) {
-                        final coefficient = coefficients[otherCategories.length - 1 - index];
+                        final coefficient =
+                            coefficients[otherCategories.length - 1 - index];
                         final colorLabel = coefficient.isNaN
                             ? defaultTextColor
                             : HSLColor.fromColor(
-                                Color.lerp(Colors.red, Colors.green, (coefficient + 1) / 2) ?? Colors.white,
+                                Color.lerp(Colors.red, Colors.green,
+                                        (coefficient + 1) / 2) ??
+                                    Colors.white,
                               ).withLightness(0.75).toColor();
                         return ListTile(
                           title: Text(otherCategories.elementAt(index)),
                           trailing: ColorFiltered(
-                            colorFilter: ColorFilter.mode(colorLabel, BlendMode.modulate),
+                            colorFilter: ColorFilter.mode(
+                                colorLabel, BlendMode.modulate),
                             child: Container(
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(4),
-                                color: Theme.of(context).colorScheme.brightness == Brightness.dark
-                                    ? Colors.black
-                                    : Colors.white,
+                                color:
+                                    Theme.of(context).colorScheme.brightness ==
+                                            Brightness.dark
+                                        ? Colors.black
+                                        : Colors.white,
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 8.0),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 4.0, horizontal: 8.0),
                               child: Text(
                                 coefficient.toStringAsPrecision(3),
                                 style: TextStyle(

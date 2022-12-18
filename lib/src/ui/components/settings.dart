@@ -7,8 +7,8 @@ import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import 'constrained_card.dart';
 
-class SettingsPage extends StatelessWidget {
-  const SettingsPage({Key? key}) : super(key: key);
+class SettingsView extends StatelessWidget {
+  const SettingsView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) => ListView(
@@ -35,8 +35,12 @@ class DarkModeSettingsCard extends StatelessWidget {
               const Text("Dark mode"),
               Consumer(
                 builder: (innerContext, ref, _) => Switch.adaptive(
-                  value: _isDark(themeMode: ref.watch(appSettingsProvider).themeMode, context: innerContext),
-                  onChanged: (value) async => await ref.read(appSettingsProvider.notifier).setDarkMode(value),
+                  value: _isDark(
+                      themeMode: ref.watch(appSettingsProvider).themeMode,
+                      context: innerContext),
+                  onChanged: (value) async => await ref
+                      .read(appSettingsProvider.notifier)
+                      .setDarkMode(value),
                 ),
               ),
             ],
@@ -70,9 +74,13 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                     value: ref.watch(appSettingsProvider).google.enabled,
                     onChanged: (newValue) async {
                       if (newValue) {
-                        await ref.read(appSettingsProvider.notifier).signInToGoogle();
+                        await ref
+                            .read(appSettingsProvider.notifier)
+                            .signInToGoogle();
                       } else {
-                        await ref.read(appSettingsProvider.notifier).signOutOfGoogle();
+                        await ref
+                            .read(appSettingsProvider.notifier)
+                            .signOutOfGoogle();
                       }
                     },
                   ),
@@ -80,17 +88,20 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
               ),
               if (ref.watch(appSettingsProvider).google.enabled)
                 FutureBuilder<Iterable<g.CalendarListEntry>>(
-                  future: ref.read(appSettingsProvider.notifier).googleCalendars,
+                  future:
+                      ref.read(appSettingsProvider.notifier).googleCalendars,
                   builder: (context, snapshot) {
                     final errorIndicator = Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Row(
                         children: [
-                          Icon(Icons.error, color: Theme.of(context).errorColor),
+                          Icon(Icons.error,
+                              color: Theme.of(context).errorColor),
                           const Flexible(
                             child: Padding(
                               padding: EdgeInsets.all(8.0),
-                              child: Text("Couldn't retrieve your list of calendars from Google Calendar."),
+                              child: Text(
+                                  "Couldn't retrieve your list of calendars from Google Calendar."),
                             ),
                           ),
                         ],
@@ -105,10 +116,12 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                       final calendarSwitches = snapshot.data
                               ?.map(
                                 (calendar) => Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Expanded(
-                                      child: Text(_calendarEntryTitle(calendar), overflow: TextOverflow.ellipsis),
+                                      child: Text(_calendarEntryTitle(calendar),
+                                          overflow: TextOverflow.ellipsis),
                                     ),
                                     Switch.adaptive(
                                       value: ref
@@ -118,7 +131,8 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                                           .contains(calendar.id),
                                       onChanged: (newValue) => ref
                                           .read(appSettingsProvider.notifier)
-                                          .setGoogleCalendarImportance(calendar, newValue),
+                                          .setGoogleCalendarImportance(
+                                              calendar, newValue),
                                     ),
                                   ],
                                 ),
@@ -133,7 +147,8 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                             children: [
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 8.0),
-                                child: Text("Read (or ignore) events from my calendars:"),
+                                child: Text(
+                                    "Read (or ignore) events from my calendars:"),
                               ),
                               ...calendarSwitches
                             ],
@@ -146,7 +161,8 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
 
                     return const Padding(
                       padding: EdgeInsets.all(8.0),
-                      child: Center(child: CircularProgressIndicator.adaptive()),
+                      child:
+                          Center(child: CircularProgressIndicator.adaptive()),
                     );
                   },
                 ),
@@ -160,7 +176,9 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
     final calendarSummary = calendar.summary;
     if (calendarSummary != null) {
       // TODO remove soft hyphens once Flutter allows to specify word hyphenation
-      return isPrimary ? "Primary calendar (${calendarSummary.split('').join('\u00ad')})" : calendarSummary;
+      return isPrimary
+          ? "Primary calendar (${calendarSummary.split('').join('\u00ad')})"
+          : calendarSummary;
     } else {
       return "Untitled";
     }
@@ -190,7 +208,8 @@ class DangerZoneSettingsCard extends ConsumerWidget {
                     await ref.read(eventProvider).delete(e.id);
                   }
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('All your events have been deleted 😅')),
+                    const SnackBar(
+                        content: Text('All your events have been deleted 😅')),
                   );
                 }
               },
@@ -200,7 +219,10 @@ class DangerZoneSettingsCard extends ConsumerWidget {
               ),
               label: Text(
                 "Delete all events",
-                style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Theme.of(context).errorColor),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText1
+                    ?.copyWith(color: Theme.of(context).errorColor),
               ),
             ),
           ],
@@ -214,7 +236,8 @@ class _DeleteAllEventsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) => AlertDialog(
         title: const Text("Confirmation"),
-        content: const Text("This will permanently delete all the events that you entered, "
+        content: const Text(
+            "This will permanently delete all the events that you entered, "
             "and all the patterns calculated from those events."),
         actions: <Widget>[
           TextButton(
@@ -224,7 +247,10 @@ class _DeleteAllEventsDialog extends StatelessWidget {
           TextButton(
             child: Text(
               'Delete all my events',
-              style: Theme.of(context).textTheme.bodyText1?.copyWith(color: Theme.of(context).errorColor),
+              style: Theme.of(context)
+                  .textTheme
+                  .bodyText1
+                  ?.copyWith(color: Theme.of(context).errorColor),
             ),
             onPressed: () => Navigator.of(context).pop(true),
           ),
@@ -236,10 +262,12 @@ class BodyWeightSettingsCard extends ConsumerStatefulWidget {
   const BodyWeightSettingsCard({Key? key}) : super(key: key);
 
   @override
-  ConsumerState<BodyWeightSettingsCard> createState() => _BodyWeightSettingsCardState();
+  ConsumerState<BodyWeightSettingsCard> createState() =>
+      _BodyWeightSettingsCardState();
 }
 
-class _BodyWeightSettingsCardState extends ConsumerState<BodyWeightSettingsCard> {
+class _BodyWeightSettingsCardState
+    extends ConsumerState<BodyWeightSettingsCard> {
   final _formKey = GlobalKey<FormState>();
   double? _newBodyWeight;
   bool _addingEvent = false;
@@ -247,11 +275,8 @@ class _BodyWeightSettingsCardState extends ConsumerState<BodyWeightSettingsCard>
   @override
   Widget build(BuildContext context) => ConstrainedCard(
         child: FutureBuilder<Iterable<Event>>(
-          future: ref
-              .read(eventProvider)
-              .sorted()
-              .last
-              .then((events) => events.where((e) => e.title == "weight measurement")),
+          future: ref.read(eventProvider).sorted().last.then(
+              (events) => events.where((e) => e.title == "weight measurement")),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               return Padding(
@@ -261,7 +286,8 @@ class _BodyWeightSettingsCardState extends ConsumerState<BodyWeightSettingsCard>
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Icon(Icons.warning, color: Theme.of(context).errorColor),
+                      child: Icon(Icons.warning,
+                          color: Theme.of(context).errorColor),
                     ),
                     const Padding(
                       padding: EdgeInsets.all(8.0),
@@ -288,9 +314,11 @@ class _BodyWeightSettingsCardState extends ConsumerState<BodyWeightSettingsCard>
                         child: TextFormField(
                           initialValue: (snapshot.data?.isEmpty ?? true)
                               ? null
-                              : snapshot.data?.last.value.toStringAsPrecision(2),
+                              : snapshot.data?.last.value
+                                  .toStringAsPrecision(2),
                           decoration: const InputDecoration(suffixText: "Kg"),
-                          onChanged: (value) => setState(() => _newBodyWeight = double.tryParse(value)),
+                          onChanged: (value) => setState(
+                              () => _newBodyWeight = double.tryParse(value)),
                           validator: (value) {
                             if (value?.isEmpty ?? true) {
                               return 'Please enter your current weight';
@@ -305,8 +333,11 @@ class _BodyWeightSettingsCardState extends ConsumerState<BodyWeightSettingsCard>
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: _addingEvent
-                          ? const Center(child: CircularProgressIndicator.adaptive())
-                          : ActionChip(label: const Text("Update"), onPressed: _onSubmit),
+                          ? const Center(
+                              child: CircularProgressIndicator.adaptive())
+                          : ActionChip(
+                              label: const Text("Update"),
+                              onPressed: _onSubmit),
                     ),
                   ],
                 ),
@@ -330,7 +361,8 @@ class _BodyWeightSettingsCardState extends ConsumerState<BodyWeightSettingsCard>
         if (newBodyWeight != null) {
           final _now = DateTime.now();
           final _today = DateTime(_now.year, _now.month, _now.day);
-          final event = Event("weight measurement", value: newBodyWeight, start: _today);
+          final event =
+              Event("weight measurement", value: newBodyWeight, start: _today);
           await ref.read(eventProvider).add(event);
           setState(() => _addingEvent = false);
         }
