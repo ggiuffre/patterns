@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:flutter/material.dart' show DateTimeRange;
 
@@ -11,7 +9,12 @@ class Event implements Comparable<Event> {
   final Map<String, String?> recurrence;
   final double value;
 
-  static const defaultRecurrence = <String, String?>{"rRule": null, "exRule": null, "rDate": null, "exDate": null};
+  static const defaultRecurrence = <String, String?>{
+    "rRule": null,
+    "exRule": null,
+    "rDate": null,
+    "exDate": null
+  };
 
   const Event(
     this.title, {
@@ -41,13 +44,16 @@ class Event implements Comparable<Event> {
       };
 
   @override
-  int compareTo(Event other) => start == other.start ? title.compareTo(other.title) : start.compareTo(other.start);
+  int compareTo(Event other) => start == other.start
+      ? title.compareTo(other.title)
+      : start.compareTo(other.start);
 
   @override
-  bool operator ==(Object other) => other is Event && start == other.start && title == other.title;
+  bool operator ==(Object other) =>
+      other is Event && start == other.start && title == other.title;
 
   @override
-  int get hashCode => hashValues(title, start);
+  int get hashCode => Object.hash(title, start);
 
   bool operator <(Event other) => compareTo(other) < 0;
 
@@ -58,19 +64,24 @@ class Event implements Comparable<Event> {
   bool operator >(Event other) => compareTo(other) > 0;
 
   /// Whether the event is recurring.
-  bool get recurring => recurrence["rRule"] != null && recurrence["rRule"]!.contains("FREQ");
+  bool get recurring =>
+      recurrence["rRule"] != null && recurrence["rRule"]!.contains("FREQ");
 
   /// Whether the event is recurring on a daily frequency.
-  bool get daily => recurring && (recurrence["rRule"]?.contains("FREQ:DAILY") ?? false);
+  bool get daily =>
+      recurring && (recurrence["rRule"]?.contains("FREQ:DAILY") ?? false);
 
   /// Whether the event is recurring on a weekly frequency.
-  bool get weekly => recurring && (recurrence["rRule"]?.contains("FREQ:WEEKLY") ?? false);
+  bool get weekly =>
+      recurring && (recurrence["rRule"]?.contains("FREQ:WEEKLY") ?? false);
 
   /// Whether the event is recurring on a monthly frequency.
-  bool get monthly => recurring && (recurrence["rRule"]?.contains("FREQ:MONTHLY") ?? false);
+  bool get monthly =>
+      recurring && (recurrence["rRule"]?.contains("FREQ:MONTHLY") ?? false);
 
   /// Whether the event is recurring on a yearly frequency.
-  bool get yearly => recurring && (recurrence["rRule"]?.contains("FREQ:YEARLY") ?? false);
+  bool get yearly =>
+      recurring && (recurrence["rRule"]?.contains("FREQ:YEARLY") ?? false);
 
   /// Frequency at which the event occurs.
   Frequency get frequency {
@@ -93,7 +104,8 @@ class Event implements Comparable<Event> {
   /// 0 if the event is not a recurring event.
   int get interval => recurring
       ? int.tryParse((recurrence["rRule"]?.split(";") ?? [])
-              .firstWhere((rule) => rule.startsWith("INTERVAL"), orElse: () => "INTERVAL=0")
+              .firstWhere((rule) => rule.startsWith("INTERVAL"),
+                  orElse: () => "INTERVAL=0")
               .split("=")
               .last) ??
           0
@@ -108,7 +120,8 @@ class Event implements Comparable<Event> {
       DateTime instanceTime = start;
       while (!instanceTime.isAfter(endTime)) {
         result.add(Event(title, value: value, start: instanceTime));
-        instanceTime = instanceTime.increaseByInterval(interval: interval, frequency: frequency);
+        instanceTime = instanceTime.increaseByInterval(
+            interval: interval, frequency: frequency);
       }
 
       return result;
@@ -151,20 +164,24 @@ extension IncreasableByInterval on DateTime {
     required Frequency frequency,
   }) {
     if (frequency == Frequency.daily) {
-      return DateTime.utc(year, month, day + interval, hour, minute, second, millisecond, microsecond);
+      return DateTime.utc(year, month, day + interval, hour, minute, second,
+          millisecond, microsecond);
     } else if (frequency == Frequency.weekly) {
-      return DateTime.utc(year, month, day + (7 * interval), hour, minute, second, millisecond, microsecond);
+      return DateTime.utc(year, month, day + (7 * interval), hour, minute,
+          second, millisecond, microsecond);
     } else if (frequency == Frequency.monthly) {
       return monthsLater(months: interval);
     } else if (frequency == Frequency.yearly) {
-      return DateTime.utc(year + interval, month, day, hour, minute, second, millisecond, microsecond);
+      return DateTime.utc(year + interval, month, day, hour, minute, second,
+          millisecond, microsecond);
     } else {
       throw Exception("Invalid frequency '$frequency'");
     }
   }
 
   DateTime monthsLater({required int months}) {
-    DateTime candidate = DateTime.utc(year, month + months, day, hour, minute, second, millisecond, microsecond);
+    DateTime candidate = DateTime.utc(year, month + months, day, hour, minute,
+        second, millisecond, microsecond);
     int correction = 0;
 
     while (((candidate.month - month) % 12 > months.abs())) {

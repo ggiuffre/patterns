@@ -359,10 +359,10 @@ class _BodyWeightSettingsCardState
         setState(() => _addingEvent = true);
         final newBodyWeight = _newBodyWeight;
         if (newBodyWeight != null) {
-          final _now = DateTime.now();
-          final _today = DateTime(_now.year, _now.month, _now.day);
+          final now = DateTime.now();
+          final today = DateTime(now.year, now.month, now.day);
           final event =
-              Event("weight measurement", value: newBodyWeight, start: _today);
+              Event("weight measurement", value: newBodyWeight, start: today);
           await ref.read(eventProvider).add(event);
           setState(() => _addingEvent = false);
         }
