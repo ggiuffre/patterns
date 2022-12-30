@@ -35,14 +35,19 @@ class PatternsApp extends ConsumerWidget {
         '/categories': (_) => const MaterialPage(child: CategoriesIndexPage()),
         '/patterns': (_) => const MaterialPage(child: PatternsIndexPage()),
         '/categories/:id': (r) => MaterialPage(
-              child:
-                  CategoryDetailsPage(category: r.pathParameters['id'] ?? ''),
+              child: CategoryDetailsPage(
+                category: Uri.decodeComponent(r.pathParameters['id'] ?? ''),
+              ),
             ),
         '/categories/:id/events': (r) => MaterialPage(
-              child: EventsIndexPage(category: r.pathParameters['id']),
+              child: EventsIndexPage(
+                category: Uri.decodeComponent(r.pathParameters['id'] ?? ''),
+              ),
             ),
         '/events/:id': (r) => MaterialPage(
-              child: EventDetailsPage(eventId: r.pathParameters['id']),
+              child: EventDetailsPage(
+                eventId: Uri.decodeComponent(r.pathParameters['id'] ?? ''),
+              ),
             ),
         '/new-event': (_) => const MaterialPage(child: NewEventPage()),
         '/settings': (_) => const MaterialPage(child: SettingsPage()),
