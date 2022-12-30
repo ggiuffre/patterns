@@ -11,16 +11,16 @@ dependencies:
     sdk: flutter
   flutter_localizations:
     sdk: flutter
-  cloud_firestore: ^4.2.0
-  cupertino_icons: ^1.0.4
-  firebase_auth: ^4.2.1
+  cloud_firestore: ^4.3.0
+  cupertino_icons: ^1.0.5
+  firebase_auth: ^4.2.3
   firebase_core: ^2.4.0
   flutter_riverpod: ^2.1.2
   googleapis: ^9.2.0
   google_sign_in: ^5.4.2
-  http: ^0.13.4
+  http: ^0.13.5
   routemaster: ^1.0.1
-  shared_preferences: ^2.0.11
+  shared_preferences: ^2.0.15
 
 dev_dependencies:
   flutter_test:
