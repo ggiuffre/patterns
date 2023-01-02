@@ -21,7 +21,7 @@ class CategoryDetailsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
         appBar: CustomAppBar(title: Text(category), withLogoutAction: true),
         body: StreamBuilder<Iterable<Event>>(
-          stream: ref.read(eventProvider).sorted(descending: true),
+          stream: ref.read(eventProvider).list,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               developer.log(snapshot.error.toString());
@@ -30,23 +30,36 @@ class CategoryDetailsPage extends ConsumerWidget {
 
             if (snapshot.hasData) {
               final events = snapshot.data ?? const Iterable.empty();
-              final categoryEvents = events.where((e) => e.title == category);
-              final otherEvents = events.where((e) => e.title != category);
-              final otherCategories = otherEvents.map((e) => e.title).toSet();
-              final coefficients = otherCategories
-                  .map((c) => similarity(
+              List<Event> categoryEvents = [];
+              Map<String, List<Event>> eventsByCategory = {};
+              for (final event in events) {
+                final title = event.title;
+                if (title == category) {
+                  categoryEvents.add(event);
+                } else {
+                  eventsByCategory.putIfAbsent(title, () => []).add(event);
+                }
+              }
+              final coefficientsByCategory = eventsByCategory
+                  .map(
+                    (categoryTitle, otherCategoryEvents) => MapEntry(
+                      categoryTitle,
+                      similarity(
                         categoryEvents,
-                        otherEvents.where((e) => e.title == c),
+                        otherCategoryEvents,
                         binary: true,
-                      ))
+                      ),
+                    ),
+                  )
+                  .entries
                   .toList()
-                ..sort();
+                ..sort((a, b) => b.value.compareTo(a.value));
 
               final defaultTextColor =
                   Theme.of(context).colorScheme.brightness == Brightness.dark
                       ? Colors.white
                       : Colors.black;
-              return otherCategories.isEmpty
+              return coefficientsByCategory.isEmpty
                   ? const Padding(
                       padding: EdgeInsets.all(8.0),
                       child:
@@ -55,12 +68,12 @@ class CategoryDetailsPage extends ConsumerWidget {
                   : ListView.separated(
                       shrinkWrap: true,
                       padding: const EdgeInsets.all(8.0),
-                      itemCount: otherCategories.length,
                       separatorBuilder: (BuildContext context, int index) =>
                           const Divider(),
+                      itemCount: coefficientsByCategory.length,
                       itemBuilder: (BuildContext context, int index) {
-                        final coefficient =
-                            coefficients[otherCategories.length - 1 - index];
+                        final mapEntry = coefficientsByCategory[index];
+                        final coefficient = mapEntry.value;
                         final colorLabel = coefficient.isNaN
                             ? defaultTextColor
                             : HSLColor.fromColor(
@@ -69,7 +82,7 @@ class CategoryDetailsPage extends ConsumerWidget {
                                     Colors.white,
                               ).withLightness(0.75).toColor();
                         return ListTile(
-                          title: Text(otherCategories.elementAt(index)),
+                          title: Text(mapEntry.key),
                           trailing: ColorFiltered(
                             colorFilter: ColorFilter.mode(
                                 colorLabel, BlendMode.modulate),
