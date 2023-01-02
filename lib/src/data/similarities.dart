@@ -14,6 +14,7 @@ class CorrelationException implements Exception {
   CorrelationException(this.cause);
 }
 
+/// Get the Pearson correlation coefficient of two vectors.
 double correlation(Iterable<double> x, Iterable<double> y) {
   final n = x.length;
   final m = y.length;
