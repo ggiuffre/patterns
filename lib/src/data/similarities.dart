@@ -124,30 +124,6 @@ double similarity(Iterable<Event> originalA, Iterable<Event> originalB,
   }
 }
 
-class CategoryCouple {
-  final String first;
-  final String second;
-
-  const CategoryCouple(this.first, this.second);
-}
-
-Set<CategoryCouple> couples(Iterable<Event> events) {
-  final categories = events.map((e) => e.title).toSet();
-  var couples = <CategoryCouple>{};
-  var visitedCategories = <String>{};
-
-  for (final a in categories) {
-    for (final b in categories.difference({a})) {
-      if (!visitedCategories.contains(b)) {
-        couples.add(CategoryCouple(a, b));
-      }
-    }
-    visitedCategories.add(a);
-  }
-
-  return couples;
-}
-
 List<Similarity> similarities(Iterable<Event> events, {bool binary = false}) {
   Map<String, List<Event>> eventsByCategory = {};
   for (final event in events) {
