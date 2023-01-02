@@ -19,7 +19,8 @@ double correlation(Iterable<double> x, Iterable<double> y) {
   final m = y.length;
 
   if (n != m) {
-    throw CorrelationException("Cannot compute the covariance between lists of different length: $n != $m");
+    throw CorrelationException(
+        "Cannot compute the covariance between lists of different length: $n != $m");
   }
 
   if (n < 1) {
@@ -41,7 +42,8 @@ double correlation(Iterable<double> x, Iterable<double> y) {
   }
 
   return (n * sumXY - sumX * sumY) /
-      (sqrt(n * stdDevFractionX - pow(sumX, 2)) * sqrt(n * stdDevFractionY - pow(sumY, 2)));
+      (sqrt(n * stdDevFractionX - pow(sumX, 2)) *
+          sqrt(n * stdDevFractionY - pow(sumY, 2)));
 }
 
 List<Event> interpolated(List<Event> events, {bool binary = false}) {
@@ -57,14 +59,18 @@ List<Event> interpolated(List<Event> events, {bool binary = false}) {
   var previousEvent = events.first;
   for (final event in events.skip(1)) {
     final previousDate = previousEvent.start;
-    final distanceFromPreviousEvent = event.start.difference(previousDate).inDays;
+    final distanceFromPreviousEvent =
+        event.start.difference(previousDate).inDays;
     if (distanceFromPreviousEvent > 1) {
       missingEvents.addAll(
         List.generate(
           distanceFromPreviousEvent - 1,
           (index) => Event(
             title,
-            value: binary ? 0 : previousEvent.value + ((event.value - previousEvent.value) / (index + 1)),
+            value: binary
+                ? 0
+                : previousEvent.value +
+                    ((event.value - previousEvent.value) / (index + 1)),
             start: previousDate.add(Duration(days: index + 1)),
           ),
         ),
@@ -78,7 +84,8 @@ List<Event> interpolated(List<Event> events, {bool binary = false}) {
   return events;
 }
 
-double similarity(Iterable<Event> originalA, Iterable<Event> originalB, {bool binary = false}) {
+double similarity(Iterable<Event> originalA, Iterable<Event> originalB,
+    {bool binary = false}) {
   final a = [...originalA];
   final b = [...originalB];
 
@@ -142,27 +149,26 @@ Set<CategoryCouple> couples(Iterable<Event> events) {
 }
 
 List<Similarity> similarities(Iterable<Event> events) {
-  final categories = events.map((e) => e.title).toSet();
+  Map<String, List<Event>> eventsByCategory = {};
+  for (final event in events) {
+    eventsByCategory.putIfAbsent(event.title, () => []).add(event);
+  }
 
-  Set couples = {};
+  List<Similarity> coefficients = [];
   Set visitedCategories = {};
+  final categories = eventsByCategory.keys.toSet();
   for (final a in categories) {
     for (final b in categories.difference({a})) {
-      if (!visitedCategories.contains(b)) {
-        couples.add({a, b});
+      if (!visitedCategories.contains(b) &&
+          eventsByCategory.containsKey(a) &&
+          eventsByCategory.containsKey(b)) {
+        final aEvents = eventsByCategory[a]!;
+        final bEvents = eventsByCategory[b]!;
+        coefficients.add(Similarity({a, b}, similarity(aEvents, bEvents)));
       }
     }
     visitedCategories.add(a);
   }
 
-  return couples
-      .map((couple) => Similarity(
-            {couple.first, couple.last},
-            similarity(
-              events.where((e) => e.title == couple.first).toList(),
-              events.where((e) => e.title == couple.last).toList(),
-            ),
-          ))
-      .toList()
-    ..sort((a, b) => a.coefficient.compareTo(b.coefficient));
+  return coefficients..sort((a, b) => a.coefficient.compareTo(b.coefficient));
 }

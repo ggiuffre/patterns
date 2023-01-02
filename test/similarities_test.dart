@@ -7,13 +7,29 @@ import 'factories.dart';
 void main() {
   group("similarities", () {
     test(
-        "returns as (n * (n - 1)) / 2 elements where n is the number of 'categories' it computes on",
+        "returns (n * (n - 1)) / 2 elements where n is the number of 'categories' it computes on",
         () {
       final events = randomEvents(20, fromYear: 2005, toYear: 2007);
       final categories = events.map((e) => e.title).toSet();
       final result = similarities(events);
       expect(result.length,
           equals((categories.length * (categories.length - 1) / 2)));
+    });
+
+    test(
+        "returns a list where the first element is the similarity between known categories",
+        () {
+      final events = randomEvents(20, fromYear: 2005, toYear: 2007);
+      final result = similarities(events);
+      expect(
+        result.first.coefficient,
+        equals(
+          similarity(
+            events.where((e) => e.title == result.first.labels.first),
+            events.where((e) => e.title == result.first.labels.last),
+          ),
+        ),
+      );
     });
   });
 
