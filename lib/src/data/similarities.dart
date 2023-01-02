@@ -148,7 +148,7 @@ Set<CategoryCouple> couples(Iterable<Event> events) {
   return couples;
 }
 
-List<Similarity> similarities(Iterable<Event> events) {
+List<Similarity> similarities(Iterable<Event> events, {bool binary = false}) {
   Map<String, List<Event>> eventsByCategory = {};
   for (final event in events) {
     eventsByCategory.putIfAbsent(event.title, () => []).add(event);
@@ -164,7 +164,16 @@ List<Similarity> similarities(Iterable<Event> events) {
           eventsByCategory.containsKey(b)) {
         final aEvents = eventsByCategory[a]!;
         final bEvents = eventsByCategory[b]!;
-        coefficients.add(Similarity({a, b}, similarity(aEvents, bEvents)));
+        coefficients.add(
+          Similarity(
+            {a, b},
+            similarity(
+              aEvents,
+              bEvents,
+              binary: binary,
+            ),
+          ),
+        );
       }
     }
     visitedCategories.add(a);
