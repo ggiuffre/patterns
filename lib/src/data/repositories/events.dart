@@ -1,6 +1,5 @@
 import 'dart:async' show Future, Stream;
 
-import 'package:async/async.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -59,13 +58,12 @@ class HybridEventRepository implements EventRepository {
       .last;
 
   @override
-  Stream<Iterable<Event>> get list {
-    final streamGroup = StreamGroup<Iterable<Event>>();
-    for (final repository in repositories) {
-      streamGroup.add(repository.list);
-    }
-    return streamGroup.stream;
-  }
+  Stream<Iterable<Event>> get list =>
+      repositories.map((repository) => repository.list).fold(
+            Stream.value(const Iterable<Event>.empty()),
+            (accumulator, events) => accumulator.asyncMap(
+                (value) async => value.followedBy(await events.first)),
+          );
 
   @override
   Stream<Iterable<Event>> sorted({bool descending = false}) => descending

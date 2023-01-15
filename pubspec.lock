@@ -16,7 +16,7 @@ packages:
     source: hosted
     version: "1.0.11"
   async:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: async
       url: "https://pub.dartlang.org"
