@@ -13,16 +13,18 @@ abstract class EventRepository {
   /// Get the event identified by [id].
   Future<Event> get(String id);
 
-  /// Persist [event] to the repository, and return an identifier to retrieve it.
+  /// Persist [event] to the repository, and return an identifier to retrieve
+  /// it.
   Future<String> add(Event event);
 
-  /// Delete [event] from the repository.
+  /// Delete the event [id] from the repository.
   Future<void> delete(String id);
 
   /// Stream of iterable with all events stored in the repository.
   Stream<Iterable<Event>> get list;
 
-  /// Stream of iterable with all events stored in the repository, sorted by date (default ascending).
+  /// Stream of iterable with all events stored in the repository, sorted by
+  /// date (default ascending).
   Stream<Iterable<Event>> sorted({bool descending = false});
 }
 
@@ -36,7 +38,9 @@ final eventProvider = Provider<EventRepository>(
   ),
 );
 
-/// Implementation of [EventRepository] that merges the events coming from several other repositories
+/// Implementation of [EventRepository] that reads merged events coming from a
+/// list of several other repositories and writes to the first repository in
+/// the list.
 class HybridEventRepository implements EventRepository {
   final Iterable<EventRepository> repositories;
 
@@ -178,7 +182,8 @@ class FirestoreEventRepository implements EventRepository {
               )));
 }
 
-/// Implementation of [EventRepository] that keeps events in memory until the app closes.
+/// Implementation of [EventRepository] that keeps events in memory until the
+/// app closes.
 class InMemoryEventRepository implements EventRepository {
   List<Event> events = [];
 
