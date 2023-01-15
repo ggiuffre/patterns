@@ -1,4 +1,4 @@
-import 'dart:developer' as developer;
+import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,11 +7,14 @@ import 'package:googleapis/calendar/v3.dart' as g;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-final appSettingsProvider = StateNotifierProvider<AppSettingsController, AppSettings>((_) => AppSettingsController());
+final appSettingsProvider =
+    StateNotifierProvider<AppSettingsController, AppSettings>(
+        (_) => AppSettingsController());
 
 /// Controller for [AppSettings].
 class AppSettingsController extends StateNotifier<AppSettings> {
-  AppSettingsController({AppSettings appSettings = const AppSettings()}) : super(appSettings);
+  AppSettingsController({AppSettings appSettings = const AppSettings()})
+      : super(appSettings);
 
   g.CalendarApi? _calendarApi;
 
@@ -24,25 +27,35 @@ class AppSettingsController extends StateNotifier<AppSettings> {
   );
 
   Future<void> setDarkMode(bool darkMode) async {
-    state = state.copyWith(themeMode: darkMode ? ThemeMode.dark : ThemeMode.light);
+    state =
+        state.copyWith(themeMode: darkMode ? ThemeMode.dark : ThemeMode.light);
     try {
       final localStorage = await SharedPreferences.getInstance();
       await localStorage.setBool("darkMode", darkMode);
     } catch (error) {
-      developer.log("Couldn't persist setting 'darkMode' to disk. $error");
+      dev.log("Couldn't persist setting 'darkMode' to disk. $error");
     }
   }
 
   Future<void> syncFromSharedPreferences() async {
     final localStorage = await SharedPreferences.getInstance();
 
-    final darkMode = localStorage.getBool("darkMode");
+    final darkMode = localStorage.containsKey("darkMode")
+        ? localStorage.getBool("darkMode")
+        : null;
     if (darkMode != null) {
-      state = state.copyWith(themeMode: darkMode ? ThemeMode.dark : ThemeMode.light);
+      state = state.copyWith(
+          themeMode: darkMode ? ThemeMode.dark : ThemeMode.light);
     }
 
-    final googleDataEnabled = localStorage.getBool("googleDataEnabled");
-    final enabledGoogleCalendars = localStorage.getStringList("enabledGoogleCalendars") ?? const <String>{};
+    final googleDataEnabled = localStorage.containsKey("googleDataEnabled")
+        ? localStorage.getBool("googleDataEnabled")
+        : null;
+    final enabledGoogleCalendars =
+        localStorage.containsKey("enabledGoogleCalendars")
+            ? localStorage.getStringList("enabledGoogleCalendars") ??
+                const <String>[]
+            : const <String>[];
 
     if (googleDataEnabled != null) {
       if (googleDataEnabled) {
@@ -66,19 +79,21 @@ class AppSettingsController extends StateNotifier<AppSettings> {
   }
 
   Future<GoogleSignInAccount?> signInToGoogle() async {
-    final googleAccount =
-        await _googleApiAuth.signInSilently().then((account) async => account ?? await _googleApiAuth.signIn());
+    final googleAccount = await _googleApiAuth
+        .signInSilently()
+        .then((account) async => account ?? await _googleApiAuth.signIn());
 
     if (googleAccount != null) {
       final headers = await googleAccount.authHeaders;
       _calendarApi = g.CalendarApi(_GoogleAuthClient(headers));
-      state =
-          state.copyWith(google: state.google.copyWith(enabled: true, account: googleAccount, authHeaders: headers));
+      state = state.copyWith(
+          google: state.google.copyWith(
+              enabled: true, account: googleAccount, authHeaders: headers));
       try {
         final localStorage = await SharedPreferences.getInstance();
         await localStorage.setBool("googleDataEnabled", true);
       } catch (error) {
-        developer.log("Couldn't persist setting 'googleDataEnabled' to disk. $error");
+        dev.log("Couldn't persist setting 'googleDataEnabled' to disk. $error");
       }
     }
 
@@ -90,11 +105,12 @@ class AppSettingsController extends StateNotifier<AppSettings> {
       final localStorage = await SharedPreferences.getInstance();
       await localStorage.setBool("googleDataEnabled", false);
     } catch (error) {
-      developer.log("Couldn't persist setting 'googleDataEnabled' to disk. $error");
+      dev.log("Couldn't persist setting 'googleDataEnabled' to disk. $error");
     }
 
     final googleAccount = await _googleApiAuth.signOut();
-    state = state.copyWith(google: state.google.copyWith(enabled: false, account: googleAccount));
+    state = state.copyWith(
+        google: state.google.copyWith(enabled: false, account: googleAccount));
     _calendarApi = null;
 
     return googleAccount;
@@ -102,26 +118,34 @@ class AppSettingsController extends StateNotifier<AppSettings> {
 
   /// Retrieve a list of calendars and assign default settings to any new calendar.
   Future<Iterable<g.CalendarListEntry>> get googleCalendars =>
-      _calendarApi?.calendarList.list().then((calendars) => calendars.items ?? <g.CalendarListEntry>[]).whenComplete(
-          () => SharedPreferences.getInstance()
-                  .then((sharedPrefs) =>
-                      sharedPrefs.setStringList("enabledGoogleCalendars", state.google.enabledCalendarIds.toList()))
+      _calendarApi?.calendarList
+          .list()
+          .then((calendars) => calendars.items ?? <g.CalendarListEntry>[])
+          .whenComplete(() => SharedPreferences.getInstance()
+                  .then((sharedPrefs) => sharedPrefs.setStringList(
+                      "enabledGoogleCalendars",
+                      state.google.enabledCalendarIds.toList()))
                   .catchError((error) {
-                developer.log("Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
+                dev.log(
+                    "Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
                 return true; // ignore error
               })) ??
       Future.value(const {});
 
-  void setGoogleCalendarImportance(g.CalendarListEntry calendar, bool isEnabled) {
+  void setGoogleCalendarImportance(
+      g.CalendarListEntry calendar, bool isEnabled) {
     final calendarId = calendar.id;
     final enabledCalendarIds = state.google.enabledCalendarIds;
     if (calendarId != null) {
       if (isEnabled && !enabledCalendarIds.contains(calendarId)) {
-        state =
-            state.copyWith(google: state.google.copyWith(enabledCalendarIds: enabledCalendarIds.union({calendarId})));
+        state = state.copyWith(
+            google: state.google.copyWith(
+                enabledCalendarIds: enabledCalendarIds.union({calendarId})));
       } else if (!isEnabled && enabledCalendarIds.contains(calendarId)) {
         state = state.copyWith(
-            google: state.google.copyWith(enabledCalendarIds: enabledCalendarIds.difference({calendarId})));
+            google: state.google.copyWith(
+                enabledCalendarIds:
+                    enabledCalendarIds.difference({calendarId})));
       }
     }
   }
@@ -135,7 +159,10 @@ class AppSettings {
   final ThemeMode themeMode;
   final GoogleData google;
 
-  const AppSettings({this.themeMode = ThemeMode.system, this.google = const GoogleData()});
+  const AppSettings({
+    this.themeMode = ThemeMode.system,
+    this.google = const GoogleData(),
+  });
 
   AppSettings copyWith({
     ThemeMode? themeMode,
@@ -176,7 +203,9 @@ class GoogleData {
         enabled: enabled ?? this.enabled,
         enabledCalendarIds: enabledCalendarIds ?? this.enabledCalendarIds,
         account: (enabled ?? this.enabled) ? (account ?? this.account) : null,
-        authHeaders: (enabled ?? this.enabled) ? (authHeaders ?? this.authHeaders) : null,
+        authHeaders: (enabled ?? this.enabled)
+            ? (authHeaders ?? this.authHeaders)
+            : null,
       );
 }
 
@@ -187,5 +216,6 @@ class _GoogleAuthClient extends http.BaseClient {
   _GoogleAuthClient(this._headers);
 
   @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) => _client.send(request..headers.addAll(_headers));
+  Future<http.StreamedResponse> send(http.BaseRequest request) =>
+      _client.send(request..headers.addAll(_headers));
 }
