@@ -61,8 +61,13 @@ class GoogleCalendarEventsRepository implements EventRepository {
   Future<Iterable<Event>> _eventsFromCalendarId(String calendarId) async {
     final api = _calendarApi;
     if (api != null) {
-      final eventsComputation = await api.events.list(calendarId);
-      final events = eventsComputation.items ?? const [];
+      String? pageToken;
+      List<g.Event> events = [];
+      do {
+        final eventsComputation = await api.events.list(calendarId, pageToken: pageToken);
+        pageToken = eventsComputation.nextPageToken;
+        events.addAll(eventsComputation.items ?? const []);
+      } while (pageToken != null);
       return events.map(_eventFromGoogleCalendar);
     } else {
       return Future.value(const Iterable<Event>.empty());
