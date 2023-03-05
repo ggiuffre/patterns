@@ -135,8 +135,9 @@ List<Similarity> similarities(Iterable<Event> events, {bool binary = false}) {
   Set visitedCategories = {};
   final categories = eventsByCategory.keys.toSet();
   for (final a in categories) {
-    for (final b in categories.difference({a})) {
-      if (!visitedCategories.contains(b) &&
+    for (final b in categories) {
+      if (a != b &&
+          !visitedCategories.contains(b) &&
           eventsByCategory.containsKey(a) &&
           eventsByCategory.containsKey(b)) {
         final aEvents = eventsByCategory[a]!;
