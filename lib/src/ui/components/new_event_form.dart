@@ -548,7 +548,6 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
           final weightMeasurements = await ref
               .read(eventProvider)
               .sorted()
-              .first
               .then((events) => events
                   .where((e) => e.title == "weight measurement")
                   .map((e) => e.value));
@@ -742,7 +741,6 @@ class _EventTitleTextField extends ConsumerWidget {
         future: ref
             .read(eventProvider)
             .list
-            .last
             .then((events) => events.map((e) => e.title).toSet()),
         builder: (context, snapshot) {
           final hints = (snapshot.connectionState == ConnectionState.done)

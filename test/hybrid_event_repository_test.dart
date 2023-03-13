@@ -14,7 +14,7 @@ main() {
     final hybridRepository =
         HybridEventRepository(repositories: [repository1, repository2]);
     final eventsLength =
-        await hybridRepository.list.last.then((events) => events.length);
+        await hybridRepository.list.then((events) => events.length);
     expect(eventsLength, 3);
   });
 
@@ -24,9 +24,9 @@ main() {
     final repository2 = InMemoryEventRepository()..add(randomEvent());
     final hybridRepository =
         HybridEventRepository(repositories: [repository1, repository2]);
-    final events1 = await repository1.list.last;
-    final events2 = await repository2.list.last;
-    expect(await hybridRepository.list.last.then((events) => events.toSet()),
+    final events1 = await repository1.list;
+    final events2 = await repository2.list;
+    expect(await hybridRepository.list.then((events) => events.toSet()),
         events1.followedBy(events2).toSet());
   });
 
@@ -38,9 +38,9 @@ main() {
     final hybridRepository =
         HybridEventRepository(repositories: [repository1, repository2]);
     repository1.add(randomEvent());
-    final events1 = await repository1.list.last;
-    final events2 = await repository2.list.last;
-    expect(await hybridRepository.list.last.then((events) => events.toSet()),
+    final events1 = await repository1.list;
+    final events2 = await repository2.list;
+    expect(await hybridRepository.list.then((events) => events.toSet()),
         events1.followedBy(events2).toSet());
   });
 }

@@ -43,18 +43,18 @@ class GoogleCalendarEventsRepository implements EventRepository {
   }
 
   @override
-  Stream<Iterable<Event>> get list {
+  Future<Iterable<Event>> get list {
     final api = _calendarApi;
     if (api != null) {
       developer.log("Retrieving Google calendar events...");
       return _calendarIds
           .map(_eventsFromCalendarId)
-          .fold(Future.value(const Iterable<Event>.empty()), _chainEventComputations)
-          .then((eventsList) => eventsList.toSet())
-          .asStream();
+          .fold(Future.value(const Iterable<Event>.empty()),
+              _chainEventComputations)
+          .then((eventsList) => eventsList.toSet());
     } else {
       developer.log("No auth headers to retrieve Google Calendar events.");
-      return Stream.value({});
+      return Future.value({});
     }
   }
 
@@ -64,7 +64,8 @@ class GoogleCalendarEventsRepository implements EventRepository {
       String? pageToken;
       List<g.Event> events = [];
       do {
-        final eventsComputation = await api.events.list(calendarId, pageToken: pageToken);
+        final eventsComputation =
+            await api.events.list(calendarId, pageToken: pageToken);
         pageToken = eventsComputation.nextPageToken;
         events.addAll(eventsComputation.items ?? const []);
       } while (pageToken != null);
@@ -83,36 +84,52 @@ class GoogleCalendarEventsRepository implements EventRepository {
     final eventRecurrence = event.recurrence;
 
     // TODO using Event.defaultRecurrence makes recurrenceProperties immutable, so what follows is a temp. patch:
-    final recurrenceProperties = <String, String?>{"rRule": null, "exRule": null, "rDate": null, "exDate": null};
+    final recurrenceProperties = <String, String?>{
+      "rRule": null,
+      "exRule": null,
+      "rDate": null,
+      "exDate": null
+    };
     if (eventRecurrence != null) {
-      recurrenceProperties["rRule"] =
-          eventRecurrence.singleWhere((rule) => rule.startsWith("RRULE:"), orElse: () => "").replaceFirst("RRULE:", "");
+      recurrenceProperties["rRule"] = eventRecurrence
+          .singleWhere((rule) => rule.startsWith("RRULE:"), orElse: () => "")
+          .replaceFirst("RRULE:", "");
       recurrenceProperties["exRule"] = eventRecurrence
           .singleWhere((rule) => rule.startsWith("EXRULE:"), orElse: () => "")
           .replaceFirst("EXRULE:", "");
-      recurrenceProperties["rDate"] =
-          eventRecurrence.singleWhere((date) => date.startsWith("RDATE:"), orElse: () => "").replaceFirst("RDATE:", "");
+      recurrenceProperties["rDate"] = eventRecurrence
+          .singleWhere((date) => date.startsWith("RDATE:"), orElse: () => "")
+          .replaceFirst("RDATE:", "");
       recurrenceProperties["exDate"] = eventRecurrence
           .singleWhere((date) => date.startsWith("EXDATE:"), orElse: () => "")
           .replaceFirst("EXDATE:", "");
     }
 
     if (startDateTime != null) {
-      return Event(eventTitle, value: 1, start: startDateTime, end: endDateTime, recurrence: recurrenceProperties);
+      return Event(eventTitle,
+          value: 1,
+          start: startDateTime,
+          end: endDateTime,
+          recurrence: recurrenceProperties);
     } else if (startDate != null) {
-      return Event(eventTitle, value: 1, start: startDate, end: endDate, recurrence: recurrenceProperties);
+      return Event(eventTitle,
+          value: 1,
+          start: startDate,
+          end: endDate,
+          recurrence: recurrenceProperties);
     } else {
       return Event(eventTitle, value: 1, start: DateTime.now());
     }
   }
 
-  Future<Iterable<Event>> _chainEventComputations(Future<Iterable<Event>> acc, Future<Iterable<Event>> events) =>
+  Future<Iterable<Event>> _chainEventComputations(
+          Future<Iterable<Event>> acc, Future<Iterable<Event>> events) =>
       acc.then((allEvents) async => allEvents.followedBy(await events));
 
   @override
-  Stream<Iterable<Event>> sorted({bool descending = false}) => descending
-      ? list.map((events) => events.toList()..sort((a, b) => b.compareTo(a)))
-      : list.map((events) => events.toList()..sort((a, b) => a.compareTo(b)));
+  Future<Iterable<Event>> sorted({bool descending = false}) => descending
+      ? list.then((events) => events.toList()..sort((a, b) => b.compareTo(a)))
+      : list.then((events) => events.toList()..sort((a, b) => a.compareTo(b)));
 }
 
 class _GoogleAuthClient extends http.BaseClient {
@@ -122,5 +139,6 @@ class _GoogleAuthClient extends http.BaseClient {
   _GoogleAuthClient(this._headers);
 
   @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) => _client.send(request..headers.addAll(_headers));
+  Future<http.StreamedResponse> send(http.BaseRequest request) =>
+      _client.send(request..headers.addAll(_headers));
 }

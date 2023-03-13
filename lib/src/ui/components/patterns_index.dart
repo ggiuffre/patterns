@@ -12,12 +12,14 @@ class PatternsIndex extends ConsumerWidget {
   const PatternsIndex({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => StreamBuilder<Iterable<Event>>(
-        stream: ref.read(eventProvider).sorted(),
+  Widget build(BuildContext context, WidgetRef ref) =>
+      FutureBuilder<Iterable<Event>>(
+        future: ref.read(eventProvider).sorted(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             developer.log(snapshot.error.toString());
-            return const ErrorCard(text: "Couldn't retrieve events needed to extract patterns.");
+            return const ErrorCard(
+                text: "Couldn't retrieve events needed to extract patterns.");
           }
 
           if (snapshot.hasData) {
@@ -31,11 +33,16 @@ class PatternsIndex extends ConsumerWidget {
                 : ListView.separated(
                     padding: const EdgeInsets.all(8.0),
                     itemCount: coefficients.length,
-                    separatorBuilder: (BuildContext context, int index) => const Divider(),
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const Divider(),
                     itemBuilder: (BuildContext context, int index) => ListTile(
-                      title: Text("${coefficients[index].labels.first} && ${coefficients[index].labels.last}"),
-                      onTap: () => developer.log("tapped ${coefficients[index]}"),
-                      trailing: Text(coefficients[index].coefficient.toStringAsPrecision(3)),
+                      title: Text(
+                          "${coefficients[index].labels.first} && ${coefficients[index].labels.last}"),
+                      onTap: () =>
+                          developer.log("tapped ${coefficients[index]}"),
+                      trailing: Text(coefficients[index]
+                          .coefficient
+                          .toStringAsPrecision(3)),
                     ),
                   );
           }

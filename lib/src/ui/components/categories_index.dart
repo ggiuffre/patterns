@@ -8,11 +8,13 @@ import 'error_card.dart';
 class CategoriesIndex extends ConsumerWidget {
   final void Function(String) onCategoryTapped;
 
-  const CategoriesIndex({Key? key, required this.onCategoryTapped}) : super(key: key);
+  const CategoriesIndex({Key? key, required this.onCategoryTapped})
+      : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => StreamBuilder<Iterable<Event>>(
-        stream: ref.read(eventProvider).sorted(descending: true),
+  Widget build(BuildContext context, WidgetRef ref) =>
+      FutureBuilder<Iterable<Event>>(
+        future: ref.read(eventProvider).sorted(descending: true),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return const ErrorCard(text: "Couldn't retrieve events.");
@@ -29,11 +31,13 @@ class CategoriesIndex extends ConsumerWidget {
                 : ListView.separated(
                     padding: const EdgeInsets.all(8.0),
                     itemCount: categories.length,
-                    separatorBuilder: (BuildContext context, int index) => const Divider(),
+                    separatorBuilder: (BuildContext context, int index) =>
+                        const Divider(),
                     itemBuilder: (BuildContext context, int index) => ListTile(
                       title: Text(categories[index]),
                       onTap: () => onCategoryTapped(categories[index]),
-                      trailing: Text("${events.where((e) => e.title == categories[index]).length} events"),
+                      trailing: Text(
+                          "${events.where((e) => e.title == categories[index]).length} events"),
                     ),
                   );
           }

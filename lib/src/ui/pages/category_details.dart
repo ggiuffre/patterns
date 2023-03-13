@@ -20,8 +20,8 @@ class CategoryDetailsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) => Scaffold(
         appBar: CustomAppBar(title: Text(category), withLogoutAction: true),
-        body: StreamBuilder<Iterable<Event>>(
-          stream: ref.read(eventProvider).list,
+        body: FutureBuilder<Iterable<Event>>(
+          future: ref.read(eventProvider).list,
           builder: (context, snapshot) {
             if (snapshot.hasError) {
               developer.log(snapshot.error.toString());

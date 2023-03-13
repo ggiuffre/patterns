@@ -59,7 +59,7 @@ class EventDetails extends ConsumerWidget {
                   ),
                   TextButton.icon(
                     onPressed: () async {
-                      final allEvents = await ref.read(eventProvider).list.last;
+                      final allEvents = await ref.read(eventProvider).list;
                       final eventsInCategory =
                           allEvents.where((e) => e.title == event.title);
                       for (final e in eventsInCategory) {

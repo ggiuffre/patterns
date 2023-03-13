@@ -11,10 +11,12 @@ main() {
   testWidgets("shows patterns as a list of tiles", (WidgetTester tester) async {
     final eventRepository = InMemoryEventRepository();
     eventRepository.events = randomEvents(randomInt(max: 5) + 10);
-    final events = await eventRepository.list.last;
+    final events = await eventRepository.list;
     final coefficients = similarities(events).reversed;
     await tester.pumpWidget(ProviderScope(
-      overrides: [eventProvider.overrideWithProvider(Provider((_) => eventRepository))],
+      overrides: [
+        eventProvider.overrideWithProvider(Provider((_) => eventRepository))
+      ],
       child: const MaterialApp(home: Scaffold(body: PatternsIndex())),
     ));
     await tester.pumpAndSettle();

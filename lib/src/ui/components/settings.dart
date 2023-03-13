@@ -203,7 +203,7 @@ class DangerZoneSettingsCard extends ConsumerWidget {
                     ) ??
                     false;
                 if (shouldDeleteEvents) {
-                  final allEvents = await ref.read(eventProvider).list.last;
+                  final allEvents = await ref.read(eventProvider).list;
                   for (final e in allEvents) {
                     await ref.read(eventProvider).delete(e.id);
                   }
@@ -275,7 +275,7 @@ class _BodyWeightSettingsCardState
   @override
   Widget build(BuildContext context) => ConstrainedCard(
         child: FutureBuilder<Iterable<Event>>(
-          future: ref.read(eventProvider).sorted().last.then(
+          future: ref.read(eventProvider).sorted().then(
               (events) => events.where((e) => e.title == "weight measurement")),
           builder: (context, snapshot) {
             if (snapshot.hasError) {
