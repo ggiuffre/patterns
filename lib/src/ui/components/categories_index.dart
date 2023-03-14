@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/category.dart';
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import 'error_card.dart';
@@ -21,8 +22,8 @@ class CategoriesIndex extends ConsumerWidget {
           }
 
           if (snapshot.hasData) {
-            final events = snapshot.data?.toList() ?? [];
-            final categories = events.map((e) => e.title).toSet().toList();
+            final categories =
+                categoriesFromEvents(snapshot.data ?? const Iterable.empty());
             return categories.isEmpty
                 ? const Padding(
                     padding: EdgeInsets.all(8.0),
@@ -33,11 +34,12 @@ class CategoriesIndex extends ConsumerWidget {
                     itemCount: categories.length,
                     separatorBuilder: (BuildContext context, int index) =>
                         const Divider(),
-                    itemBuilder: (BuildContext context, int index) => ListTile(
-                      title: Text(categories[index]),
-                      onTap: () => onCategoryTapped(categories[index]),
-                      trailing: Text(
-                          "${events.where((e) => e.title == categories[index]).length} events"),
+                    itemBuilder: (context, index) => ListTile(
+                      title: Text(categories.elementAt(index).title),
+                      onTap: () =>
+                          onCategoryTapped(categories.elementAt(index).title),
+                      trailing:
+                          Text("${categories.elementAt(index).count} events"),
                     ),
                   );
           }
