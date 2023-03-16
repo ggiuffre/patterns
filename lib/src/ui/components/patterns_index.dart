@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/category.dart';
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import '../../data/similarities.dart';
@@ -14,7 +15,7 @@ class PatternsIndex extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) =>
       FutureBuilder<Iterable<Event>>(
-        future: ref.read(eventProvider).sorted(),
+        future: ref.read(eventProvider).list,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             developer.log(snapshot.error.toString());
@@ -23,7 +24,15 @@ class PatternsIndex extends ConsumerWidget {
           }
 
           if (snapshot.hasData) {
-            final events = snapshot.data?.toList() ?? [];
+            final categories =
+                categoriesFromEvents(snapshot.data ?? const Iterable.empty());
+            int maxNumCategories = 10;
+            final topCategories = categories.takeWhile(
+                (category) => maxNumCategories-- >= 0 && category.count > 1);
+            final categoryTitles = topCategories.map((c) => c.title).toSet();
+            final events =
+                snapshot.data?.where((e) => categoryTitles.contains(e.title)) ??
+                    const Iterable.empty();
             final coefficients = similarities(events).reversed.toList();
             return coefficients.isEmpty
                 ? const Padding(
