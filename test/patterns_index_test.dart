@@ -14,9 +14,7 @@ main() {
     final events = await eventRepository.list;
     final coefficients = similarities(events).reversed;
     await tester.pumpWidget(ProviderScope(
-      overrides: [
-        eventProvider.overrideWithProvider(Provider((_) => eventRepository))
-      ],
+      overrides: [eventProvider.overrideWith((_) => eventRepository)],
       child: const MaterialApp(home: Scaffold(body: PatternsIndex())),
     ));
     await tester.pumpAndSettle();
@@ -28,4 +26,26 @@ main() {
       expect(widgetFinder, findsOneWidget);
     }
   }, skip: true);
+
+  testWidgets("shows ListTile with pattern between two categories",
+      (WidgetTester tester) async {
+    final eventRepository = InMemoryEventRepository();
+    eventRepository.events = randomEvents(randomInt(max: 5) + 10, title: "a");
+    eventRepository.events
+        .addAll(randomEvents(randomInt(max: 5) + 10, title: "b"));
+    final events = await eventRepository.list;
+    final coefficients = similarities(events).reversed;
+    await tester.pumpWidget(ProviderScope(
+      overrides: [eventProvider.overrideWith((_) => eventRepository)],
+      child: const MaterialApp(home: Scaffold(body: PatternsIndex())),
+    ));
+    await tester.pumpAndSettle();
+
+    for (final similarity in coefficients) {
+      final label = "${similarity.labels.first} && ${similarity.labels.last}";
+      final widgetFinder = find.widgetWithText(ListTile, label);
+      await tester.scrollUntilVisible(widgetFinder, 100);
+      expect(widgetFinder, findsOneWidget);
+    }
+  });
 }
