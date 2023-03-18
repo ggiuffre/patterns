@@ -10,8 +10,7 @@ main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          eventProvider.overrideWithProvider(
-              Provider((_) => const DummyEventRepository()))
+          eventProvider.overrideWith((_) => const DummyEventRepository())
         ],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
@@ -23,8 +22,7 @@ main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          eventProvider.overrideWithProvider(
-              Provider((_) => const DummyEventRepository()))
+          eventProvider.overrideWith((_) => const DummyEventRepository())
         ],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
@@ -36,8 +34,7 @@ main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          eventProvider.overrideWithProvider(
-              Provider((_) => const DummyEventRepository()))
+          eventProvider.overrideWith((_) => const DummyEventRepository())
         ],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
@@ -49,8 +46,7 @@ main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          eventProvider.overrideWithProvider(
-              Provider((_) => const DummyEventRepository()))
+          eventProvider.overrideWith((_) => const DummyEventRepository())
         ],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
@@ -61,8 +57,7 @@ main() {
     testWidgets("shows a submit button", (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          eventProvider.overrideWithProvider(
-              Provider((_) => const DummyEventRepository()))
+          eventProvider.overrideWith((_) => const DummyEventRepository())
         ],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
@@ -80,8 +75,7 @@ main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          eventProvider.overrideWithProvider(
-              Provider((_) => const DummyEventRepository()))
+          eventProvider.overrideWith((_) => const DummyEventRepository())
         ],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
@@ -105,8 +99,7 @@ main() {
       void onSubmit() => formSubmitted = true;
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          eventProvider.overrideWithProvider(
-              Provider((_) => const DummyEventRepository()))
+          eventProvider.overrideWith((_) => const DummyEventRepository())
         ],
         child: MaterialApp(home: NewEventForm(onSubmit: onSubmit)),
       ));
@@ -128,8 +121,7 @@ main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          eventProvider.overrideWithProvider(
-              Provider((_) => const DummyEventRepository()))
+          eventProvider.overrideWith((_) => const DummyEventRepository())
         ],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
@@ -151,9 +143,7 @@ main() {
         (WidgetTester tester) async {
       final eventRepository = InMemoryEventRepository();
       await tester.pumpWidget(ProviderScope(
-        overrides: [
-          eventProvider.overrideWithProvider(Provider((_) => eventRepository))
-        ],
+        overrides: [eventProvider.overrideWith((_) => eventRepository)],
         child: MaterialApp(home: NewEventForm(onSubmit: () {})),
       ));
 

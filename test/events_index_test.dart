@@ -12,8 +12,9 @@ main() {
     final eventRepository = InMemoryEventRepository();
     eventRepository.events = randomEvents(nEvents, title: "title", value: 1);
     await tester.pumpWidget(ProviderScope(
-      overrides: [eventProvider.overrideWithProvider(Provider((_) => eventRepository))],
-      child: MaterialApp(home: Scaffold(body: EventsIndex(onEventTapped: (_) {}))),
+      overrides: [eventProvider.overrideWith((_) => eventRepository)],
+      child:
+          MaterialApp(home: Scaffold(body: EventsIndex(onEventTapped: (_) {}))),
     ));
     await tester.pumpAndSettle();
 
