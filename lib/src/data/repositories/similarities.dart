@@ -1,17 +1,26 @@
 import 'package:cloud_firestore/cloud_firestore.dart' show FirebaseFirestore;
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/src/data/repositories/events.dart';
 
+import '../category.dart';
 import '../event.dart';
 import '../similarities.dart';
 
 /// A repository of [Similarity] objects.
 abstract class SimilarityRepository {
-  /// Get a list of similarities between given [events].
-  Future<List<Similarity>> all(Iterable<Event> events, {bool binary = false});
+  /// Get a list of similarities between all available events.
+  Future<List<Similarity>> all({bool binary = false});
 
   /// Get the similarity between two event iterables.
   Future<Similarity> get(Iterable<Event> aEvents, Iterable<Event> bEvents);
 }
+
+/// Currently selected implementation of [SimilarityRepository].
+final similaritiesProvider = FutureProvider<SimilarityRepository>(
+  (ref) async =>
+      FirestoreSimilarityRepository(await ref.watch(eventProvider).list),
+);
 
 /// Implementation of [SimilarityRepository] with a Cloud Firestore back-end.
 ///
@@ -21,14 +30,24 @@ abstract class SimilarityRepository {
 /// error.
 class FirestoreSimilarityRepository implements SimilarityRepository {
   final _userId = FirebaseAuth.instance.currentUser?.uid;
+  final Iterable<Event> events;
 
-  /// Get a list of similarities between given [events], reading and/or
-  /// updating the Cloud Firestore cache.
+  FirestoreSimilarityRepository(this.events);
+
+  Iterable<Event> _nextEvents([int maxNumCategories = 10]) {
+    final categories = categoriesFromEvents(events);
+    final topCategories = categories
+        .takeWhile((category) => maxNumCategories-- >= 0 && category.count > 1);
+    final categoryTitles = topCategories.map((c) => c.title);
+    return events.where((e) => categoryTitles.contains(e.title));
+  }
+
+  /// Get a list of similarities between all available events, reading
+  /// and/or updating the Cloud Firestore cache.
   @override
-  Future<List<Similarity>> all(Iterable<Event> events,
-      {bool binary = false}) async {
+  Future<List<Similarity>> all({bool binary = false}) async {
     Map<String, List<Event>> eventsByCategory = {};
-    for (final event in events) {
+    for (final event in _nextEvents()) {
       eventsByCategory.putIfAbsent(event.title, () => []).add(event);
     }
 
