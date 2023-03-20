@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
+import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart' show DateTimeRange;
 
 class Event implements Comparable<Event> {
@@ -53,7 +56,13 @@ class Event implements Comparable<Event> {
       other is Event && start == other.start && title == other.title;
 
   @override
-  int get hashCode => Object.hash(title, start);
+  int get hashCode => int.parse(
+        sha1
+            .convert(utf8.encode(title + start.toString()))
+            .toString()
+            .substring(0, 10),
+        radix: 36,
+      );
 
   bool operator <(Event other) => compareTo(other) < 0;
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patterns/src/data/repositories/events.dart';
+import 'package:patterns/src/data/repositories/similarities.dart';
 import 'package:patterns/src/data/similarities.dart';
 import 'package:patterns/src/ui/components/patterns_index.dart';
 
@@ -36,7 +37,11 @@ main() {
     final events = await eventRepository.list;
     final coefficients = similarities(events).reversed;
     await tester.pumpWidget(ProviderScope(
-      overrides: [eventProvider.overrideWith((_) => eventRepository)],
+      overrides: [
+        eventProvider.overrideWith((_) => eventRepository),
+        similarityProvider.overrideWith((ref) async =>
+            InMemorySimilarityRepository(await ref.watch(eventProvider).list))
+      ],
       child: const MaterialApp(home: Scaffold(body: PatternsIndex())),
     ));
     await tester.pumpAndSettle();
