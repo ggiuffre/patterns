@@ -42,7 +42,7 @@ class FirestoreSimilarityRepository implements SimilarityRepository {
     developer.log("Listing all similarities",
         name: "FirestoreSimilarityRepository");
     Map<String, List<Event>> eventsByCategory = {};
-    for (final event in _nextEvents()) {
+    for (final event in _batchEvents().first) {
       eventsByCategory.putIfAbsent(event.title, () => []).add(event);
     }
 
@@ -86,16 +86,23 @@ class FirestoreSimilarityRepository implements SimilarityRepository {
     return coefficients..sort((a, b) => a.coefficient.compareTo(b.coefficient));
   }
 
-  /// Get the [maxNumCategories] most relevant events from the current event
-  /// provider, where relevance is event title frequency.
-  Iterable<Event> _nextEvents([int maxNumCategories = 10]) {
-    developer.log("Getting next batch of events.",
-        name: "FirestoreSimilarityRepository");
+  /// Generate batches of events ordered from most to least relevant, taken from
+  /// the current event provider. Relevance is event title frequency, and each
+  /// element of the iterable generated is a batch of at most [batchSize] events.
+  Iterable<Iterable<Event>> _batchEvents([final int batchSize = 10]) sync* {
     final categories = categoriesFromEvents(events);
-    final topCategories = categories
-        .takeWhile((category) => maxNumCategories-- > 0 && category.count > 1);
-    final categoryTitles = topCategories.map((c) => c.title).toSet();
-    return events.where((e) => categoryTitles.contains(e.title));
+    final categoryBatch = <String>{};
+    int i = 0;
+    while (i < categories.length && categories.elementAt(i).count > 1) {
+      categoryBatch.add(categories.elementAt(i).title);
+      if (categoryBatch.length >= batchSize) {
+        developer.log("Returning a batch of events.",
+            name: "FirestoreSimilarityRepository");
+        yield events.where((e) => categoryBatch.contains(e.title));
+        categoryBatch.clear();
+      }
+      i++;
+    }
   }
 
   /// Retrieve all similarities stored on Cloud Firestore.
