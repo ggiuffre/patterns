@@ -26,27 +26,15 @@ class AppSettingsController extends StateNotifier<AppSettings> {
     ],
   );
 
-  Future<void> setDarkMode(bool darkMode) async {
-    state =
-        state.copyWith(themeMode: darkMode ? ThemeMode.dark : ThemeMode.light);
-    try {
-      final localStorage = await SharedPreferences.getInstance();
-      await localStorage.setBool("darkMode", darkMode);
-    } catch (error) {
-      dev.log("Couldn't persist setting 'darkMode' to disk. $error");
-    }
-  }
-
   Future<void> syncFromSharedPreferences() async {
     final localStorage = await SharedPreferences.getInstance();
 
     final darkMode = localStorage.containsKey("darkMode")
         ? localStorage.getBool("darkMode")
         : null;
-    if (darkMode != null) {
-      state = state.copyWith(
-          themeMode: darkMode ? ThemeMode.dark : ThemeMode.light);
-    }
+    final themeMode = darkMode == null
+        ? ThemeMode.system
+        : (darkMode ? ThemeMode.dark : ThemeMode.light);
 
     final googleDataEnabled = localStorage.containsKey("googleDataEnabled")
         ? localStorage.getBool("googleDataEnabled")
@@ -57,24 +45,37 @@ class AppSettingsController extends StateNotifier<AppSettings> {
                 const <String>[]
             : const <String>[];
 
-    if (googleDataEnabled != null) {
-      if (googleDataEnabled) {
-        final googleAccount = await _googleApiAuth.signInSilently();
-        if (googleAccount != null) {
-          final headers = await googleAccount.authHeaders;
-          if (headers.isNotEmpty) {
-            _calendarApi = g.CalendarApi(_GoogleAuthClient(headers));
-            state = state.copyWith(
-              google: state.google.copyWith(
-                enabled: true,
-                account: googleAccount,
-                authHeaders: headers,
-                enabledCalendarIds: enabledGoogleCalendars.toSet(),
-              ),
-            );
-          }
+    GoogleData googleData = const GoogleData();
+    if (googleDataEnabled ?? false) {
+      final googleAccount = await _googleApiAuth.signInSilently();
+      if (googleAccount != null) {
+        final headers = await googleAccount.authHeaders;
+        if (headers.isNotEmpty) {
+          _calendarApi = g.CalendarApi(_GoogleAuthClient(headers));
+          googleData = googleData.copyWith(
+            enabled: true,
+            account: googleAccount,
+            authHeaders: headers,
+            enabledCalendarIds: enabledGoogleCalendars.toSet(),
+          );
         }
       }
+    }
+
+    state = AppSettings(
+      themeMode: themeMode,
+      google: googleData,
+    );
+  }
+
+  Future<void> setDarkMode(bool darkMode) async {
+    state =
+        state.copyWith(themeMode: darkMode ? ThemeMode.dark : ThemeMode.light);
+    try {
+      final localStorage = await SharedPreferences.getInstance();
+      await localStorage.setBool("darkMode", darkMode);
+    } catch (error) {
+      dev.log("Couldn't persist setting 'darkMode' to disk. $error");
     }
   }
 
