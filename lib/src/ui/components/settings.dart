@@ -96,7 +96,7 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                       child: Row(
                         children: [
                           Icon(Icons.error,
-                              color: Theme.of(context).errorColor),
+                              color: Theme.of(context).colorScheme.error),
                           const Flexible(
                             child: Padding(
                               padding: EdgeInsets.all(8.0),
@@ -215,14 +215,14 @@ class DangerZoneSettingsCard extends ConsumerWidget {
               },
               icon: Icon(
                 Icons.delete,
-                color: Theme.of(context).errorColor,
+                color: Theme.of(context).colorScheme.error,
               ),
               label: Text(
                 "Delete all events",
                 style: Theme.of(context)
                     .textTheme
-                    .bodyText1
-                    ?.copyWith(color: Theme.of(context).errorColor),
+                    .bodyLarge
+                    ?.copyWith(color: Theme.of(context).colorScheme.error),
               ),
             ),
           ],
@@ -249,8 +249,8 @@ class _DeleteAllEventsDialog extends StatelessWidget {
               'Delete all my events',
               style: Theme.of(context)
                   .textTheme
-                  .bodyText1
-                  ?.copyWith(color: Theme.of(context).errorColor),
+                  .bodyLarge
+                  ?.copyWith(color: Theme.of(context).colorScheme.error),
             ),
             onPressed: () => Navigator.of(context).pop(true),
           ),
@@ -287,7 +287,7 @@ class _BodyWeightSettingsCardState
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Icon(Icons.warning,
-                          color: Theme.of(context).errorColor),
+                          color: Theme.of(context).colorScheme.error),
                     ),
                     const Padding(
                       padding: EdgeInsets.all(8.0),

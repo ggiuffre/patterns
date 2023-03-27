@@ -44,7 +44,8 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
               children: <Widget>[
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text("Register for free", style: Theme.of(context).textTheme.headline5),
+                  child: Text("Register for free",
+                      style: Theme.of(context).textTheme.headlineSmall),
                 ),
                 TextFormField(
                   controller: _emailController,
@@ -55,7 +56,8 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                     if (value?.isEmpty ?? true) {
                       return 'Please enter your email address';
                     }
-                    if (!RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                    if (!RegExp(
+                            r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                         .hasMatch(value ?? "")) {
                       return 'Please check that the address you entered is correct';
                     }
@@ -67,8 +69,11 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     suffixIcon: IconButton(
-                      icon: Icon(_isPasswordObscured ? Icons.visibility : Icons.visibility_off),
-                      onPressed: () => setState(() => _isPasswordObscured = !_isPasswordObscured),
+                      icon: Icon(_isPasswordObscured
+                          ? Icons.visibility
+                          : Icons.visibility_off),
+                      onPressed: () => setState(
+                          () => _isPasswordObscured = !_isPasswordObscured),
                     ),
                   ),
                   validator: (String? value) {
@@ -86,7 +91,8 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                 Container(
                   padding: const EdgeInsets.all(16.0),
                   alignment: Alignment.center,
-                  child: _authState == _AuthState.signedOut || _authState == _AuthState.error
+                  child: _authState == _AuthState.signedOut ||
+                          _authState == _AuthState.error
                       ? TextButton.icon(
                           icon: const Icon(Icons.person_add),
                           onPressed: () async {
@@ -98,8 +104,10 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
                         )
                       : const CircularProgressIndicator.adaptive(),
                 ),
-                if (_authState == _AuthState.error) const Center(child: Text('Registration failed')),
-                if (_authState == _AuthState.signedIn) const Center(child: Text('Successfully registered new user')),
+                if (_authState == _AuthState.error)
+                  const Center(child: Text('Registration failed')),
+                if (_authState == _AuthState.signedIn)
+                  const Center(child: Text('Successfully registered new user')),
               ],
             ),
           ),

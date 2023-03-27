@@ -8,7 +8,8 @@ void main() {
   group("The dark mode switch", () {
     testWidgets("is off if the system's brightness is light.",
         (WidgetTester tester) async {
-      tester.binding.window.platformBrightnessTestValue = Brightness.light;
+      tester.binding.window.platformDispatcher.platformBrightnessTestValue =
+          Brightness.light;
       await tester.pumpWidget(const ProviderScope(
           child: MaterialApp(home: DarkModeSettingsCard())));
 
@@ -18,7 +19,8 @@ void main() {
 
     testWidgets("is on if the system's brightness is dark.",
         (WidgetTester tester) async {
-      tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+      tester.binding.window.platformDispatcher.platformBrightnessTestValue =
+          Brightness.dark;
       await tester.pumpWidget(const ProviderScope(
           child: MaterialApp(home: DarkModeSettingsCard())));
 
@@ -29,13 +31,15 @@ void main() {
     testWidgets(
         "turns on if the system's brightness changes from light to dark.",
         (WidgetTester tester) async {
-      tester.binding.window.platformBrightnessTestValue = Brightness.light;
+      tester.binding.window.platformDispatcher.platformBrightnessTestValue =
+          Brightness.light;
       await tester.pumpWidget(const ProviderScope(
           child: MaterialApp(home: DarkModeSettingsCard())));
 
       expect(tester.widget<Switch>(find.byType(Switch)).value, false);
 
-      tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+      tester.binding.window.platformDispatcher.platformBrightnessTestValue =
+          Brightness.dark;
       await tester.pumpAndSettle();
       expect(tester.widget<Switch>(find.byType(Switch)).value, true);
     });
@@ -43,13 +47,15 @@ void main() {
     testWidgets(
         "turns off if the system's brightness changes from dark to light.",
         (WidgetTester tester) async {
-      tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+      tester.binding.window.platformDispatcher.platformBrightnessTestValue =
+          Brightness.dark;
       await tester.pumpWidget(const ProviderScope(
           child: MaterialApp(home: DarkModeSettingsCard())));
 
       expect(tester.widget<Switch>(find.byType(Switch)).value, true);
 
-      tester.binding.window.platformBrightnessTestValue = Brightness.light;
+      tester.binding.window.platformDispatcher.platformBrightnessTestValue =
+          Brightness.light;
       await tester.pumpAndSettle();
       expect(tester.widget<Switch>(find.byType(Switch)).value, false);
     });
@@ -85,7 +91,8 @@ void main() {
     testWidgets(
         "depends more on the user-defined theme mode than on the system's brightness.",
         (WidgetTester tester) async {
-      tester.binding.window.platformBrightnessTestValue = Brightness.dark;
+      tester.binding.window.platformDispatcher.platformBrightnessTestValue =
+          Brightness.dark;
       await tester.pumpWidget(ProviderScope(
         overrides: [
           appSettingsProvider.overrideWith((ref) => AppSettingsController(

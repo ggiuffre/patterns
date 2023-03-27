@@ -47,14 +47,12 @@ class EventDetails extends ConsumerWidget {
                     },
                     icon: Icon(
                       Icons.delete,
-                      color: Theme.of(context).errorColor,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     label: Text(
                       "Delete this event",
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyText1
-                          ?.copyWith(color: Theme.of(context).errorColor),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.error),
                     ),
                   ),
                   TextButton.icon(
@@ -69,14 +67,12 @@ class EventDetails extends ConsumerWidget {
                     },
                     icon: Icon(
                       Icons.delete,
-                      color: Theme.of(context).errorColor,
+                      color: Theme.of(context).colorScheme.error,
                     ),
                     label: Text(
                       "Delete all events with this title",
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodyText1
-                          ?.copyWith(color: Theme.of(context).errorColor),
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Theme.of(context).colorScheme.error),
                     ),
                   ),
                 ],

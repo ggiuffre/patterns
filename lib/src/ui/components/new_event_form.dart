@@ -56,7 +56,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text("Event type",
-                          style: Theme.of(context).textTheme.headline5),
+                          style: Theme.of(context).textTheme.headlineSmall),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -81,7 +81,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("Event title",
-                            style: Theme.of(context).textTheme.headline5),
+                            style: Theme.of(context).textTheme.headlineSmall),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -107,7 +107,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("Food properties",
-                            style: Theme.of(context).textTheme.headline5),
+                            style: Theme.of(context).textTheme.headlineSmall),
                       ),
                       _FoodRadioInput(
                         values: FoodType.values,
@@ -130,7 +130,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("Your mood",
-                            style: Theme.of(context).textTheme.headline5),
+                            style: Theme.of(context).textTheme.headlineSmall),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -204,7 +204,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("Social event",
-                            style: Theme.of(context).textTheme.headline5),
+                            style: Theme.of(context).textTheme.headlineSmall),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -363,7 +363,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("Record your performance",
-                            style: Theme.of(context).textTheme.headline5),
+                            style: Theme.of(context).textTheme.headlineSmall),
                       ),
                       _SportsRadioInput(
                         values: Sport.values,
@@ -386,7 +386,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("Weight measurement",
-                            style: Theme.of(context).textTheme.headline5),
+                            style: Theme.of(context).textTheme.headlineSmall),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -427,7 +427,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text("Event time",
-                          style: Theme.of(context).textTheme.headline5),
+                          style: Theme.of(context).textTheme.headlineSmall),
                     ),
                     _EventDateRangeInput(
                       initialValue: DateTimeRange(
@@ -471,7 +471,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Text("Event value",
-                            style: Theme.of(context).textTheme.headline5),
+                            style: Theme.of(context).textTheme.headlineSmall),
                       ),
                       Padding(
                         padding: const EdgeInsets.all(8.0),

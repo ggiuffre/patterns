@@ -20,14 +20,15 @@ class ErrorCard extends StatelessWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Icon(Icons.error, color: Theme.of(context).errorColor),
+                      child: Icon(Icons.error,
+                          color: Theme.of(context).colorScheme.error),
                     ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Text(
                         text,
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.bodyText1,
+                        style: Theme.of(context).textTheme.bodyLarge,
                       ),
                     ),
                   ],
