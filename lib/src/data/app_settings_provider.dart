@@ -16,8 +16,6 @@ class AppSettingsController extends StateNotifier<AppSettings> {
   AppSettingsController({AppSettings appSettings = const AppSettings()})
       : super(appSettings);
 
-  g.CalendarApi? _calendarApi;
-
   static final _googleApiAuth = GoogleSignIn(
     scopes: const [
       'email',
@@ -51,7 +49,6 @@ class AppSettingsController extends StateNotifier<AppSettings> {
       if (googleAccount != null) {
         final headers = await googleAccount.authHeaders;
         if (headers.isNotEmpty) {
-          _calendarApi = g.CalendarApi(_GoogleAuthClient(headers));
           googleData = googleData.copyWith(
             enabled: true,
             account: googleAccount,
@@ -86,7 +83,6 @@ class AppSettingsController extends StateNotifier<AppSettings> {
 
     if (googleAccount != null) {
       final headers = await googleAccount.authHeaders;
-      _calendarApi = g.CalendarApi(_GoogleAuthClient(headers));
       state = state.copyWith(
           google: state.google.copyWith(
               enabled: true, account: googleAccount, authHeaders: headers));
@@ -112,26 +108,9 @@ class AppSettingsController extends StateNotifier<AppSettings> {
     final googleAccount = await _googleApiAuth.signOut();
     state = state.copyWith(
         google: state.google.copyWith(enabled: false, account: googleAccount));
-    _calendarApi = null;
 
     return googleAccount;
   }
-
-  /// Retrieve a list of calendars and assign default settings to any new calendar.
-  Future<Iterable<g.CalendarListEntry>> get googleCalendars =>
-      _calendarApi?.calendarList
-          .list()
-          .then((calendars) => calendars.items ?? <g.CalendarListEntry>[])
-          .whenComplete(() => SharedPreferences.getInstance()
-                  .then((sharedPrefs) => sharedPrefs.setStringList(
-                      "enabledGoogleCalendars",
-                      state.google.enabledCalendarIds.toList()))
-                  .catchError((error) {
-                dev.log(
-                    "Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
-                return true; // ignore error
-              })) ??
-      Future.value(const {});
 
   void setGoogleCalendarImportance(
       g.CalendarListEntry calendar, bool isEnabled) {
@@ -208,6 +187,27 @@ class GoogleData {
             ? (authHeaders ?? this.authHeaders)
             : null,
       );
+
+  /// Retrieve a list of calendars and assign default settings to any new calendar.
+  Future<Iterable<g.CalendarListEntry>> get calendars {
+    final headers = authHeaders;
+    if (headers == null) {
+      return Future.value(const {});
+    }
+
+    return g.CalendarApi(_GoogleAuthClient(headers))
+        .calendarList
+        .list()
+        .then((calendars) => calendars.items ?? <g.CalendarListEntry>[])
+        .whenComplete(() => SharedPreferences.getInstance()
+                .then((sharedPrefs) => sharedPrefs.setStringList(
+                    "enabledGoogleCalendars", enabledCalendarIds.toList()))
+                .catchError((error) {
+              dev.log(
+                  "Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
+              return true; // ignore error
+            }));
+  }
 }
 
 class _GoogleAuthClient extends http.BaseClient {

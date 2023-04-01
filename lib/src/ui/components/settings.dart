@@ -88,8 +88,7 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
               ),
               if (ref.watch(appSettingsProvider).google.enabled)
                 FutureBuilder<Iterable<g.CalendarListEntry>>(
-                  future:
-                      ref.read(appSettingsProvider.notifier).googleCalendars,
+                  future: ref.read(appSettingsProvider).google.calendars,
                   builder: (context, snapshot) {
                     final errorIndicator = Padding(
                       padding: const EdgeInsets.all(8.0),
