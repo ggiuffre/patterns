@@ -1,5 +1,3 @@
-import 'dart:developer' as dev;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -8,14 +6,11 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 final appSettingsProvider =
-    StateNotifierProvider<AppSettingsController, AppSettings>(
-        (_) => AppSettingsController());
+    AsyncNotifierProvider<AppSettingsController, AppSettings>(
+        () => AppSettingsController());
 
 /// Controller for [AppSettings].
-class AppSettingsController extends StateNotifier<AppSettings> {
-  AppSettingsController({AppSettings appSettings = const AppSettings()})
-      : super(appSettings);
-
+class AppSettingsController extends AsyncNotifier<AppSettings> {
   static final _googleApiAuth = GoogleSignIn(
     scopes: const [
       'email',
@@ -24,7 +19,7 @@ class AppSettingsController extends StateNotifier<AppSettings> {
     ],
   );
 
-  Future<void> syncFromSharedPreferences() async {
+  Future<AppSettings> _fetchAppSettings() async {
     final localStorage = await SharedPreferences.getInstance();
 
     final darkMode = localStorage.containsKey("darkMode")
@@ -59,75 +54,76 @@ class AppSettingsController extends StateNotifier<AppSettings> {
       }
     }
 
-    state = AppSettings(
+    return AppSettings(
       themeMode: themeMode,
       google: googleData,
     );
   }
 
+  @override
+  Future<AppSettings> build() async {
+    return _fetchAppSettings();
+  }
+
   Future<void> setDarkMode(bool darkMode) async {
-    state =
-        state.copyWith(themeMode: darkMode ? ThemeMode.dark : ThemeMode.light);
-    try {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
       final localStorage = await SharedPreferences.getInstance();
       await localStorage.setBool("darkMode", darkMode);
-    } catch (error) {
-      dev.log("Couldn't persist setting 'darkMode' to disk. $error");
-    }
+      return _fetchAppSettings();
+    });
   }
 
-  Future<GoogleSignInAccount?> signInToGoogle() async {
-    final googleAccount = await _googleApiAuth
-        .signInSilently()
-        .then((account) async => account ?? await _googleApiAuth.signIn());
+  Future<void> signInToGoogle() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final googleAccount = await _googleApiAuth
+          .signInSilently()
+          .then((account) async => account ?? await _googleApiAuth.signIn());
 
-    if (googleAccount != null) {
-      final headers = await googleAccount.authHeaders;
-      state = state.copyWith(
-          google: state.google.copyWith(
-              enabled: true, account: googleAccount, authHeaders: headers));
-      try {
+      if (googleAccount != null) {
         final localStorage = await SharedPreferences.getInstance();
         await localStorage.setBool("googleDataEnabled", true);
-      } catch (error) {
-        dev.log("Couldn't persist setting 'googleDataEnabled' to disk. $error");
       }
-    }
 
-    return googleAccount;
+      return _fetchAppSettings();
+    });
   }
 
-  Future<GoogleSignInAccount?> signOutOfGoogle() async {
-    try {
+  Future<void> signOutOfGoogle() async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
       final localStorage = await SharedPreferences.getInstance();
       await localStorage.setBool("googleDataEnabled", false);
-    } catch (error) {
-      dev.log("Couldn't persist setting 'googleDataEnabled' to disk. $error");
-    }
+      await _googleApiAuth.signOut();
 
-    final googleAccount = await _googleApiAuth.signOut();
-    state = state.copyWith(
-        google: state.google.copyWith(enabled: false, account: googleAccount));
-
-    return googleAccount;
+      return _fetchAppSettings();
+    });
   }
 
   void setGoogleCalendarImportance(
-      g.CalendarListEntry calendar, bool isEnabled) {
-    final calendarId = calendar.id;
-    final enabledCalendarIds = state.google.enabledCalendarIds;
-    if (calendarId != null) {
-      if (isEnabled && !enabledCalendarIds.contains(calendarId)) {
-        state = state.copyWith(
-            google: state.google.copyWith(
-                enabledCalendarIds: enabledCalendarIds.union({calendarId})));
-      } else if (!isEnabled && enabledCalendarIds.contains(calendarId)) {
-        state = state.copyWith(
-            google: state.google.copyWith(
-                enabledCalendarIds:
-                    enabledCalendarIds.difference({calendarId})));
+      g.CalendarListEntry calendar, bool isEnabled) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final calendarId = calendar.id;
+      if (calendarId != null) {
+        final localStorage = await SharedPreferences.getInstance();
+        final enabledCalendarIds =
+            localStorage.containsKey("enabledGoogleCalendars")
+                ? localStorage.getStringList("enabledGoogleCalendars") ??
+                    const <String>[]
+                : const <String>[];
+        if (isEnabled && !enabledCalendarIds.contains(calendarId)) {
+          enabledCalendarIds.add(calendarId);
+        } else if (!isEnabled && enabledCalendarIds.contains(calendarId)) {
+          enabledCalendarIds.remove(calendarId);
+        }
+        localStorage.setStringList(
+            "enabledGoogleCalendars", enabledCalendarIds);
       }
-    }
+
+      return _fetchAppSettings();
+    });
   }
 }
 
@@ -198,15 +194,7 @@ class GoogleData {
     return g.CalendarApi(_GoogleAuthClient(headers))
         .calendarList
         .list()
-        .then((calendars) => calendars.items ?? <g.CalendarListEntry>[])
-        .whenComplete(() => SharedPreferences.getInstance()
-                .then((sharedPrefs) => sharedPrefs.setStringList(
-                    "enabledGoogleCalendars", enabledCalendarIds.toList()))
-                .catchError((error) {
-              dev.log(
-                  "Couldn't persist setting 'enabledGoogleCalendars' to disk. $error");
-              return true; // ignore error
-            }));
+        .then((calendars) => calendars.items ?? <g.CalendarListEntry>[]);
   }
 }
 

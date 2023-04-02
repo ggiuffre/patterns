@@ -17,16 +17,21 @@ class FirebaseEnabler extends ConsumerWidget {
   FirebaseEnabler({Key? key, required this.child}) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) => FutureBuilder<FirebaseApp>(
+  Widget build(BuildContext context, WidgetRef ref) =>
+      FutureBuilder<FirebaseApp>(
         future: _firebaseInitialization,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return MaterialApp(
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
-              themeMode: ref.read(appSettingsProvider).themeMode,
+              themeMode: ref
+                  .watch(appSettingsProvider)
+                  .whenOrNull(data: (value) => value.themeMode),
               title: 'Patterns',
-              home: const Scaffold(body: ErrorCard(text: "Couldn't initialize storage.")),
+              home: const Scaffold(
+                body: ErrorCard(text: "Couldn't initialize storage."),
+              ),
             );
           }
 
@@ -37,9 +42,13 @@ class FirebaseEnabler extends ConsumerWidget {
           return MaterialApp(
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
-            themeMode: ref.read(appSettingsProvider).themeMode,
+            themeMode: ref
+                .watch(appSettingsProvider)
+                .whenOrNull(data: (value) => value.themeMode),
             title: 'Patterns',
-            home: const Scaffold(body: Center(child: CircularProgressIndicator.adaptive())),
+            home: const Scaffold(
+              body: Center(child: CircularProgressIndicator.adaptive()),
+            ),
           );
         },
       );

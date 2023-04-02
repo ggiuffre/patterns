@@ -1,3 +1,4 @@
+import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' as g;
@@ -22,29 +23,44 @@ class SettingsView extends StatelessWidget {
       );
 }
 
-class DarkModeSettingsCard extends StatelessWidget {
+class DarkModeSettingsCard extends ConsumerWidget {
   const DarkModeSettingsCard({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => ConstrainedCard(
+  Widget build(BuildContext context, WidgetRef ref) => ConstrainedCard(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text("Dark mode"),
-              Consumer(
-                builder: (innerContext, ref, _) => Switch.adaptive(
-                  value: _isDark(
-                      themeMode: ref.watch(appSettingsProvider).themeMode,
-                      context: innerContext),
-                  onChanged: (value) async => await ref
-                      .read(appSettingsProvider.notifier)
-                      .setDarkMode(value),
+          child: ref.watch(appSettingsProvider).when(
+                data: (value) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Dark mode"),
+                    Switch.adaptive(
+                      value:
+                          _isDark(themeMode: value.themeMode, context: context),
+                      onChanged: (value) async => await ref
+                          .read(appSettingsProvider.notifier)
+                          .setDarkMode(value),
+                    ),
+                  ],
+                ),
+                loading: () => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Dark mode"),
+                    Switch.adaptive(
+                      value: _isDark(
+                          themeMode: ThemeMode.system, context: context),
+                      onChanged: null,
+                    ),
+                  ],
+                ),
+                error: (Object error, StackTrace stackTrace) => _ErrorNotice(
+                  "Couldn't retrieve theme mode.",
+                  error: error,
+                  stackTrace: stackTrace,
                 ),
               ),
-            ],
-          ),
         ),
       );
 
@@ -64,109 +80,122 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => ConstrainedCard(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text("Allow to see my Google Calendar events"),
-                  Switch.adaptive(
-                    value: ref.watch(appSettingsProvider).google.enabled,
-                    onChanged: (newValue) async {
-                      if (newValue) {
-                        await ref
-                            .read(appSettingsProvider.notifier)
-                            .signInToGoogle();
-                      } else {
-                        await ref
-                            .read(appSettingsProvider.notifier)
-                            .signOutOfGoogle();
-                      }
-                    },
-                  ),
-                ],
-              ),
-              if (ref.watch(appSettingsProvider).google.enabled)
-                FutureBuilder<Iterable<g.CalendarListEntry>>(
-                  future: ref.read(appSettingsProvider).google.calendars,
-                  builder: (context, snapshot) {
-                    final errorIndicator = Padding(
+          child: ref.watch(appSettingsProvider).when(
+                error: (Object error, StackTrace stackTrace) => Column(
+                  children: [
+                    const Text("Allow to see my Google Calendar events"),
+                    Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: Row(
-                        children: [
-                          Icon(Icons.error,
-                              color: Theme.of(context).colorScheme.error),
-                          const Flexible(
-                            child: Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text(
-                                  "Couldn't retrieve your list of calendars from Google Calendar."),
-                            ),
-                          ),
-                        ],
+                      child: _ErrorNotice(
+                        "Couldn't retrieve Google settings.",
+                        error: error,
+                        stackTrace: stackTrace,
                       ),
-                    );
+                    ),
+                  ],
+                ),
+                loading: () => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text("Allow to see my Google Calendar events"),
+                    CircularProgressIndicator.adaptive(),
+                  ],
+                ),
+                data: (value) => Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text("Allow to see my Google Calendar events"),
+                        Switch.adaptive(
+                          value: value.google.enabled,
+                          onChanged: (newValue) async {
+                            if (newValue) {
+                              await ref
+                                  .read(appSettingsProvider.notifier)
+                                  .signInToGoogle();
+                            } else {
+                              await ref
+                                  .read(appSettingsProvider.notifier)
+                                  .signOutOfGoogle();
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                    if (value.google.enabled)
+                      FutureBuilder<Iterable<g.CalendarListEntry>>(
+                        future: value.google.calendars,
+                        builder: (context, snapshot) {
+                          const errorIndicator = Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: _ErrorNotice(
+                                "Couldn't retrieve your list of calendars from Google Calendar."),
+                          );
 
-                    if (snapshot.hasError) {
-                      return errorIndicator;
-                    }
+                          if (snapshot.hasError) {
+                            return errorIndicator;
+                          }
 
-                    if (snapshot.hasData) {
-                      final calendarSwitches = snapshot.data
-                              ?.map(
-                                (calendar) => Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                          if (snapshot.hasData) {
+                            final calendarSwitches = snapshot.data
+                                    ?.map(
+                                      (calendar) => Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                                _calendarEntryTitle(calendar),
+                                                overflow:
+                                                    TextOverflow.ellipsis),
+                                          ),
+                                          Switch.adaptive(
+                                            value: value
+                                                .google.enabledCalendarIds
+                                                .contains(calendar.id),
+                                            onChanged: (newValue) => ref
+                                                .read(appSettingsProvider
+                                                    .notifier)
+                                                .setGoogleCalendarImportance(
+                                                    calendar, newValue),
+                                          ),
+                                        ],
+                                      ),
+                                    )
+                                    .toList() ??
+                                [];
+                            if (calendarSwitches.isNotEmpty) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Expanded(
-                                      child: Text(_calendarEntryTitle(calendar),
-                                          overflow: TextOverflow.ellipsis),
+                                    const Padding(
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 8.0),
+                                      child: Text(
+                                          "Read (or ignore) events from my calendars:"),
                                     ),
-                                    Switch.adaptive(
-                                      value: ref
-                                          .watch(appSettingsProvider)
-                                          .google
-                                          .enabledCalendarIds
-                                          .contains(calendar.id),
-                                      onChanged: (newValue) => ref
-                                          .read(appSettingsProvider.notifier)
-                                          .setGoogleCalendarImportance(
-                                              calendar, newValue),
-                                    ),
+                                    ...calendarSwitches
                                   ],
                                 ),
-                              )
-                              .toList() ??
-                          [];
-                      if (calendarSwitches.isNotEmpty) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 8.0),
-                                child: Text(
-                                    "Read (or ignore) events from my calendars:"),
-                              ),
-                              ...calendarSwitches
-                            ],
-                          ),
-                        );
-                      } else {
-                        return errorIndicator;
-                      }
-                    }
+                              );
+                            } else {
+                              return errorIndicator;
+                            }
+                          }
 
-                    return const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child:
-                          Center(child: CircularProgressIndicator.adaptive()),
-                    );
-                  },
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Center(
+                                child: CircularProgressIndicator.adaptive()),
+                          );
+                        },
+                      ),
+                  ],
                 ),
-            ],
-          ),
+              ),
         ),
       );
 
@@ -367,5 +396,30 @@ class _BodyWeightSettingsCardState
         }
       }
     }
+  }
+}
+
+class _ErrorNotice extends StatelessWidget {
+  final String message;
+  final Object? error;
+  final StackTrace? stackTrace;
+
+  const _ErrorNotice(this.message, {this.error, this.stackTrace});
+
+  @override
+  Widget build(BuildContext context) {
+    dev.log(message, error: error, stackTrace: stackTrace);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+        Flexible(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(message),
+          ),
+        ),
+      ],
+    );
   }
 }

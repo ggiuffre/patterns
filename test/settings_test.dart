@@ -3,9 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patterns/src/data/app_settings_provider.dart';
 import 'package:patterns/src/ui/components/settings.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group("The dark mode switch", () {
+    testWidgets("has a title.", (WidgetTester tester) async {
+      tester.binding.window.platformDispatcher.platformBrightnessTestValue =
+          Brightness.light;
+      await tester.pumpWidget(const ProviderScope(
+          child: MaterialApp(home: DarkModeSettingsCard())));
+
+      final darkModeSwitch = tester.widget<Text>(find.byType(Text));
+      expect(darkModeSwitch.data, "Dark mode");
+    });
+
     testWidgets("is off if the system's brightness is light.",
         (WidgetTester tester) async {
       tester.binding.window.platformDispatcher.platformBrightnessTestValue =
@@ -62,13 +73,14 @@ void main() {
 
     testWidgets("is off if the user-defined theme mode is light.",
         (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({"darkMode": false});
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          appSettingsProvider.overrideWith((ref) => AppSettingsController(
-              appSettings: const AppSettings(themeMode: ThemeMode.light)))
+          appSettingsProvider.overrideWith(() => AppSettingsController())
         ],
         child: const MaterialApp(home: DarkModeSettingsCard()),
       ));
+      await tester.pumpAndSettle();
 
       final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
       expect(darkModeSwitch.value, false);
@@ -76,13 +88,14 @@ void main() {
 
     testWidgets("is on if the user-defined theme mode is dark.",
         (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({"darkMode": true});
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          appSettingsProvider.overrideWith((ref) => AppSettingsController(
-              appSettings: const AppSettings(themeMode: ThemeMode.dark)))
+          appSettingsProvider.overrideWith(() => AppSettingsController())
         ],
         child: const MaterialApp(home: DarkModeSettingsCard()),
       ));
+      await tester.pumpAndSettle();
 
       final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
       expect(darkModeSwitch.value, true);
@@ -91,15 +104,16 @@ void main() {
     testWidgets(
         "depends more on the user-defined theme mode than on the system's brightness.",
         (WidgetTester tester) async {
+      SharedPreferences.setMockInitialValues({"darkMode": false});
       tester.binding.window.platformDispatcher.platformBrightnessTestValue =
           Brightness.dark;
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          appSettingsProvider.overrideWith((ref) => AppSettingsController(
-              appSettings: const AppSettings(themeMode: ThemeMode.light)))
+          appSettingsProvider.overrideWith(() => AppSettingsController())
         ],
         child: const MaterialApp(home: DarkModeSettingsCard()),
       ));
+      await tester.pumpAndSettle();
 
       final darkModeSwitch = tester.widget<Switch>(find.byType(Switch));
       expect(darkModeSwitch.value, false);

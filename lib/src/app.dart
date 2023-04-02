@@ -61,7 +61,9 @@ class PatternsApp extends ConsumerWidget {
           ? MaterialApp.router(
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
-              themeMode: ref.watch(appSettingsProvider).themeMode,
+              themeMode: ref
+                  .watch(appSettingsProvider)
+                  .whenOrNull(data: (value) => value.themeMode),
               title: 'Patterns',
               routerDelegate: RoutemasterDelegate(
                 routesBuilder: (context) => loggedOutMap,
@@ -71,7 +73,9 @@ class PatternsApp extends ConsumerWidget {
           : MaterialApp.router(
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
-              themeMode: ref.watch(appSettingsProvider).themeMode,
+              themeMode: ref
+                  .watch(appSettingsProvider)
+                  .whenOrNull(data: (value) => value.themeMode),
               title: 'Patterns',
               routerDelegate: RoutemasterDelegate(
                 routesBuilder: (context) => loggedInMap,

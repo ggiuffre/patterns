@@ -33,7 +33,11 @@ final eventProvider = Provider<EventRepository>(
   (ref) => HybridEventRepository(
     repositories: [
       FirestoreEventRepository(),
-      GoogleCalendarEventsRepository(ref.watch(appSettingsProvider).google),
+      GoogleCalendarEventsRepository(
+        ref
+            .watch(appSettingsProvider)
+            .whenOrNull(data: (value) => value.google),
+      ),
     ],
   ),
 );
