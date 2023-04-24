@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:routemaster/routemaster.dart';
 
 import 'authentication.dart';
-import 'data/app_settings_provider.dart';
+import 'data/theme_mode_provider.dart';
 import 'theme.dart';
 import 'ui/pages/categories.dart';
 import 'ui/pages/category_details.dart';
@@ -62,8 +62,8 @@ class PatternsApp extends ConsumerWidget {
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
               themeMode: ref
-                  .watch(appSettingsProvider)
-                  .whenOrNull(data: (value) => value.themeMode),
+                  .watch(themeModeProvider)
+                  .whenOrNull(data: (themeMode) => themeMode),
               title: 'Patterns',
               routerDelegate: RoutemasterDelegate(
                 routesBuilder: (context) => loggedOutMap,
@@ -74,8 +74,8 @@ class PatternsApp extends ConsumerWidget {
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,
               themeMode: ref
-                  .watch(appSettingsProvider)
-                  .whenOrNull(data: (value) => value.themeMode),
+                  .watch(themeModeProvider)
+                  .whenOrNull(data: (themeMode) => themeMode),
               title: 'Patterns',
               routerDelegate: RoutemasterDelegate(
                 routesBuilder: (context) => loggedInMap,

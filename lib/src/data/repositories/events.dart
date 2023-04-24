@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../app_settings_provider.dart';
+import '../google_data_provider.dart';
 import '../event.dart';
 import 'google_calendar.dart';
 
@@ -34,9 +34,7 @@ final eventProvider = Provider<EventRepository>(
     repositories: [
       FirestoreEventRepository(),
       GoogleCalendarEventsRepository(
-        ref
-            .watch(appSettingsProvider)
-            .whenOrNull(data: (value) => value.google),
+        ref.watch(googleDataProvider).whenOrNull(data: (value) => value),
       ),
     ],
   ),

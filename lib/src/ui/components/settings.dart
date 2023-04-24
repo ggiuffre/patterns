@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' as g;
 
-import '../../data/app_settings_provider.dart';
+import '../../data/google_data_provider.dart';
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
+import '../../data/theme_mode_provider.dart';
 import 'constrained_card.dart';
 
 class SettingsView extends StatelessWidget {
@@ -30,16 +31,15 @@ class DarkModeSettingsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => ConstrainedCard(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: ref.watch(appSettingsProvider).when(
-                data: (value) => Row(
+          child: ref.watch(themeModeProvider).when(
+                data: (themeMode) => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text("Dark mode"),
                     Switch.adaptive(
-                      value:
-                          _isDark(themeMode: value.themeMode, context: context),
+                      value: _isDark(themeMode: themeMode, context: context),
                       onChanged: (value) async => await ref
-                          .read(appSettingsProvider.notifier)
+                          .read(themeModeProvider.notifier)
                           .setDarkMode(value),
                     ),
                   ],
@@ -80,7 +80,7 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) => ConstrainedCard(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: ref.watch(appSettingsProvider).when(
+          child: ref.watch(googleDataProvider).when(
                 error: (Object error, StackTrace stackTrace) => Column(
                   children: [
                     const Text("Allow to see my Google Calendar events"),
@@ -108,24 +108,24 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                       children: [
                         const Text("Allow to see my Google Calendar events"),
                         Switch.adaptive(
-                          value: value.google.enabled,
+                          value: value.enabled,
                           onChanged: (newValue) async {
                             if (newValue) {
                               await ref
-                                  .read(appSettingsProvider.notifier)
+                                  .read(googleDataProvider.notifier)
                                   .signInToGoogle();
                             } else {
                               await ref
-                                  .read(appSettingsProvider.notifier)
+                                  .read(googleDataProvider.notifier)
                                   .signOutOfGoogle();
                             }
                           },
                         ),
                       ],
                     ),
-                    if (value.google.enabled)
+                    if (value.enabled)
                       FutureBuilder<Iterable<g.CalendarListEntry>>(
-                        future: value.google.calendars,
+                        future: value.calendars,
                         builder: (context, snapshot) {
                           const errorIndicator = Padding(
                             padding: EdgeInsets.all(8.0),
@@ -151,12 +151,11 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                                                     TextOverflow.ellipsis),
                                           ),
                                           Switch.adaptive(
-                                            value: value
-                                                .google.enabledCalendarIds
+                                            value: value.enabledCalendarIds
                                                 .contains(calendar.id),
                                             onChanged: (newValue) => ref
-                                                .read(appSettingsProvider
-                                                    .notifier)
+                                                .read(
+                                                    googleDataProvider.notifier)
                                                 .setGoogleCalendarImportance(
                                                     calendar, newValue),
                                           ),

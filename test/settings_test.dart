@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patterns/src/data/app_settings_provider.dart';
+import 'package:patterns/src/data/theme_mode_provider.dart';
 import 'package:patterns/src/ui/components/settings.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -76,7 +76,7 @@ void main() {
       SharedPreferences.setMockInitialValues({"darkMode": false});
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          appSettingsProvider.overrideWith(() => AppSettingsController())
+          themeModeProvider.overrideWith(() => ThemeModeController())
         ],
         child: const MaterialApp(home: DarkModeSettingsCard()),
       ));
@@ -91,7 +91,7 @@ void main() {
       SharedPreferences.setMockInitialValues({"darkMode": true});
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          appSettingsProvider.overrideWith(() => AppSettingsController())
+          themeModeProvider.overrideWith(() => ThemeModeController())
         ],
         child: const MaterialApp(home: DarkModeSettingsCard()),
       ));
@@ -109,7 +109,7 @@ void main() {
           Brightness.dark;
       await tester.pumpWidget(ProviderScope(
         overrides: [
-          appSettingsProvider.overrideWith(() => AppSettingsController())
+          themeModeProvider.overrideWith(() => ThemeModeController())
         ],
         child: const MaterialApp(home: DarkModeSettingsCard()),
       ));

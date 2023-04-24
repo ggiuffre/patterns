@@ -3,7 +3,7 @@ import 'dart:developer' as developer;
 import 'package:googleapis/calendar/v3.dart' as g;
 import 'package:http/http.dart' as http;
 
-import '../app_settings_provider.dart';
+import '../google_data_provider.dart';
 import '../event.dart';
 import 'events.dart';
 

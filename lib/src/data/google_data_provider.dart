@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart'
     show GoogleSignIn, GoogleSignInAccount;
@@ -6,12 +5,12 @@ import 'package:googleapis/calendar/v3.dart' as g;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-final appSettingsProvider =
-    AsyncNotifierProvider<AppSettingsController, AppSettings>(
-        () => AppSettingsController());
+final googleDataProvider =
+    AsyncNotifierProvider<GoogleDataController, GoogleData>(
+        () => GoogleDataController());
 
-/// Controller for [AppSettings].
-class AppSettingsController extends AsyncNotifier<AppSettings> {
+/// Controller for [GoogleData].
+class GoogleDataController extends AsyncNotifier<GoogleData> {
   static final _googleApiAuth = GoogleSignIn(
     scopes: const [
       'email',
@@ -20,19 +19,10 @@ class AppSettingsController extends AsyncNotifier<AppSettings> {
     ],
   );
 
-  Future<AppSettings> _fetchAppSettings() async {
+  Future<GoogleData> _fetchGoogleData() async {
     final localStorage = await SharedPreferences.getInstance();
 
-    final darkMode = localStorage.containsKey("darkMode")
-        ? localStorage.getBool("darkMode")
-        : null;
-    final themeMode = darkMode == null
-        ? ThemeMode.system
-        : (darkMode ? ThemeMode.dark : ThemeMode.light);
-
-    final googleDataEnabled = localStorage.containsKey("googleDataEnabled")
-        ? localStorage.getBool("googleDataEnabled")
-        : null;
+    final googleDataEnabled = localStorage.getBool("googleDataEnabled");
     final enabledGoogleCalendars =
         localStorage.containsKey("enabledGoogleCalendars")
             ? localStorage.getStringList("enabledGoogleCalendars") ??
@@ -55,15 +45,12 @@ class AppSettingsController extends AsyncNotifier<AppSettings> {
       }
     }
 
-    return AppSettings(
-      themeMode: themeMode,
-      google: googleData,
-    );
+    return googleData;
   }
 
   @override
-  Future<AppSettings> build() async {
-    return _fetchAppSettings();
+  Future<GoogleData> build() async {
+    return _fetchGoogleData();
   }
 
   Future<void> setDarkMode(bool darkMode) async {
@@ -71,7 +58,7 @@ class AppSettingsController extends AsyncNotifier<AppSettings> {
     state = await AsyncValue.guard(() async {
       final localStorage = await SharedPreferences.getInstance();
       await localStorage.setBool("darkMode", darkMode);
-      return _fetchAppSettings();
+      return _fetchGoogleData();
     });
   }
 
@@ -87,7 +74,7 @@ class AppSettingsController extends AsyncNotifier<AppSettings> {
         await localStorage.setBool("googleDataEnabled", true);
       }
 
-      return _fetchAppSettings();
+      return _fetchGoogleData();
     });
   }
 
@@ -98,7 +85,7 @@ class AppSettingsController extends AsyncNotifier<AppSettings> {
       await localStorage.setBool("googleDataEnabled", false);
       await _googleApiAuth.signOut();
 
-      return _fetchAppSettings();
+      return _fetchGoogleData();
     });
   }
 
@@ -123,32 +110,9 @@ class AppSettingsController extends AsyncNotifier<AppSettings> {
             "enabledGoogleCalendars", enabledCalendarIds);
       }
 
-      return _fetchAppSettings();
+      return _fetchGoogleData();
     });
   }
-}
-
-/// Settings for the app, persisted to and retrieved from disk.
-///
-/// Default or user-defined settings for the app, including the theme mode
-/// (dark or light) and Google Calendar settings.
-class AppSettings {
-  final ThemeMode themeMode;
-  final GoogleData google;
-
-  const AppSettings({
-    this.themeMode = ThemeMode.system,
-    this.google = const GoogleData(),
-  });
-
-  AppSettings copyWith({
-    ThemeMode? themeMode,
-    GoogleData? google,
-  }) =>
-      AppSettings(
-        themeMode: themeMode ?? this.themeMode,
-        google: google ?? this.google,
-      );
 }
 
 /// Data regarding a Google user.
