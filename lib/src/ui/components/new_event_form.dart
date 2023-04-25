@@ -582,7 +582,7 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
         }
 
         for (final event in derivedEvents) {
-          await ref.read(eventProvider).add(event);
+          await ref.read(writableEventProvider).add(event);
         }
 
         widget.onSubmit();

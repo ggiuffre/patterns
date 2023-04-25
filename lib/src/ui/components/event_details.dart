@@ -42,7 +42,7 @@ class EventDetails extends ConsumerWidget {
                 children: [
                   TextButton.icon(
                     onPressed: () async {
-                      await ref.read(eventProvider).delete(event.id);
+                      await ref.read(writableEventProvider).delete(event.id);
                       onDeleteEvent();
                     },
                     icon: Icon(
@@ -61,7 +61,7 @@ class EventDetails extends ConsumerWidget {
                       final eventsInCategory =
                           allEvents.where((e) => e.title == event.title);
                       for (final e in eventsInCategory) {
-                        await ref.read(eventProvider).delete(e.id);
+                        await ref.read(writableEventProvider).delete(e.id);
                       }
                       onDeleteEvent();
                     },

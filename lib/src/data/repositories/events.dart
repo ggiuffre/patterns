@@ -8,17 +8,10 @@ import '../google_data_provider.dart';
 import '../event.dart';
 import 'google_calendar.dart';
 
-/// A repository of [Event] objects.
+/// A read-only repository of [Event] objects.
 abstract class EventRepository {
   /// Get the event identified by [id].
   Future<Event> get(String id);
-
-  /// Persist [event] to the repository, and return an identifier to retrieve
-  /// it.
-  Future<String> add(Event event);
-
-  /// Delete the event [id] from the repository.
-  Future<void> delete(String id);
 
   /// Future of iterable with all events stored in the repository.
   Future<Iterable<Event>> get list;
@@ -28,11 +21,26 @@ abstract class EventRepository {
   Future<Iterable<Event>> sorted({bool descending = false});
 }
 
+/// A repository of [Event] objects that can be read and written to.
+abstract class WritableEventRepository extends EventRepository {
+  /// Persist [event] to the repository, and return an identifier to retrieve
+  /// it.
+  Future<String> add(Event event);
+
+  /// Delete the event [id] from the repository.
+  Future<void> delete(String id);
+}
+
+/// Currently selected implementation of [WritableEventRepository].
+final writableEventProvider = Provider<WritableEventRepository>(
+  (ref) => FirestoreEventRepository(),
+);
+
 /// Currently selected implementation of [EventRepository].
 final eventProvider = Provider<EventRepository>(
   (ref) => HybridEventRepository(
     repositories: [
-      FirestoreEventRepository(),
+      ref.watch(writableEventProvider),
       GoogleCalendarEventsRepository(ref.watch(googleDataProvider).value),
     ],
   ),
@@ -45,12 +53,6 @@ class HybridEventRepository implements EventRepository {
   final Iterable<EventRepository> repositories;
 
   HybridEventRepository({required this.repositories});
-
-  @override
-  Future<String> add(Event event) => repositories.first.add(event);
-
-  @override
-  Future<void> delete(String id) => repositories.first.delete(id);
 
   @override
   Future<Event> get(String id) =>
@@ -70,12 +72,12 @@ class HybridEventRepository implements EventRepository {
       : list.then((events) => events.toList()..sort((a, b) => a.compareTo(b)));
 }
 
-/// Implementation of [EventRepository] with a Firestore back-end.
+/// Implementation of [WritableEventRepository] with a Firestore back-end.
 ///
 /// Events are only read from (and persisted to) Cloud Firestore if the app
 /// user is currently logged via Firebase. Otherwise all methods of this class
 /// return a future that resolves in an error or a future that emits an error.
-class FirestoreEventRepository implements EventRepository {
+class FirestoreEventRepository implements WritableEventRepository {
   final _userId = FirebaseAuth.instance.currentUser?.uid;
 
   @override
@@ -183,9 +185,9 @@ class FirestoreEventRepository implements EventRepository {
               )));
 }
 
-/// Implementation of [EventRepository] that keeps events in memory until the
-/// app closes.
-class InMemoryEventRepository implements EventRepository {
+/// Implementation of [WritableEventRepository] that keeps events in memory
+/// until the app closes.
+class InMemoryEventRepository implements WritableEventRepository {
   List<Event> events = [];
 
   @override
@@ -223,8 +225,9 @@ class InMemoryEventRepository implements EventRepository {
       Future.value(descending ? events.reversed : events);
 }
 
-/// Mock implementation of [EventRepository], meant to be used in widget tests.
-class DummyEventRepository implements EventRepository {
+/// Mock implementation of [WritableEventRepository], meant to be used in
+/// widget tests.
+class DummyEventRepository implements WritableEventRepository {
   const DummyEventRepository();
 
   @override

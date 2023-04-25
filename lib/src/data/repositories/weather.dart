@@ -14,18 +14,6 @@ class TemperatureEventRepository implements EventRepository {
   static const weatherApi = _MeteostatApi();
 
   @override
-  Future<String> add(Event event) {
-    // TODO: implement add
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> delete(String id) {
-    // TODO: implement delete
-    throw UnimplementedError();
-  }
-
-  @override
   Future<Event> get(String id) {
     // TODO: implement get
     throw UnimplementedError();

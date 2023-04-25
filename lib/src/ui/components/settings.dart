@@ -232,7 +232,7 @@ class DangerZoneSettingsCard extends ConsumerWidget {
                 if (shouldDeleteEvents) {
                   final allEvents = await ref.read(eventProvider).list;
                   for (final e in allEvents) {
-                    await ref.read(eventProvider).delete(e.id);
+                    await ref.read(writableEventProvider).delete(e.id);
                   }
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
@@ -390,7 +390,7 @@ class _BodyWeightSettingsCardState
           final today = DateTime(now.year, now.month, now.day);
           final event =
               Event("weight measurement", value: newBodyWeight, start: today);
-          await ref.read(eventProvider).add(event);
+          await ref.read(writableEventProvider).add(event);
           setState(() => _addingEvent = false);
         }
       }
