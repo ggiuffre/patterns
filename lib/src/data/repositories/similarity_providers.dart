@@ -16,7 +16,7 @@ final similarityList = FutureProvider<Iterable<Similarity>>((ref) async {
   const binary = false; // TODO compute similarities between binary events
 
   Map<String, List<Event>> eventsByCategory = {};
-  for (final event in _batchEvents(events).first) {
+  for (final event in _batchEvents(events).first ?? const Iterable.empty()) {
     eventsByCategory.putIfAbsent(event.title, () => []).add(event);
   }
 
@@ -63,7 +63,7 @@ final similarityList = FutureProvider<Iterable<Similarity>>((ref) async {
 /// Generate batches of events ordered from most to least relevant, taken from
 /// the current event provider. Relevance is event title frequency, and each
 /// element of the iterable generated is a batch of at most [batchSize] events.
-Iterable<Iterable<Event>> _batchEvents(final Iterable<Event> events,
+Iterable<Iterable<Event>?> _batchEvents(final Iterable<Event> events,
     [final int batchSize = 10]) sync* {
   final categories = categoriesFromEvents(events);
   final categoryBatch = <String>{};
@@ -77,6 +77,8 @@ Iterable<Iterable<Event>> _batchEvents(final Iterable<Event> events,
     }
     i++;
   }
+
+  yield null;
 }
 
 /// Retrieve all similarities stored on Cloud Firestore.
