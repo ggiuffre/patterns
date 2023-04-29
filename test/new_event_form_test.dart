@@ -166,8 +166,7 @@ main() {
           scrollable: scrollableForm);
       await tester.tap(submitButtonFinder);
       await tester.pump();
-      final events = await eventRepository.list;
-      expect(events.first.title, equals(eventTitle));
+      expect(eventRepository.events.first.title, equals(eventTitle));
     });
   });
 }

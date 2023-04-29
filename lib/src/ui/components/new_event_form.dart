@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/src/data/repositories/event_providers.dart';
 
 import '../../data/date_formatting.dart';
 import '../../data/event.dart';
@@ -545,15 +546,14 @@ class _NewEventFormState extends ConsumerState<NewEventForm> {
           derivedEvents =
               _eventsFromSocialEvent(_socialEventInfo, time: _eventStartTime);
         } else if (_eventType == EventType.sportsEvent) {
-          final weightMeasurements = await ref
-              .read(eventProvider)
-              .sorted()
-              .then((events) => events
-                  .where((e) => e.title == "weight measurement")
-                  .map((e) => e.value));
+          final weightMeasurements = ref.read(sortedEventList).whenOrNull(
+                  data: (events) => events
+                      .where((e) => e.title == "weight measurement")
+                      .map((e) => e.value)) ??
+              [];
           final bodyWeight = weightMeasurements.isEmpty
               ? 65.0
-              : weightMeasurements.last; // TODO ask user
+              : weightMeasurements.first; // TODO ask user
           derivedEvents = _eventsFromSportsInfo(_sportsInfo,
               time: _eventStartTime, bodyWeight: bodyWeight);
         } else if (_eventType == EventType.customEvent) {
@@ -736,76 +736,69 @@ class _EventTitleTextField extends ConsumerWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) =>
-      FutureBuilder<Set<String>>(
-        future: ref
-            .read(eventProvider)
-            .list
-            .then((events) => events.map((e) => e.title).toSet()),
-        builder: (context, snapshot) {
-          final hints = (snapshot.connectionState == ConnectionState.done)
-              ? snapshot.data ?? const Iterable<String>.empty()
-              : const Iterable<String>.empty();
-          return Autocomplete<String>(
-            optionsBuilder: (textEditingValue) => textEditingValue.text == ''
-                ? const Iterable<String>.empty()
-                : hints.where((option) => option
-                    .toLowerCase()
-                    .contains(textEditingValue.text.toLowerCase())),
-            onSelected: onHintSelected,
-            fieldViewBuilder:
-                (context, textEditingController, focusNode, onFieldSubmitted) =>
-                    TextFormField(
-              controller: textEditingController,
-              focusNode: focusNode,
-              onChanged: onFieldChanged,
-              decoration: const InputDecoration(
-                icon: Icon(Icons.info),
-                labelText: 'Event title',
-              ),
-              autovalidateMode: autoValidate
-                  ? AutovalidateMode.onUserInteraction
-                  : AutovalidateMode.disabled,
-              validator: (value) {
-                if (value?.isEmpty ?? true) {
-                  return 'Please enter a title for this event';
-                }
-                return null;
-              },
-            ),
-            optionsViewBuilder: (context, onSelected, options) => Padding(
-              padding: EdgeInsets.only(
-                  left: (IconTheme.of(context).size ?? 24.0) + 16.0,
-                  right: 56.0),
-              child: Align(
-                alignment: Alignment.topLeft,
-                child: Material(
-                  elevation: 4.0,
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 400),
-                    child: SizedBox(
-                      height: min(options.length * 75.0, 200.0),
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(8.0),
-                        itemCount: options.length,
-                        itemBuilder: (context, index) {
-                          final option = options.elementAt(index);
-                          return GestureDetector(
-                            onTap: () => onSelected(option),
-                            child: ListTile(
-                              title: Text(option),
-                            ),
-                          );
-                        },
+  Widget build(context, ref) {
+    final uniqueEvents = ref
+        .watch(eventList)
+        .whenOrNull(data: (events) => events.map((e) => e.title).toSet());
+    final hints = uniqueEvents ?? const Iterable<String>.empty();
+    return Autocomplete<String>(
+      optionsBuilder: (textEditingValue) => textEditingValue.text == ''
+          ? const Iterable<String>.empty()
+          : hints.where((option) => option
+              .toLowerCase()
+              .contains(textEditingValue.text.toLowerCase())),
+      onSelected: onHintSelected,
+      fieldViewBuilder:
+          (context, textEditingController, focusNode, onFieldSubmitted) =>
+              TextFormField(
+        controller: textEditingController,
+        focusNode: focusNode,
+        onChanged: onFieldChanged,
+        decoration: const InputDecoration(
+          icon: Icon(Icons.info),
+          labelText: 'Event title',
+        ),
+        autovalidateMode: autoValidate
+            ? AutovalidateMode.onUserInteraction
+            : AutovalidateMode.disabled,
+        validator: (value) {
+          if (value?.isEmpty ?? true) {
+            return 'Please enter a title for this event';
+          }
+          return null;
+        },
+      ),
+      optionsViewBuilder: (context, onSelected, options) => Padding(
+        padding: EdgeInsets.only(
+            left: (IconTheme.of(context).size ?? 24.0) + 16.0, right: 56.0),
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4.0,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 400),
+              child: SizedBox(
+                height: min(options.length * 75.0, 200.0),
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(8.0),
+                  itemCount: options.length,
+                  itemBuilder: (context, index) {
+                    final option = options.elementAt(index);
+                    return GestureDetector(
+                      onTap: () => onSelected(option),
+                      child: ListTile(
+                        title: Text(option),
                       ),
-                    ),
-                  ),
+                    );
+                  },
                 ),
               ),
             ),
-          );
-        },
-      );
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class _FoodRadioInput extends StatelessWidget {

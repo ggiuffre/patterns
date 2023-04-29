@@ -25,11 +25,6 @@ class TemperatureEventRepository implements EventRepository {
           start: DateTime(2021).toUtc(), end: DateTime(2021, 12, 5).toUtc())
       .then((weatherEvents) => weatherEvents.map(
           (e) => Event("rain", value: e.rainVolume, start: e.time.toLocal())));
-
-  @override
-  Future<Iterable<Event>> sorted({bool descending = false}) => descending
-      ? list.then((events) => events.toList()..sort((a, b) => b.compareTo(a)))
-      : list;
 }
 
 class _MeteostatApi {

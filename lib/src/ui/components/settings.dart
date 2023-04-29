@@ -2,6 +2,7 @@ import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' as g;
+import 'package:patterns/src/data/repositories/event_providers.dart';
 
 import '../../data/google_data_provider.dart';
 import '../../data/event.dart';
@@ -230,10 +231,8 @@ class DangerZoneSettingsCard extends ConsumerWidget {
                     ) ??
                     false;
                 if (shouldDeleteEvents) {
-                  final allEvents = await ref.read(eventProvider).list;
-                  for (final e in allEvents) {
-                    await ref.read(writableEventProvider).delete(e.id);
-                  }
+                  ref.read(eventList).value?.forEach((e) async =>
+                      await ref.read(writableEventProvider).delete(e.id));
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                         content: Text('All your events have been deleted 😅')),
@@ -301,12 +300,12 @@ class _BodyWeightSettingsCardState
 
   @override
   Widget build(BuildContext context) => ConstrainedCard(
-        child: FutureBuilder<Iterable<Event>>(
-          future: ref.read(eventProvider).sorted().then(
-              (events) => events.where((e) => e.title == "weight measurement")),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Padding(
+        child: ref.watch(sortedEventList).when(
+              loading: () => const Padding(
+                padding: EdgeInsets.all(8.0),
+                child: Center(child: CircularProgressIndicator.adaptive()),
+              ),
+              error: (error, stackTrace) => Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -322,61 +321,54 @@ class _BodyWeightSettingsCardState
                     ),
                   ],
                 ),
-              );
-            }
-
-            if (snapshot.hasData) {
-              return Form(
-                key: _formKey,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Text("Body weight"),
-                    ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextFormField(
-                          initialValue: (snapshot.data?.isEmpty ?? true)
-                              ? null
-                              : snapshot.data?.last.value
-                                  .toStringAsPrecision(2),
-                          decoration: const InputDecoration(suffixText: "Kg"),
-                          onChanged: (value) => setState(
-                              () => _newBodyWeight = double.tryParse(value)),
-                          validator: (value) {
-                            if (value?.isEmpty ?? true) {
-                              return 'Please enter your current weight';
-                            } else if (double.tryParse(value ?? "") == null) {
-                              return 'Please enter a valid numeric value for your weight';
-                            }
-                            return null;
-                          },
+              ),
+              data: (data) {
+                final events =
+                    data.where((e) => e.title == "weight measurement");
+                return Form(
+                  key: _formKey,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Text("Body weight"),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextFormField(
+                            initialValue: (events.isEmpty)
+                                ? null
+                                : events.first.value.toStringAsPrecision(2),
+                            decoration: const InputDecoration(suffixText: "Kg"),
+                            onChanged: (value) => setState(
+                                () => _newBodyWeight = double.tryParse(value)),
+                            validator: (value) {
+                              if (value?.isEmpty ?? true) {
+                                return 'Please enter your current weight';
+                              } else if (double.tryParse(value ?? "") == null) {
+                                return 'Please enter a valid numeric value for your weight';
+                              }
+                              return null;
+                            },
+                          ),
                         ),
                       ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: _addingEvent
-                          ? const Center(
-                              child: CircularProgressIndicator.adaptive())
-                          : ActionChip(
-                              label: const Text("Update"),
-                              onPressed: _onSubmit),
-                    ),
-                  ],
-                ),
-              );
-            }
-
-            return const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Center(child: CircularProgressIndicator.adaptive()),
-            );
-          },
-        ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: _addingEvent
+                            ? const Center(
+                                child: CircularProgressIndicator.adaptive())
+                            : ActionChip(
+                                label: const Text("Update"),
+                                onPressed: _onSubmit),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
       );
 
   Future<void> _onSubmit() async {

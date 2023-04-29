@@ -15,10 +15,6 @@ abstract class EventRepository {
 
   /// Future of iterable with all events stored in the repository.
   Future<Iterable<Event>> get list;
-
-  /// Future of iterable with all events stored in the repository, sorted by
-  /// date (default ascending).
-  Future<Iterable<Event>> sorted({bool descending = false});
 }
 
 /// A repository of [Event] objects that can be read and written to.
@@ -65,11 +61,6 @@ class HybridEventRepository implements EventRepository {
             (accumulator, events) => accumulator
                 .then((value) async => value.followedBy(await events)),
           );
-
-  @override
-  Future<Iterable<Event>> sorted({bool descending = false}) => descending
-      ? list.then((events) => events.toList()..sort((a, b) => b.compareTo(a)))
-      : list.then((events) => events.toList()..sort((a, b) => a.compareTo(b)));
 }
 
 /// Implementation of [WritableEventRepository] with a Firestore back-end.
@@ -165,24 +156,6 @@ class FirestoreEventRepository implements WritableEventRepository {
                 end: e.data()["end"],
                 id: e.id,
               )));
-
-  @override
-  Future<Iterable<Event>> sorted({bool descending = false}) => _userId == null
-      ? Future.error("Couldn't get events from Cloud Firestore.")
-      : FirebaseFirestore.instance
-          .collection("users")
-          .doc(_userId)
-          .collection("events")
-          .orderBy("start", descending: descending)
-          .snapshots()
-          .first
-          .then((snapshot) => snapshot.docs.map((e) => Event.fromFirestore(
-                e.data()["title"],
-                value: double.tryParse(e.data()["value"] ?? "0") ?? 0,
-                start: e.data()["start"],
-                end: e.data()["end"],
-                id: e.id,
-              )));
 }
 
 /// Implementation of [WritableEventRepository] that keeps events in memory
@@ -219,10 +192,6 @@ class InMemoryEventRepository implements WritableEventRepository {
 
   @override
   Future<Iterable<Event>> get list => Future.value(events);
-
-  @override
-  Future<Iterable<Event>> sorted({bool descending = false}) =>
-      Future.value(descending ? events.reversed : events);
 }
 
 /// Mock implementation of [WritableEventRepository], meant to be used in

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:patterns/src/data/repositories/event_providers.dart';
 
 import '../../data/event.dart';
 import '../../data/repositories/events.dart';
@@ -56,13 +57,14 @@ class EventDetails extends ConsumerWidget {
                     ),
                   ),
                   TextButton.icon(
-                    onPressed: () async {
-                      final allEvents = await ref.read(eventProvider).list;
-                      final eventsInCategory =
-                          allEvents.where((e) => e.title == event.title);
-                      for (final e in eventsInCategory) {
-                        await ref.read(writableEventProvider).delete(e.id);
-                      }
+                    onPressed: () {
+                      ref
+                          .read(eventList)
+                          .value
+                          ?.where((e) => e.title == event.title)
+                          .forEach((e) async => await ref
+                              .read(writableEventProvider)
+                              .delete(e.id));
                       onDeleteEvent();
                     },
                     icon: Icon(

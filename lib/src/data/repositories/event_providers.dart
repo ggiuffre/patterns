@@ -21,7 +21,7 @@ final eventList = FutureProvider<Iterable<Event>>((ref) => [
 final sortedEventList = FutureProvider<Iterable<Event>>((ref) {
   final events = ref.watch(eventList).value;
   if (events != null) {
-    return events.toList()..sort((a, b) => a.compareTo(b));
+    return events.toList()..sort((a, b) => b.compareTo(a));
   } else {
     return const Iterable.empty();
   }

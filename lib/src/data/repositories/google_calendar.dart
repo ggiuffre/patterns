@@ -113,11 +113,6 @@ class GoogleCalendarEventsRepository implements EventRepository {
   Future<Iterable<Event>> _chainEventComputations(
           Future<Iterable<Event>> acc, Future<Iterable<Event>> events) =>
       acc.then((allEvents) async => allEvents.followedBy(await events));
-
-  @override
-  Future<Iterable<Event>> sorted({bool descending = false}) => descending
-      ? list.then((events) => events.toList()..sort((a, b) => b.compareTo(a)))
-      : list.then((events) => events.toList()..sort((a, b) => a.compareTo(b)));
 }
 
 class _GoogleAuthClient extends http.BaseClient {

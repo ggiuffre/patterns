@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' show FirebaseFirestore;
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart' show FirebaseAuth;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:patterns/src/data/repositories/events.dart';
+import 'package:patterns/src/data/repositories/event_providers.dart';
 
 import '../category.dart';
 import '../event.dart';
@@ -19,8 +19,7 @@ abstract class SimilarityRepository {
 
 /// Currently selected implementation of [SimilarityRepository].
 final similarityProvider = FutureProvider<SimilarityRepository>(
-  (ref) async =>
-      FirestoreSimilarityRepository(await ref.watch(eventProvider).list),
+  (ref) => FirestoreSimilarityRepository(ref.watch(eventList).whenOrNull()),
 );
 
 /// Implementation of [SimilarityRepository] with a Cloud Firestore back-end.
