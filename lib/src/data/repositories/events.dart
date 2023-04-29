@@ -8,9 +8,6 @@ import '../event.dart';
 
 /// A repository of [Event] objects.
 abstract class WritableEventRepository {
-  /// Future of iterable with all events stored in the repository.
-  Future<Iterable<Event>> get list;
-
   /// Persist [event] to the repository, and return an identifier to retrieve
   /// it.
   Future<String> add(Event event);
@@ -84,7 +81,6 @@ class FirestoreEventRepository implements WritableEventRepository {
           .doc(id)
           .delete();
 
-  @override
   Future<Iterable<Event>> get list => _userId == null
       ? Future.error("Couldn't get events from Cloud Firestore.")
       : FirebaseFirestore.instance
@@ -129,9 +125,6 @@ class InMemoryEventRepository implements WritableEventRepository {
   @override
   Future<void> delete(String id) =>
       Future(() => events.removeWhere((e) => e.id == id));
-
-  @override
-  Future<Iterable<Event>> get list => Future.value(events);
 }
 
 /// Mock implementation of [WritableEventRepository], meant to be used in
@@ -144,7 +137,4 @@ class DummyEventRepository implements WritableEventRepository {
 
   @override
   Future<void> delete(String id) => Future.value();
-
-  @override
-  Future<Iterable<Event>> get list => Future.value(const {});
 }
