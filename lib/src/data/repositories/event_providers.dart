@@ -9,6 +9,24 @@ import 'package:http/http.dart' as http;
 import '../event.dart';
 import '../google_data_provider.dart';
 
+final eventList = FutureProvider<Iterable<Event>>((ref) => [
+      ref.watch(firestoreEventList).value,
+      ref.watch(googleCalendarEventList).value,
+    ].fold<Iterable<Event>>(
+      const Iterable.empty(),
+      (accumulator, newEvents) =>
+          newEvents != null ? accumulator.followedBy(newEvents) : accumulator,
+    ));
+
+final sortedEventList = FutureProvider<Iterable<Event>>((ref) {
+  final events = ref.watch(eventList).value;
+  if (events != null) {
+    return events.toList()..sort((a, b) => a.compareTo(b));
+  } else {
+    return const Iterable.empty();
+  }
+});
+
 final firestoreEventList = FutureProvider<Iterable<Event>>((_) async {
   final userId = FirebaseAuth.instance.currentUser?.uid;
   return userId == null
