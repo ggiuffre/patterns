@@ -46,8 +46,7 @@ final googleCalendarList =
         pageToken = eventsComputation.nextPageToken;
         events.addAll(eventsComputation.items ?? const []);
       } while (pageToken != null);
-      final y = events.map(_eventFromGoogleCalendar);
-      return y;
+      return events.map(Event.fromGoogleCalendar);
     }));
   } else {
     developer.log("No auth headers to retrieve Google Calendar events.");
@@ -66,53 +65,6 @@ final googleCalendarEventList = FutureProvider<Iterable<Event>>((ref) async {
       )
       .toSet();
 });
-
-Event _eventFromGoogleCalendar(g.Event event) {
-  final eventTitle = event.summary ?? "untitled";
-  final startDate = event.start?.date;
-  final endDate = event.end?.date;
-  final startDateTime = event.start?.dateTime;
-  final endDateTime = event.end?.dateTime;
-  final eventRecurrence = event.recurrence;
-
-  // TODO using Event.defaultRecurrence makes recurrenceProperties immutable, so what follows is a temp. patch:
-  final recurrenceProperties = <String, String?>{
-    "rRule": null,
-    "exRule": null,
-    "rDate": null,
-    "exDate": null
-  };
-  if (eventRecurrence != null) {
-    recurrenceProperties["rRule"] = eventRecurrence
-        .singleWhere((rule) => rule.startsWith("RRULE:"), orElse: () => "")
-        .replaceFirst("RRULE:", "");
-    recurrenceProperties["exRule"] = eventRecurrence
-        .singleWhere((rule) => rule.startsWith("EXRULE:"), orElse: () => "")
-        .replaceFirst("EXRULE:", "");
-    recurrenceProperties["rDate"] = eventRecurrence
-        .singleWhere((date) => date.startsWith("RDATE:"), orElse: () => "")
-        .replaceFirst("RDATE:", "");
-    recurrenceProperties["exDate"] = eventRecurrence
-        .singleWhere((date) => date.startsWith("EXDATE:"), orElse: () => "")
-        .replaceFirst("EXDATE:", "");
-  }
-
-  if (startDateTime != null) {
-    return Event(eventTitle,
-        value: 1,
-        start: startDateTime,
-        end: endDateTime,
-        recurrence: recurrenceProperties);
-  } else if (startDate != null) {
-    return Event(eventTitle,
-        value: 1,
-        start: startDate,
-        end: endDate,
-        recurrence: recurrenceProperties);
-  } else {
-    return Event(eventTitle, value: 1, start: DateTime.now());
-  }
-}
 
 class _GoogleAuthClient extends http.BaseClient {
   final Map<String, String> _headers;

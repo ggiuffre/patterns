@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart' show DateTimeRange;
+import 'package:googleapis/calendar/v3.dart' as g;
 
 class Event implements Comparable<Event> {
   final String id;
@@ -36,6 +37,35 @@ class Event implements Comparable<Event> {
     this.recurrence = defaultRecurrence,
   })  : start = start.toDate(),
         end = end?.toDate();
+
+  factory Event.fromGoogleCalendar(g.Event event) {
+    final title = event.summary ?? "untitled";
+    final start = event.start?.dateTime ?? event.start?.date;
+    final end = event.end?.dateTime ?? event.end?.date;
+
+    final recurrenceProps = {
+      "rRule": event.recurrence
+          ?.singleWhere((rule) => rule.startsWith("RRULE:"), orElse: () => "")
+          .replaceFirst("RRULE:", ""),
+      "exRule": event.recurrence
+          ?.singleWhere((rule) => rule.startsWith("EXRULE:"), orElse: () => "")
+          .replaceFirst("EXRULE:", ""),
+      "rDate": event.recurrence
+          ?.singleWhere((date) => date.startsWith("RDATE:"), orElse: () => "")
+          .replaceFirst("RDATE:", ""),
+      "exDate": event.recurrence
+          ?.singleWhere((date) => date.startsWith("EXDATE:"), orElse: () => "")
+          .replaceFirst("EXDATE:", "")
+    };
+
+    return Event(
+      title,
+      value: 1,
+      start: start ?? DateTime.now(),
+      end: start != null ? end : null,
+      recurrence: start != null ? recurrenceProps : Event.defaultRecurrence,
+    );
+  }
 
   Map<String, String> get asJson => {
         "id": id,
