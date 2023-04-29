@@ -4,9 +4,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' as g;
-import 'package:http/http.dart' as http;
 
 import '../event.dart';
+import '../google_auth_client.dart';
 import '../google_data_provider.dart';
 
 final eventList = FutureProvider<Iterable<Event>>((ref) => [
@@ -51,7 +51,7 @@ final googleCalendarList =
   final google = ref.watch(googleDataProvider).value;
   final calendarIds = google?.enabledCalendarIds ?? const {};
   final calendarApi = (google != null && google.authHeaders != null)
-      ? g.CalendarApi(_GoogleAuthClient(google.authHeaders!))
+      ? g.CalendarApi(GoogleAuthClient(google.authHeaders!))
       : null;
   if (calendarApi != null) {
     developer.log("Retrieving Google calendar events...");
@@ -83,14 +83,3 @@ final googleCalendarEventList = FutureProvider<Iterable<Event>>((ref) async {
       )
       .toSet();
 });
-
-class _GoogleAuthClient extends http.BaseClient {
-  final Map<String, String> _headers;
-  final http.Client _client = http.Client();
-
-  _GoogleAuthClient(this._headers);
-
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) =>
-      _client.send(request..headers.addAll(_headers));
-}

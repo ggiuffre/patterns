@@ -2,8 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart'
     show GoogleSignIn, GoogleSignInAccount;
 import 'package:googleapis/calendar/v3.dart' as g;
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'google_auth_client.dart';
 
 final googleDataProvider =
     AsyncNotifierProvider<GoogleDataController, GoogleData>(
@@ -156,20 +157,9 @@ class GoogleData {
       return Future.value(const {});
     }
 
-    return g.CalendarApi(_GoogleAuthClient(headers))
+    return g.CalendarApi(GoogleAuthClient(headers))
         .calendarList
         .list()
         .then((calendars) => calendars.items ?? <g.CalendarListEntry>[]);
   }
-}
-
-class _GoogleAuthClient extends http.BaseClient {
-  final Map<String, String> _headers;
-  final http.Client _client = http.Client();
-
-  _GoogleAuthClient(this._headers);
-
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) =>
-      _client.send(request..headers.addAll(_headers));
 }

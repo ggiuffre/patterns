@@ -1,8 +1,8 @@
 import 'dart:developer' as developer;
 
 import 'package:googleapis/calendar/v3.dart' as g;
-import 'package:http/http.dart' as http;
 
+import '../google_auth_client.dart';
 import '../google_data_provider.dart';
 import '../event.dart';
 import 'events.dart';
@@ -21,7 +21,7 @@ class GoogleCalendarEventsRepository implements EventRepository {
   GoogleCalendarEventsRepository([GoogleData? google])
       : _calendarIds = google?.enabledCalendarIds ?? const {},
         _calendarApi = (google != null && google.authHeaders != null)
-            ? g.CalendarApi(_GoogleAuthClient(google.authHeaders!))
+            ? g.CalendarApi(GoogleAuthClient(google.authHeaders!))
             : null;
 
   @override
@@ -113,15 +113,4 @@ class GoogleCalendarEventsRepository implements EventRepository {
   Future<Iterable<Event>> _chainEventComputations(
           Future<Iterable<Event>> acc, Future<Iterable<Event>> events) =>
       acc.then((allEvents) async => allEvents.followedBy(await events));
-}
-
-class _GoogleAuthClient extends http.BaseClient {
-  final Map<String, String> _headers;
-  final http.Client _client = http.Client();
-
-  _GoogleAuthClient(this._headers);
-
-  @override
-  Future<http.StreamedResponse> send(http.BaseRequest request) =>
-      _client.send(request..headers.addAll(_headers));
 }
