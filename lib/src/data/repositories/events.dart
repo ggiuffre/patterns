@@ -4,21 +4,13 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../google_data_provider.dart';
 import '../event.dart';
-import 'google_calendar.dart';
 
-/// A read-only repository of [Event] objects.
-abstract class EventRepository {
-  /// Get the event identified by [id].
-  Future<Event> get(String id);
-
+/// A repository of [Event] objects.
+abstract class WritableEventRepository {
   /// Future of iterable with all events stored in the repository.
   Future<Iterable<Event>> get list;
-}
 
-/// A repository of [Event] objects that can be read and written to.
-abstract class WritableEventRepository extends EventRepository {
   /// Persist [event] to the repository, and return an identifier to retrieve
   /// it.
   Future<String> add(Event event);
@@ -32,37 +24,6 @@ final writableEventProvider = Provider<WritableEventRepository>(
   (ref) => FirestoreEventRepository(),
 );
 
-/// Currently selected implementation of [EventRepository].
-final eventProvider = Provider<EventRepository>(
-  (ref) => HybridEventRepository(
-    repositories: [
-      ref.watch(writableEventProvider),
-      GoogleCalendarEventsRepository(ref.watch(googleDataProvider).value),
-    ],
-  ),
-);
-
-/// Implementation of [EventRepository] that reads merged events coming from a
-/// list of several other repositories and writes to the first repository in
-/// the list.
-class HybridEventRepository implements EventRepository {
-  final Iterable<EventRepository> repositories;
-
-  HybridEventRepository({required this.repositories});
-
-  @override
-  Future<Event> get(String id) =>
-      list.then((events) => events.firstWhere((element) => element.id == id));
-
-  @override
-  Future<Iterable<Event>> get list =>
-      repositories.map((repository) => repository.list).fold(
-            Future.value(const Iterable<Event>.empty()),
-            (accumulator, events) => accumulator
-                .then((value) async => value.followedBy(await events)),
-          );
-}
-
 /// Implementation of [WritableEventRepository] with a Firestore back-end.
 ///
 /// Events are only read from (and persisted to) Cloud Firestore if the app
@@ -70,23 +31,6 @@ class HybridEventRepository implements EventRepository {
 /// return a future that resolves in an error or a future that emits an error.
 class FirestoreEventRepository implements WritableEventRepository {
   final _userId = FirebaseAuth.instance.currentUser?.uid;
-
-  @override
-  Future<Event> get(String id) => _userId == null
-      ? Future.error("Couldn't retrieve event from Cloud Firestore.")
-      : FirebaseFirestore.instance
-          .collection("users")
-          .doc(_userId)
-          .collection("events")
-          .doc(id)
-          .get()
-          .then((e) => Event.fromFirestore(
-                e.data()?["title"],
-                value: double.tryParse(e.data()?["value"] ?? "0") ?? 0,
-                start: e.data()?["start"],
-                end: e.data()?["end"],
-                id: id,
-              ));
 
   @override
   Future<String> add(Event event) async {
@@ -164,10 +108,6 @@ class InMemoryEventRepository implements WritableEventRepository {
   List<Event> events = [];
 
   @override
-  Future<Event> get(String id) =>
-      Future.value(events.firstWhere((e) => e.id == id));
-
-  @override
   Future<String> add(Event event) {
     // add the event at the end:
     events.add(event);
@@ -200,10 +140,6 @@ class DummyEventRepository implements WritableEventRepository {
   const DummyEventRepository();
 
   @override
-  Future<Event> get(String id) =>
-      Future.value(Event("title", value: 1, start: DateTime(2020, 1, 1)));
-
-  @override
   Future<String> add(Event event) => Future.value("id");
 
   @override
@@ -211,8 +147,4 @@ class DummyEventRepository implements WritableEventRepository {
 
   @override
   Future<Iterable<Event>> get list => Future.value(const {});
-
-  @override
-  Future<Iterable<Event>> sorted({bool descending = false}) =>
-      Future.value(const {});
 }

@@ -2,30 +2,20 @@ import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:math';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 
 import '../event.dart';
 import '../weather_data.dart';
-import 'events.dart';
 
-class TemperatureEventRepository implements EventRepository {
-  const TemperatureEventRepository();
-
-  static const weatherApi = _MeteostatApi();
-
-  @override
-  Future<Event> get(String id) {
-    // TODO: implement get
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Iterable<Event>> get list => weatherApi
+final weatherEventList = FutureProvider<Iterable<Event>>((ref) {
+  const weatherApi = _MeteostatApi();
+  return weatherApi
       .history(
           start: DateTime(2021).toUtc(), end: DateTime(2021, 12, 5).toUtc())
       .then((weatherEvents) => weatherEvents.map(
           (e) => Event("rain", value: e.rainVolume, start: e.time.toLocal())));
-}
+});
 
 class _MeteostatApi {
   const _MeteostatApi();
