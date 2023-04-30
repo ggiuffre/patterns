@@ -54,15 +54,6 @@ class GoogleDataController extends AsyncNotifier<GoogleData> {
     return _fetchGoogleData();
   }
 
-  Future<void> setDarkMode(bool darkMode) async {
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final localStorage = await SharedPreferences.getInstance();
-      await localStorage.setBool("darkMode", darkMode);
-      return _fetchGoogleData();
-    });
-  }
-
   Future<void> signInToGoogle() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
