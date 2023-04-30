@@ -155,8 +155,11 @@ class GoogleData {
 
   /// Retrieve a list of calendars and assign default settings to any new calendar.
   Future<Iterable<g.CalendarListEntry>> get calendars {
+    final logger = Logger((GoogleData).toString());
+
     final headers = authHeaders;
     if (headers == null) {
+      logger.warning("No headers to retrieve Google calendars");
       return Future.value(const {});
     }
 
