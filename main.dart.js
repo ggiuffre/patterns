@@ -90725,7 +90725,7 @@ m.toString
 A.aLE()
 p=new A.a5B(new A.LJ(new A.PE(m,new A.Ag(A.aQ(t.Gf))),"https://www.googleapis.com/","calendar/v3/",$.aMs()))}else p=null
 m=t.R
-if(p!=null){o.dO(B.ca,"Retrieving Google calendar events...",null,null)
+if(p!=null){o.dO(B.ca,"Retrieving Google calendars...",null,null)
 q=A.mx(new A.h9(l,new A.aGG(p),A.k(l).i("h9<1,ad<o<ab>>>")),m)
 s=1
 break}else{o.dO(B.ca,"No auth headers to retrieve Google Calendar events",null,null)
