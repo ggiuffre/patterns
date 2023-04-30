@@ -54,7 +54,7 @@ final googleCalendarList =
       ? g.CalendarApi(GoogleAuthClient(google.authHeaders!))
       : null;
   if (calendarApi != null) {
-    logger.info("Retrieving Google calendar events...");
+    logger.info("Retrieving Google calendars...");
     return Future.wait(calendarIds.map((calendarId) async {
       String? pageToken;
       List<g.Event> events = [];
