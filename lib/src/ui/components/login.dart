@@ -1,9 +1,10 @@
-import 'dart:developer' as developer;
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart' show Logger;
 
 import 'constrained_card.dart';
+
+final _logger = Logger((LogInScreen).toString());
 
 class LogInScreen extends StatelessWidget {
   const LogInScreen({Key? key}) : super(key: key);
@@ -126,13 +127,13 @@ class _EmailLogInFormState extends State<EmailLogInForm> {
         password: _passwordController.text,
       );
       setState(() => _authState = _AuthState.signedIn);
-    } on FirebaseAuthException catch (e) {
-      if ({'user-not-found', 'wrong-password'}.contains(e.code)) {
-        developer.log('Wrong username or password.');
+    } on FirebaseAuthException catch (error, stackTrace) {
+      if ({'user-not-found', 'wrong-password'}.contains(error.code)) {
+        _logger.severe("Wrong username or password", error, stackTrace);
       }
       setState(() => _authState = _AuthState.error);
-    } catch (e) {
-      developer.log("Login threw the following exception: $e");
+    } catch (error, stackTrace) {
+      _logger.severe("Login error", error, stackTrace);
       setState(() => _authState = _AuthState.error);
     }
   }

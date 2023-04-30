@@ -1,10 +1,11 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart' show Logger;
 
 import '../../data/repositories/similarity_providers.dart';
 import 'error_card.dart';
+
+final _logger = Logger((PatternsIndex).toString());
 
 class PatternsIndex extends ConsumerWidget {
   const PatternsIndex({Key? key}) : super(key: key);
@@ -15,14 +16,9 @@ class PatternsIndex extends ConsumerWidget {
           loading: () =>
               const Center(child: CircularProgressIndicator.adaptive()),
           error: (error, stackTrace) {
-            developer.log(
-              "Couldn't retrieve events needed to extract patterns.",
-              error: error,
-              stackTrace: stackTrace,
-              name: "PatternsIndex",
-            );
-            return const ErrorCard(
-                text: "Couldn't retrieve events needed to extract patterns.");
+            const message = "Couldn't retrieve patterns";
+            _logger.severe(message, error, stackTrace);
+            return const ErrorCard(text: message);
           },
           data: (data) {
             final coefficients = data.toList();
@@ -40,7 +36,7 @@ class PatternsIndex extends ConsumerWidget {
                       title: Text(
                           "${coefficients[index].labels.first} && ${coefficients[index].labels.last}"),
                       onTap: () =>
-                          developer.log("tapped ${coefficients[index]}"),
+                          _logger.info("tapped ${coefficients[index]}"),
                       trailing: Text(coefficients[index]
                           .coefficient
                           .toStringAsPrecision(3)),

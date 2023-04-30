@@ -1,9 +1,8 @@
-import 'dart:developer' as developer;
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' as g;
+import 'package:logging/logging.dart';
 
 import '../event.dart';
 import '../google_auth_client.dart';
@@ -30,7 +29,7 @@ final sortedEventList = FutureProvider<Iterable<Event>>((ref) {
 final firestoreEventList = FutureProvider<Iterable<Event>>((_) async {
   final userId = FirebaseAuth.instance.currentUser?.uid;
   return userId == null
-      ? Future.error("Couldn't get events from Cloud Firestore.")
+      ? Future.error("Couldn't get events from Cloud Firestore")
       : FirebaseFirestore.instance
           .collection("users")
           .doc(userId)
@@ -48,13 +47,14 @@ final firestoreEventList = FutureProvider<Iterable<Event>>((_) async {
 
 final googleCalendarList =
     FutureProvider<Iterable<Iterable<Event>>>((ref) async {
+  final logger = Logger("googleCalendarList");
   final google = ref.watch(googleDataProvider).value;
   final calendarIds = google?.enabledCalendarIds ?? const {};
   final calendarApi = (google != null && google.authHeaders != null)
       ? g.CalendarApi(GoogleAuthClient(google.authHeaders!))
       : null;
   if (calendarApi != null) {
-    developer.log("Retrieving Google calendar events...");
+    logger.info("Retrieving Google calendar events...");
     return Future.wait(calendarIds.map((calendarId) async {
       String? pageToken;
       List<g.Event> events = [];
@@ -67,13 +67,14 @@ final googleCalendarList =
       return events.map(Event.fromGoogleCalendar);
     }));
   } else {
-    developer.log("No auth headers to retrieve Google Calendar events.");
+    logger.info("No auth headers to retrieve Google Calendar events");
     return Future.value({});
   }
 });
 
 final googleCalendarEventList = FutureProvider<Iterable<Event>>((ref) async {
-  developer.log("Retrieving Google calendar events...");
+  final logger = Logger("googleCalendarEventList");
+  logger.info("Retrieving Google calendar events...");
   final calendars =
       ref.watch(googleCalendarList).value ?? const Iterable.empty();
   return calendars

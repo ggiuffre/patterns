@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart' show Logger;
 import 'package:patterns/src/data/repositories/event_providers.dart';
 
 import '../../data/category.dart';
 import 'error_card.dart';
+
+final _logger = Logger((CategoriesIndex).toString());
 
 class CategoriesIndex extends ConsumerWidget {
   final void Function(String) onCategoryTapped;
@@ -16,8 +19,11 @@ class CategoriesIndex extends ConsumerWidget {
       ref.watch(sortedEventList).when(
             loading: () =>
                 const Center(child: CircularProgressIndicator.adaptive()),
-            error: (error, stackTrace) =>
-                const ErrorCard(text: "Couldn't retrieve events."),
+            error: (error, stackTrace) {
+              const message = "Couldn't retrieve events";
+              _logger.severe(message, error, stackTrace);
+              return const ErrorCard(text: message);
+            },
             data: (data) {
               final categories = categoriesFromEvents(data);
               return categories.isEmpty

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart'
     show GoogleSignIn, GoogleSignInAccount;
 import 'package:googleapis/calendar/v3.dart' as g;
+import 'package:logging/logging.dart' show Logger;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'google_auth_client.dart';
@@ -9,6 +10,8 @@ import 'google_auth_client.dart';
 final googleDataProvider =
     AsyncNotifierProvider<GoogleDataController, GoogleData>(
         () => GoogleDataController());
+
+final _logger = Logger((GoogleDataController).toString());
 
 /// Controller for [GoogleData].
 class GoogleDataController extends AsyncNotifier<GoogleData> {
@@ -23,30 +26,35 @@ class GoogleDataController extends AsyncNotifier<GoogleData> {
   Future<GoogleData> _fetchGoogleData() async {
     final localStorage = await SharedPreferences.getInstance();
 
-    final googleDataEnabled = localStorage.getBool("googleDataEnabled");
-    final enabledGoogleCalendars =
-        localStorage.containsKey("enabledGoogleCalendars")
-            ? localStorage.getStringList("enabledGoogleCalendars") ??
-                const <String>[]
-            : const <String>[];
+    try {
+      final googleDataEnabled = localStorage.getBool("googleDataEnabled");
+      final enabledGoogleCalendars =
+          localStorage.containsKey("enabledGoogleCalendars")
+              ? localStorage.getStringList("enabledGoogleCalendars") ??
+                  const <String>[]
+              : const <String>[];
 
-    GoogleData googleData = const GoogleData();
-    if (googleDataEnabled ?? false) {
-      final googleAccount = await _googleApiAuth.signInSilently();
-      if (googleAccount != null) {
-        final headers = await googleAccount.authHeaders;
-        if (headers.isNotEmpty) {
-          googleData = googleData.copyWith(
-            enabled: true,
-            account: googleAccount,
-            authHeaders: headers,
-            enabledCalendarIds: enabledGoogleCalendars.toSet(),
-          );
+      GoogleData googleData = const GoogleData();
+      if (googleDataEnabled ?? false) {
+        final googleAccount = await _googleApiAuth.signInSilently();
+        if (googleAccount != null) {
+          final headers = await googleAccount.authHeaders;
+          if (headers.isNotEmpty) {
+            googleData = googleData.copyWith(
+              enabled: true,
+              account: googleAccount,
+              authHeaders: headers,
+              enabledCalendarIds: enabledGoogleCalendars.toSet(),
+            );
+          }
         }
       }
-    }
 
-    return googleData;
+      return googleData;
+    } catch (error, stackTrace) {
+      _logger.severe("Error reading from local storage", error, stackTrace);
+      return const GoogleData();
+    }
   }
 
   @override
@@ -88,18 +96,22 @@ class GoogleDataController extends AsyncNotifier<GoogleData> {
       final calendarId = calendar.id;
       if (calendarId != null) {
         final localStorage = await SharedPreferences.getInstance();
-        final enabledCalendarIds =
-            localStorage.containsKey("enabledGoogleCalendars")
-                ? localStorage.getStringList("enabledGoogleCalendars") ??
-                    const <String>[]
-                : const <String>[];
-        if (isEnabled && !enabledCalendarIds.contains(calendarId)) {
-          enabledCalendarIds.add(calendarId);
-        } else if (!isEnabled && enabledCalendarIds.contains(calendarId)) {
-          enabledCalendarIds.remove(calendarId);
+        try {
+          final enabledCalendarIds =
+              localStorage.containsKey("enabledGoogleCalendars")
+                  ? localStorage.getStringList("enabledGoogleCalendars") ??
+                      const <String>[]
+                  : const <String>[];
+          if (isEnabled && !enabledCalendarIds.contains(calendarId)) {
+            enabledCalendarIds.add(calendarId);
+          } else if (!isEnabled && enabledCalendarIds.contains(calendarId)) {
+            enabledCalendarIds.remove(calendarId);
+          }
+          localStorage.setStringList(
+              "enabledGoogleCalendars", enabledCalendarIds);
+        } catch (error, stackTrace) {
+          _logger.severe("Error reading from local storage", error, stackTrace);
         }
-        localStorage.setStringList(
-            "enabledGoogleCalendars", enabledCalendarIds);
       }
 
       return _fetchGoogleData();

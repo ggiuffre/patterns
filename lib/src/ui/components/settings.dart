@@ -1,7 +1,7 @@
-import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:googleapis/calendar/v3.dart' as g;
+import 'package:logging/logging.dart' show Logger;
 import 'package:patterns/src/data/repositories/event_providers.dart';
 
 import '../../data/google_data_provider.dart';
@@ -9,6 +9,8 @@ import '../../data/event.dart';
 import '../../data/repositories/events.dart';
 import '../../data/theme_mode_provider.dart';
 import 'constrained_card.dart';
+
+final _logger = Logger((SettingsView).toString());
 
 class SettingsView extends StatelessWidget {
   const SettingsView({Key? key}) : super(key: key);
@@ -33,18 +35,6 @@ class DarkModeSettingsCard extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ref.watch(themeModeProvider).when(
-                data: (themeMode) => Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text("Dark mode"),
-                    Switch.adaptive(
-                      value: _isDark(themeMode: themeMode, context: context),
-                      onChanged: (value) async => await ref
-                          .read(themeModeProvider.notifier)
-                          .setDarkMode(value),
-                    ),
-                  ],
-                ),
                 loading: () => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -56,10 +46,22 @@ class DarkModeSettingsCard extends ConsumerWidget {
                     ),
                   ],
                 ),
-                error: (Object error, StackTrace stackTrace) => _ErrorNotice(
-                  "Couldn't retrieve theme mode.",
-                  error: error,
-                  stackTrace: stackTrace,
+                error: (Object error, StackTrace stackTrace) {
+                  const message = "Couldn't retrieve theme mode";
+                  _logger.severe(message, error, stackTrace);
+                  return const _ErrorNotice(message);
+                },
+                data: (themeMode) => Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text("Dark mode"),
+                    Switch.adaptive(
+                      value: _isDark(themeMode: themeMode, context: context),
+                      onChanged: (value) async => await ref
+                          .read(themeModeProvider.notifier)
+                          .setDarkMode(value),
+                    ),
+                  ],
                 ),
               ),
         ),
@@ -82,19 +84,19 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ref.watch(googleDataProvider).when(
-                error: (Object error, StackTrace stackTrace) => Column(
-                  children: [
-                    const Text("Allow to see my Google Calendar events"),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: _ErrorNotice(
-                        "Couldn't retrieve Google settings.",
-                        error: error,
-                        stackTrace: stackTrace,
+                error: (Object error, StackTrace stackTrace) {
+                  const message = "Couldn't retrieve Google settings";
+                  _logger.severe(message, error, stackTrace);
+                  return Column(
+                    children: const [
+                      Text("Allow to see my Google Calendar events"),
+                      Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: _ErrorNotice(message),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  );
+                },
                 loading: () => Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: const [
@@ -128,14 +130,15 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                       FutureBuilder<Iterable<g.CalendarListEntry>>(
                         future: value.calendars,
                         builder: (context, snapshot) {
-                          const errorIndicator = Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: _ErrorNotice(
-                                "Couldn't retrieve your list of calendars from Google Calendar."),
-                          );
-
                           if (snapshot.hasError) {
-                            return errorIndicator;
+                            const message =
+                                "Couldn't retrieve your list of calendars from Google Calendar.";
+                            _logger.severe(
+                                message, snapshot.error, snapshot.stackTrace);
+                            return const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: _ErrorNotice(message),
+                            );
                           }
 
                           if (snapshot.hasData) {
@@ -182,7 +185,14 @@ class GoogleCalendarSettingsCard extends ConsumerWidget {
                                 ),
                               );
                             } else {
-                              return errorIndicator;
+                              const message =
+                                  "Couldn't retrieve your list of calendars from Google Calendar.";
+                              _logger.severe(
+                                  message, snapshot.error, snapshot.stackTrace);
+                              return const Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: _ErrorNotice(message),
+                              );
                             }
                           }
 
@@ -392,25 +402,20 @@ class _BodyWeightSettingsCardState
 
 class _ErrorNotice extends StatelessWidget {
   final String message;
-  final Object? error;
-  final StackTrace? stackTrace;
 
-  const _ErrorNotice(this.message, {this.error, this.stackTrace});
+  const _ErrorNotice(this.message);
 
   @override
-  Widget build(BuildContext context) {
-    dev.log(message, error: error, stackTrace: stackTrace);
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.error, color: Theme.of(context).colorScheme.error),
-        Flexible(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(message),
+  Widget build(BuildContext context) => Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error, color: Theme.of(context).colorScheme.error),
+          Flexible(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(message),
+            ),
           ),
-        ),
-      ],
-    );
-  }
+        ],
+      );
 }

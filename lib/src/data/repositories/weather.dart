@@ -1,9 +1,9 @@
 import 'dart:convert' show json;
-import 'dart:developer' as developer;
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 
 import '../event.dart';
 import '../weather_data.dart';
@@ -138,13 +138,16 @@ class OpenWeatherApi {
       });
 }
 
-Map<String, Object?>? mapOrNull(
-    {required Map<String, Object?> data, required String key}) {
+Map<String, Object?>? mapOrNull({
+  required Map<String, Object?> data,
+  required String key,
+}) {
   if (data.containsKey(key)) {
     try {
       return data[key] as Map<String, Object?>;
-    } catch (error) {
-      developer.log("mapOrNull: $error");
+    } catch (error, stackTrace) {
+      final logger = Logger("mapOrNull");
+      logger.warning("Couldn't extract $key from data", error, stackTrace);
       return null;
     }
   } else {
@@ -155,8 +158,9 @@ Map<String, Object?>? mapOrNull(
 T? parsed<T>(T Function() callback) {
   try {
     return callback();
-  } catch (error) {
-    developer.log("parsed: $error");
+  } catch (error, stackTrace) {
+    final logger = Logger("parsed");
+    logger.warning("Couldn't deserialize data as type $T", error, stackTrace);
     return null;
   }
 }

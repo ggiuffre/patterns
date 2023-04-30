@@ -1,13 +1,14 @@
-import 'dart:developer' as developer;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart' show Logger;
 import 'package:patterns/src/data/repositories/event_providers.dart';
 
 import '../../data/event.dart';
 import '../../data/similarities.dart';
 import '../components/custom_app_bar.dart';
 import '../components/error_card.dart';
+
+final _logger = Logger((CategoryDetailsPage).toString());
 
 class CategoryDetailsPage extends ConsumerWidget {
   final String category;
@@ -24,8 +25,9 @@ class CategoryDetailsPage extends ConsumerWidget {
               loading: () =>
                   const Center(child: CircularProgressIndicator.adaptive()),
               error: (error, stackTrace) {
-                developer.log(error.toString());
-                return const ErrorCard(text: "Couldn't retrieve events.");
+                const message = "Couldn't retrieve events.";
+                _logger.severe(message, error, stackTrace);
+                return const ErrorCard(text: message);
               },
               data: (events) {
                 List<Event> categoryEvents = [];

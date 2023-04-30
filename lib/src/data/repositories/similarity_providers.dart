@@ -1,15 +1,17 @@
 import 'dart:convert' show utf8;
-import 'dart:developer' as developer;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart' show sha1;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart' show Logger;
 
 import '../category.dart';
 import '../event.dart';
 import '../similarities.dart';
 import 'event_providers.dart';
+
+final _logger = Logger((similarityList).toString());
 
 final similarityList = FutureProvider<Iterable<Similarity>>((ref) async {
   final events = ref.watch(eventList).value ?? [];
@@ -71,7 +73,7 @@ Iterable<Iterable<Event>?> _batchEvents(final Iterable<Event> events,
   while (i < categories.length && categories.elementAt(i).count > 1) {
     categoryBatch.add(categories.elementAt(i).title);
     if (categoryBatch.length >= batchSize) {
-      developer.log("Returning a batch of events.", name: "similarityList");
+      _logger.info("Returning a batch of events...");
       yield events.where((e) => categoryBatch.contains(e.title));
       categoryBatch.clear();
     }
@@ -86,9 +88,10 @@ Future<Map<String, double>> _fetchAll() async {
   final userId = FirebaseAuth.instance.currentUser?.uid;
 
   if (userId == null) {
-    return Future.error("Couldn't retrieve similarity from Cloud Firestore.");
+    return Future.error("Couldn't retrieve similarities from Cloud Firestore");
   }
 
+  _logger.info("Retrieving similarities from Cloud Firestore...");
   return FirebaseFirestore.instance
       .collection("users")
       .doc(userId)
@@ -114,12 +117,10 @@ Future<void> _add(String similarityHash, double similarityCoefficient) async {
   final userId = FirebaseAuth.instance.currentUser?.uid;
 
   if (userId == null) {
-    return Future.error("Couldn't persist similarity to Cloud Firestore.");
+    return Future.error("Couldn't persist similarity to Cloud Firestore");
   }
 
-  developer.log("Saving new similarity to Cloud Firestore.",
-      name: "similarityList");
-
+  _logger.info("Saving new similarity to Cloud Firestore...");
   await FirebaseFirestore.instance
       .collection("users")
       .doc(userId)

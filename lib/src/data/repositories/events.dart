@@ -32,7 +32,7 @@ class FirestoreEventRepository implements WritableEventRepository {
   @override
   Future<String> add(Event event) async {
     if (_userId == null) {
-      return Future.error("Couldn't persist event to Cloud Firestore.");
+      return Future.error("Couldn't persist event to Cloud Firestore");
     }
 
     final matchingEvents = await list.then(
@@ -73,7 +73,7 @@ class FirestoreEventRepository implements WritableEventRepository {
 
   @override
   Future<void> delete(String id) => _userId == null
-      ? Future.error("Couldn't delete event from Cloud Firestore.")
+      ? Future.error("Couldn't delete event from Cloud Firestore")
       : FirebaseFirestore.instance
           .collection("users")
           .doc(_userId)
@@ -82,7 +82,7 @@ class FirestoreEventRepository implements WritableEventRepository {
           .delete();
 
   Future<Iterable<Event>> get list => _userId == null
-      ? Future.error("Couldn't get events from Cloud Firestore.")
+      ? Future.error("Couldn't get events from Cloud Firestore")
       : FirebaseFirestore.instance
           .collection("users")
           .doc(_userId)

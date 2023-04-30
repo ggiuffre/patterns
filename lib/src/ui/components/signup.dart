@@ -1,9 +1,10 @@
-import 'dart:developer' as developer;
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart' show Logger;
 
 import 'constrained_card.dart';
+
+final _logger = Logger((SignUpScreen).toString());
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -129,14 +130,14 @@ class _EmailRegistrationFormState extends State<EmailRegistrationForm> {
         email: _emailController.text,
         password: _passwordController.text,
       );
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'weak-password') {
-        developer.log('The password provided is too weak.');
-      } else if (e.code == 'email-already-in-use') {
-        developer.log('An account already exists for this email.');
+    } on FirebaseAuthException catch (error, stackTrace) {
+      if (error.code == 'weak-password') {
+        _logger.severe('Password provided is too weak', error, stackTrace);
+      } else if (error.code == 'email-already-in-use') {
+        _logger.severe('Account already exists', error, stackTrace);
       }
-    } catch (e) {
-      developer.log("Account registration threw the following exception: $e");
+    } catch (error, stackTrace) {
+      _logger.severe('Account registration failed', error, stackTrace);
     }
 
     final user = userCredential?.user;
