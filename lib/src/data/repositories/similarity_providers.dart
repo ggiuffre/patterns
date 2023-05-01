@@ -63,7 +63,7 @@ final similarityList = FutureProvider<Iterable<Similarity>>((ref) async {
 });
 
 /// Generate batches of events ordered from most to least relevant, taken from
-/// the current event provider. Relevance is event title frequency, and each
+/// an iterable of events. Relevance is event title frequency, and each
 /// element of the iterable generated is a batch of at most [batchSize] events.
 Iterable<Iterable<Event>?> _batchEvents(final Iterable<Event> events,
     [final int batchSize = 10]) sync* {
