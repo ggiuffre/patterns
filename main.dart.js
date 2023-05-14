@@ -27426,7 +27426,7 @@ aiV:function aiV(a){this.a=a},
 TH:function TH(a){this.a=a},
 ZM:function ZM(a){this.a=a},
 aRx(a){var s,r,q,p,o=A.o(t.N,t.S)
-for(s=J.aj(a);s.q();){r=s.gI(s).b
+for(s=J.aj(a);s.q();){r=s.gI(s).b.toLowerCase()
 q=o.h(0,r)
 o.l(0,r,(q==null?0:q)+1)}p=o.geg(o).bN(0)
 B.b.dk(p,new A.aE0())

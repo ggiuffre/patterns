@@ -18,13 +18,13 @@ const RESOURCES = {"flutter.js": "6fef97aeca90b426343ba6c5c9dc5d4a",
 "assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
 "assets/AssetManifest.bin": "a3d922a0b0bb96200631d1d9f758ce7d",
 "assets/AssetManifest.json": "2efbb41d7877d10aac9d091f58ccd7b9",
-"index.html": "0f9668752a5bfb99be01c22ab59d9022",
-"/": "0f9668752a5bfb99be01c22ab59d9022",
+"index.html": "fc0db7e502757d5b90d6384999275e4c",
+"/": "fc0db7e502757d5b90d6384999275e4c",
 "favicon.png": "c29c6336e5b9ae82247c88f957d52147",
 "version.json": "76b2fe1715647e97b513252bb6fc6e1c",
 "icons/Icon-192.png": "5be85357c159250bf456345a1e175cc0",
 "icons/Icon-512.png": "8cc827572d48a738a7f845d74c00a549",
-"main.dart.js": "5aaac73e2e8f9802e166e81df4d1616b",
+"main.dart.js": "821ae8d35034f30a4a696c9b8567f216",
 "manifest.json": "9285a43f7d9a0c7cfc1061be057060f5"};
 // The application shell files that are downloaded before a service worker can
 // start.
