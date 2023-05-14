@@ -2,8 +2,8 @@ import 'dart:math' show log;
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../event.dart' show Event;
-import 'event_providers.dart';
+import 'event.dart' show Event;
+import 'repositories/event_providers.dart';
 
 typedef EventTitle = String;
 typedef Word = String;
@@ -55,13 +55,28 @@ int _numDocumentsContainingWord(Word word, Iterable<String> documents) =>
               : count,
     );
 
-/// TF-IDF, term frequency * inverse document frequency.
-final tfidf = FutureProvider<Map<EventTitle, Map<Word, double>>>((ref) {
-  final events = ref.watch(eventList).value ?? [];
-  final tf = termFrequencies(events);
-  final idf = inverseDocumentFrequencies(events);
+/// Get the TF-IDF scores of some events (term frequency * inverse document
+/// frequency).
+Map<EventTitle, Map<Word, double>> tfidfScores(Iterable<Event> events,
+    {bool caseSensitive = false}) {
+  final tf = termFrequencies(events, caseSensitive: caseSensitive);
+  final idf = inverseDocumentFrequencies(events, caseSensitive: caseSensitive);
   return tf.map((eventTitle, value) => MapEntry(
         eventTitle,
         value.map((word, value) => MapEntry(word, value * (idf[word] ?? 0.0))),
       ));
-});
+}
+
+Map<EventTitle, Iterable<String>> eventTags(Iterable<Event> events,
+    {bool caseSensitive = false}) {
+  final tfidf = tfidfScores(events, caseSensitive: caseSensitive);
+  final tags = <EventTitle, Iterable<String>>{};
+  for (final eventScores in tfidf.entries) {
+    final entries = eventScores.value.entries.toList();
+    entries.sort(((a, b) => a.value.compareTo(b.value)));
+    tags[eventScores.key] = entries
+        .map((e) => e.key)
+        .where((tag) => tag != eventScores.key && tag.length > 1);
+  }
+  return tags;
+}

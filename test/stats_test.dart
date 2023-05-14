@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:patterns/src/data/event.dart';
-import 'package:patterns/src/data/repositories/stats.dart';
+import 'package:patterns/src/data/stats.dart';
 
 import 'factories.dart';
 
