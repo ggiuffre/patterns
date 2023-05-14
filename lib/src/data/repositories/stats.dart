@@ -34,8 +34,8 @@ Map<Word, double> inverseDocumentFrequencies(Iterable<Event> events,
     {bool caseSensitive = false}) {
   final titles =
       events.map((e) => caseSensitive ? e.title : e.title.toLowerCase());
-  final wordLists = events
-      .map((e) => e.title.split(punctuationMatcher).where((e) => e != ''));
+  final wordLists = titles
+      .map((title) => title.split(punctuationMatcher).where((e) => e != ''));
   final words = wordLists.expand((i) => i).toSet();
   final wordPresence = {
     for (final word in words) word: _numDocumentsContainingWord(word, titles)
